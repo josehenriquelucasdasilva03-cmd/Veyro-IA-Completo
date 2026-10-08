@@ -1,0 +1,10 @@
+import {assert,cleanText} from '../core/domain.js';
+export async function profileRoutes(req,env,db,user,path,body){
+ if(!['/api/profile','/api/profile/avatar'].includes(path))return null;
+ let p=await db.first('SELECT * FROM profiles WHERE user_id=?',user);
+ if(path==='/api/profile'&&req.method==='GET')return Response.json({name:p?.name||'Meu perfil',avatar:!!p?.avatar_key,updatedAt:p?.updated_at||0});
+ if(path==='/api/profile'&&req.method==='PUT'){const b=await body(req),name=cleanText(b.name,80);assert(name,'Informe seu nome.');await db.run('INSERT INTO profiles(user_id,name,updated_at) VALUES(?,?,?) ON CONFLICT(user_id) DO UPDATE SET name=excluded.name,updated_at=excluded.updated_at',user,name,Date.now());return Response.json({ok:true});}
+ if(path==='/api/profile/avatar'&&req.method==='GET'){assert(p?.avatar_key&&env.BUCKET,'Foto não encontrada.',404);const object=await env.BUCKET.get(p.avatar_key);assert(object,'Foto indisponível.',404);return new Response(object.body,{headers:{'Content-Type':p.avatar_mime,'Cache-Control':'private, max-age=600','X-Content-Type-Options':'nosniff'}});}
+ if(path==='/api/profile/avatar'&&req.method==='POST'){assert(env.BUCKET,'Armazenamento indisponível.',503);assert(Number(req.headers.get('content-length')||0)<3*1024*1024,'Use uma foto de até 2 MB.');const data=await req.formData(),file=data.get('file');assert(file&&file.size<=2*1024*1024&&['image/png','image/jpeg','image/webp'].includes(file.type),'Escolha uma foto JPG, PNG ou WebP de até 2 MB.');const key=user+'/profile/'+crypto.randomUUID();await env.BUCKET.put(key,await file.arrayBuffer(),{httpMetadata:{contentType:file.type}});try{await db.run('INSERT INTO profiles(user_id,name,avatar_key,avatar_mime,updated_at) VALUES(?,?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET avatar_key=excluded.avatar_key,avatar_mime=excluded.avatar_mime,updated_at=excluded.updated_at',user,p?.name||'Meu perfil',key,file.type,Date.now());}catch(e){await env.BUCKET.delete(key);throw e;}if(p?.avatar_key)await env.BUCKET.delete(p.avatar_key).catch(()=>{});return Response.json({ok:true});}
+ return Response.json({error:'Operação não permitida.'},{status:405});
+}
