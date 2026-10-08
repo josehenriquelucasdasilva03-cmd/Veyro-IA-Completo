@@ -1,0 +1,26 @@
+{
+  "name": "veyro-ia",
+  "version": "0.7.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "setup": "node scripts/setup.mjs",
+    "model:download": "node --env-file-if-exists=.env scripts/model-download.mjs",
+    "db:generate": "drizzle-kit generate",
+    "test": "node --test tests/*.test.mjs",
+    "dev": "node --env-file-if-exists=.env scripts/dev.mjs",
+    "test:reader": "python3 services/web-reader/test_reader.py",
+    "test:agents": "python3 services/agents/test_server.py",
+    "test:local": "node --test tests/local-runtime.test.mjs",
+    "test:speech": "node scripts/test-speech.mjs"
+  },
+  "devDependencies": {
+    "drizzle-kit": "0.31.10",
+    "drizzle-orm": "0.45.2",
+    "esbuild": "0.25.12"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

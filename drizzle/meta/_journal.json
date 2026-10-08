@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1789731359927,
+      "tag": "0000_stiff_bishop",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1789732337332,
+      "tag": "0001_sharp_human_torch",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1789754892093,
+      "tag": "0002_handy_justin_hammer",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1789775363468,
+      "tag": "0003_cynical_nomad",
+      "breakpoints": true
+    }
+  ]
+}
