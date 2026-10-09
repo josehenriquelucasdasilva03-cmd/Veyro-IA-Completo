@@ -74,9 +74,33 @@ Reinicie `npm run dev` e atualize a página. A chave fica no servidor. A rota li
 
 **Privacidade e custo:** ao pedir a demonstração ou narrar uma resposta, o texto correspondente é enviado à Microsoft para sintetizar o áudio. A leitura automática também envia o texto depois de cada resposta enquanto estiver habilitada. Evite usar esse recurso com conteúdo sensível. A [página oficial de preços do Azure Speech](https://azure.microsoft.com/pt-br/pricing/details/speech/) consultada em outubro de 2026 indica 500 mil caracteres gratuitos por mês para TTS neural padrão; o excedente é cobrado por caractere. Confirme limites, cobrança e região da sua conta antes de habilitar. A [lista oficial de vozes e idiomas](https://learn.microsoft.com/pt-br/azure/ai-services/speech-service/language-support?tabs=tts) confirma os quatro perfis. A ausência de chave mantém os botões de voz sem síntese, mas não interrompe o chat em texto.
 
+### Alternativa local gratuita: Pocket TTS
+
+O [Pocket TTS da Kyutai](https://github.com/kyutai-labs/pocket-tts) pode ser usado sem Azure e sem chave: o backend Veyro encaminha o texto para um serviço Pocket TTS que roda somente em `127.0.0.1`. O perfil exibido é **Veyro Local (Rafael)**, a voz pronta listada para português. Ele é uma opção adicional; não substitui as quatro vozes Azure, que têm bases diferentes. Na configuração Pocket, as outras quatro não aparecem e os controles de tom/ritmo ficam indisponíveis. O áudio usa WAV e continua sujeito ao limite de 8 MB do backend.
+
+No Windows, instale `pocket-tts` em um Python compatível e inicie o servidor no loopback. A documentação oficial recomenda `uvx`:
+
+```powershell
+py -3.12 -m pip install --user uv
+uvx pocket-tts serve --host 127.0.0.1 --port 8000 --language portuguese --quantize
+```
+
+Em outro terminal, altere no `.env` privado:
+
+```dotenv
+TTS_PROVIDER=pocket
+POCKET_TTS_BASE_URL=http://127.0.0.1:8000
+```
+
+Reinicie o backend Veyro e abra **Conversa e projeto → Vozes do Veyro IA**. O Pocket baixa e carrega seus pesos na primeira inicialização; o desempenho real no ROG ainda precisa ser medido. A Veyro nunca aceita URL remota para este serviço nem coloca a síntese no navegador. O projeto de código é MIT, e o modelo/vozes têm termos próprios — o modelo publicado informa CC-BY-4.0; revise-os se redistribuir arte ou áudio.
+
 ## Chat com um modelo local
 
 O chat usa o **Qwen3.5 4B** no Ollama por padrão. Instale e abra o Ollama no mesmo computador que executa o Veyro; depois rode `npm run model:download`. Esse comando baixa o valor de `MODEL_NAME` em `.env` (por padrão, `qwen3.5:4b`). O modelo ocupa cerca de 3,3–4 GB no catálogo Ollama. Para iniciar o site e backend, rode `npm run dev` e abra `http://127.0.0.1:4173`. O endpoint local padrão é `http://127.0.0.1:11434/v1`. Não há chamada ao serviço da OpenAI no código.
+
+### Endpoint remoto compatível (opcional)
+
+O backend também aceita um endpoint remoto **HTTPS** compatível com a API Chat Completions, como um endpoint de inferência do RunPod, sem trocar a arquitetura do chat. Configure `MODEL_PROVIDER=runpod`, `MODEL_BASE_URL` (URL HTTPS base, sem query string), `MODEL_NAME` e `MODEL_API_KEY` somente no `.env` privado do servidor. A chave fica no backend e é enviada como Bearer; nunca coloque credenciais na URL, no frontend ou no GitHub. URLs HTTP remotas, URLs com `?token=`, credenciais embutidas e endpoints que não ofereçam compatibilidade com Chat Completions não são aceitos. O link de painel fornecido não foi configurado como API; é necessário obter do provedor a URL de inferência HTTPS e o ID do modelo. O uso desse provedor depende dos limites e preços da conta RunPod.
 
 O Qwen3.5 9B também está disponível, mas ocupa cerca de 6,6–7,6 GB no Ollama. Em uma GPU móvel com 8 GB de VRAM, o 4B deixa mais espaço para o contexto e o restante do sistema; por isso é o padrão desta cópia. Os tamanhos publicados são do catálogo e o uso real de memória varia conforme contexto e configuração.
 

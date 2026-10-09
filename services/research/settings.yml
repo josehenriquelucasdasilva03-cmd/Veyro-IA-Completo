@@ -6,7 +6,6 @@ search:
     - json
 
 server:
-  secret_key: "ultrasecretkey"
   limiter: false
   image_proxy: false
 

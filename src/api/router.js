@@ -35,7 +35,7 @@ export default {async fetch(req,env,ctx){
   const db=database(env);
   const tts=await ttsRoute(req,env,path);if(tts)return tts;
   const language=await languageRoute(req,env,path);if(language)return language;
-  if(path==='/api/status')return json({chat:providerConfig(env).ready,chatProvider:providerConfig(env).kind,video:false,images:photoReady(env),tts:ttsReady(env),storage:Boolean(env.BUCKET),version:'0.7.0',research:researchConfig(env),agents:crewAiReady(env),embeddings:embedConfig(env).ready,knowledge:env.VEYRO_KNOWLEDGE_ENABLED==='true'});
+  if(path==='/api/status')return json({chat:providerConfig(env).ready,chatProvider:providerConfig(env).kind,video:false,images:photoReady(env),tts:ttsReady(env),ttsProvider:env.TTS_PROVIDER||'azure',storage:Boolean(env.BUCKET),version:'0.7.0',research:researchConfig(env),agents:crewAiReady(env),embeddings:embedConfig(env).ready,knowledge:env.VEYRO_KNOWLEDGE_ENABLED==='true'});
   const conversation=await conversationRoutes(req,env,db,user,path,body,ctx);if(conversation)return conversation;
   const knowledge=await knowledgeRoutes(req,env,db,user,path,body);if(knowledge)return knowledge;
   const research=await researchRoutes(req,env,db,user,path,body);if(research)return research;
