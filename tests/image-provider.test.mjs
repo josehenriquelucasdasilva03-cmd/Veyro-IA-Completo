@@ -6,6 +6,7 @@ const env={VEYRO_IMAGES_ENABLED:'true',IMAGE_PROVIDER:'comfyui-local',IMAGE_BASE
 
 test('image generation only accepts the configured local ComfyUI and Ollama endpoints',()=>{
  assert.equal(imageProviderConfig(env).ready,true);
+ assert.equal(imageProviderConfig({...env,MODEL_PROVIDER:'ollama-remote',MODEL_BASE_URL:'https://gpu.example/v1',MODEL_NAME:'qwen3.5:35b',MODEL_API_KEY:'server-only-secret-123'}).ready,true);
  assert.equal(imageProviderConfig({...env,IMAGE_BASE_URL:'https://images.example.com'}).ready,false);
  assert.equal(imageProviderConfig({...env,MODEL_BASE_URL:'https://ollama.example.com/v1'}).ready,false);
  assert.equal(imageProviderConfig({...env,IMAGE_MODEL:'../../other.safetensors'}).ready,false);
