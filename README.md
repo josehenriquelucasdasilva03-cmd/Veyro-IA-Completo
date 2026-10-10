@@ -100,6 +100,9 @@ O chat usa o **Qwen3.5 4B** no Ollama por padrão. Instale e abra o Ollama no me
 
 ### Endpoint remoto compatível (opcional)
 
+Para o modelo **Qwen3.5:35b já testado no Ollama do Vast.ai**, use o provedor `vast` com HTTPS e autenticação Basic ou Bearer. Veja o passo a passo e os limites da conexão em [docs/VAST_AI.md](docs/VAST_AI.md). A porta interna confirmada na máquina foi `21434`, mas ela **não é** um endereço externo do site. O provedor remoto não é ativado até existir endpoint HTTPS autenticado e segredos no backend privado.
+
+
 O backend também aceita um endpoint remoto **HTTPS** compatível com a API Chat Completions, como um endpoint de inferência do RunPod, sem trocar a arquitetura do chat. Configure `MODEL_PROVIDER=runpod`, `MODEL_BASE_URL` (URL HTTPS base, sem query string), `MODEL_NAME` e `MODEL_API_KEY` somente no `.env` privado do servidor. A chave fica no backend e é enviada como Bearer; nunca coloque credenciais na URL, no frontend ou no GitHub. URLs HTTP remotas, URLs com `?token=`, credenciais embutidas e endpoints que não ofereçam compatibilidade com Chat Completions não são aceitos. O link de painel fornecido não foi configurado como API; é necessário obter do provedor a URL de inferência HTTPS e o ID do modelo. O uso desse provedor depende dos limites e preços da conta RunPod.
 
 O Qwen3.5 9B também está disponível, mas ocupa cerca de 6,6–7,6 GB no Ollama. Em uma GPU móvel com 8 GB de VRAM, o 4B deixa mais espaço para o contexto e o restante do sistema; por isso é o padrão desta cópia. Os tamanhos publicados são do catálogo e o uso real de memória varia conforme contexto e configuração.

@@ -63,3 +63,12 @@ Verificação desta integração: `npm test` (9 arquivos, passou), `npm run buil
 ## Backend incluído nesta entrega
 
 O backend local inclui API de projetos e versões, conversas com streaming/cancelamento, perfil, memórias, arquivos de mídia, persistência SQLite, pesquisa web via SearXNG/leitor, transcrição local, tradução Qwen e geração de imagens via ComfyUI. Voz/tradução dependem de Ollama/Qwen, Python e faster-whisper; imagem depende de ComfyUI e SDXL-Lightning; pesquisa depende de Docker, internet e Qwen instalados. Os testes simulam provedores locais; não houve execução real desses serviços no notebook-alvo. Embeddings e geração de vídeo continuam pendentes.
+
+
+## Preparação Vast.ai Qwen3.5:35b (10/10/2026)
+
+A interface, identidade e hospedagem oficial não foram modificadas. O adaptador do chat agora suporta o modo remoto `MODEL_PROVIDER=vast`, além do modo local e do RunPod documentado; endpoints remotos exigem HTTPS e autenticação Bearer ou Basic. Há timeout configurável para a inferência mais lenta de 35B, com aviso específico se a resposta demorar demais. O backend utiliza a interface Chat Completions do Ollama, sem chamadas aos serviços da OpenAI.
+
+No terminal Vast.ai o usuário confirmou Ollama em `127.0.0.1:21434`, `GET /api/tags` com 200 e `qwen3.5:35b`. A porta 11434 respondeu com Caddy 401; isso **não** prova que a URL externa ou o proxy estejam prontos para inferência remota. O endpoint HTTPS autenticado e as credenciais privadas ainda não foram fornecidos nem configurados; o site público permanece desconectado dessa GPU. Consulte `docs/VAST_AI.md` para os próximos passos e cuidados.
+
+O script de build tolera a ausência do manifesto privado `.openai/hosting.json` nesta cópia GitHub; quando presente, ele continua sendo copiado. Nenhuma identidade de hospedagem foi inventada ou publicada.

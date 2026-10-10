@@ -26,7 +26,7 @@ O adaptador `scripts/dev.mjs` injeta uma identidade fixa somente para desenvolvi
 ## Contexto, memória e pesquisa
 
 - `core/orchestrator.js`: propostas estruturadas de cenas, regras de revisão e chamadas de modelo.
-- `core/model-provider.js`: adaptador Chat Completions com streaming e cancelamento; aceita Ollama/local (`http` somente em loopback) ou endpoint remoto `runpod` compatível (HTTPS obrigatório e chave Bearer mantida no backend). URL com query string, credencial embutida ou fragmento é recusada.
+- `core/model-provider.js`: adaptador Chat Completions com streaming e cancelamento; aceita Ollama/local (`http` somente em loopback) ou endpoints remotos `runpod` e `vast` (HTTPS obrigatório e autenticação Bearer ou Basic mantida no backend). URL com query string, credencial embutida ou fragmento é recusada; configuração remota exige segredo. Consulte `docs/VAST_AI.md`.
 - `core/gpu-lock.js`: fila exclusiva compartilhada pelo chat Qwen e pelo gerador local para impedir chamadas concorrentes na GPU.
 - `media/image-provider.js`: adaptador ComfyUI local; envia workflow SDXL-Lightning, acompanha a execução e valida o arquivo retornado. O adaptador descarrega o modelo Ollama configurado antes de enviar a geração.
 - `media/photo.js`: persiste o pedido e grava imagem produzida no armazenamento do projeto. A integração atual aceita geração por texto, não edição ou aprimoramento.
