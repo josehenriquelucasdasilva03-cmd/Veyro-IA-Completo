@@ -97,3 +97,17 @@ test('Interrupted streaming response is rejected instead of reported as complete
   await assert.rejects(provider.generate({instructions:'test',messages:[{role:'user',content:'Oi'}],tools:[],maxTokens:20},{requestId:'test-stream-cut'}),error=>error.status===502&&/conexão terminou antes/i.test(error.message));
  }finally{globalThis.fetch=original;}
 });
+
+test('Caller cancellation aborts the remote stream with a cancelled status',async()=>{
+ const original=globalThis.fetch;
+ globalThis.fetch=async(_url,{signal})=>new Promise((_,reject)=>{
+  const abort=()=>reject(new DOMException('Aborted','AbortError'));
+  if(signal.aborted)abort();else signal.addEventListener('abort',abort,{once:true});
+ });
+ try{
+  const controller=new AbortController();
+  const pending=new ModelProvider(remote()).generate({instructions:'test',messages:[{role:'user',content:'Oi'}],tools:[],maxTokens:20},{requestId:'test-stream-cancel',signal:controller.signal});
+  setTimeout(()=>controller.abort(),0);
+  await assert.rejects(pending,error=>error.status===499&&/interrompida/i.test(error.message));
+ }finally{globalThis.fetch=original;}
+});
