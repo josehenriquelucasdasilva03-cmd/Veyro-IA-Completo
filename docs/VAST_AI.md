@@ -64,3 +64,19 @@ npm run build
 ```
 
 O **site publicado permanece inalterado** até autorização expressa para implantação. Se ainda não existir um endpoint HTTPS autenticado acessível ao backend, a preparação do código estará completa, mas a integração real permanecerá pendente.
+
+
+## Estado da porta externa informado em 2026-10-10
+
+Foi informado que a porta externa mapeada é **10308**, que o Caddy responde na porta interna **11434** com autenticação Basic e que o Ollama/Qwen fica na porta interna **21434**. Confirme no painel Vast.ai que o mapeamento é exatamente **porta externa 10308 → Caddy interno 11434**; o número da porta, sem o IP/hostname, não forma uma URL completa.
+
+O mapeamento de porta do Vast.ai disponibiliza uma porta TCP pública e **não comprova que exista HTTPS/TLS nela**. Não basta trocar `http://` por `https://`: a conexão precisa apresentar um certificado TLS válido para o hostname usado pelo backend. O Instance Portal do Vast.ai pode fornecer túneis HTTPS, mas a URL do túnel deve ser verificada para confirmar que alcança a API do Caddy e que a autenticação Basic continua exigida; links temporários ou tokens em query string não devem ser tratados como configuração permanente.
+
+Antes de ativar o chat remoto ainda faltam:
+
+1. Um IP/hostname alcançável pelo backend e um endpoint HTTPS com certificado válido (por exemplo, um túnel HTTPS estável ou proxy TLS configurado para o serviço). Não inclua usuário ou senha na URL.
+2. Confirmar que o Caddy encaminha `/v1/models` e `/v1/chat/completions` para `http://127.0.0.1:21434/v1` e aplica Basic Auth também às duas rotas; o `401` atual só confirma que o proxy exige autenticação, não que o caminho compatível nem o streaming foram validados.
+3. Armazenar usuário e senha apenas nas variáveis privadas do ambiente do backend Veyro. A URL-base terá formato `https://<hostname-com-certificado>:10308/v1` somente se o TLS estiver realmente configurado nessa porta; caso o HTTPS use outra porta/hostname, usar o endereço real validado.
+4. Testar, a partir do ambiente do backend, a validação TLS, o `GET /v1/models` autenticado e uma requisição `POST /v1/chat/completions` com streaming. Só depois disso abrir o chat no navegador e enviar uma mensagem.
+
+Não publique credenciais nem envie-as pelo chat. O backend Veyro deve ser o único componente que conhece as credenciais do Caddy.
