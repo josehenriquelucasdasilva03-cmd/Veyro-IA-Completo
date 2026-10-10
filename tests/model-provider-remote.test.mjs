@@ -68,3 +68,32 @@ test('Vast Basic authentication works without exposing secrets in requests to th
   assert.equal(providerConfig(remote({MODEL_TIMEOUT_MS:'9999999'})).timeoutMs,180000);
  }finally{globalThis.fetch=original;}
 });
+
+test('Remote authentication denial is reported safely and health is unreachable',async()=>{
+ const original=globalThis.fetch;
+ globalThis.fetch=async()=>new Response('private upstream detail',{status:401});
+ try{
+  const provider=new ModelProvider(remote());
+  assert.deepEqual(await provider.health(),{configured:true,reachable:false});
+  await assert.rejects(provider.generate({instructions:'test',messages:[{role:'user',content:'Oi'}],tools:[],maxTokens:20},{requestId:'test-auth-failure'}),error=>error.status===502&&/autenticação.*recusada/i.test(error.message)&&!error.message.includes('private upstream detail'));
+ }finally{globalThis.fetch=original;}
+});
+
+test('Unavailable remote endpoint returns a controlled connection error',async()=>{
+ const original=globalThis.fetch;
+ globalThis.fetch=async()=>{throw new TypeError('network unavailable');};
+ try{
+  const provider=new ModelProvider(remote());
+  assert.deepEqual(await provider.health(),{configured:true,reachable:false});
+  await assert.rejects(provider.generate({instructions:'test',messages:[{role:'user',content:'Oi'}],tools:[],maxTokens:20},{requestId:'test-endpoint-down'}),error=>error.status===503&&/conectar ao modelo remoto/i.test(error.message));
+ }finally{globalThis.fetch=original;}
+});
+
+test('Interrupted streaming response is rejected instead of reported as complete',async()=>{
+ const original=globalThis.fetch;
+ globalThis.fetch=async()=>new Response('data: {"choices":[{"delta":{"content":"parcial"}}]}\n\n',{status:200,headers:{'content-type':'text/event-stream'}});
+ try{
+  const provider=new ModelProvider(remote());
+  await assert.rejects(provider.generate({instructions:'test',messages:[{role:'user',content:'Oi'}],tools:[],maxTokens:20},{requestId:'test-stream-cut'}),error=>error.status===502&&/conexão terminou antes/i.test(error.message));
+ }finally{globalThis.fetch=original;}
+});
