@@ -5,8 +5,9 @@ import {photoPrompt} from './studio-domain.js';
 
 const localHttp=value=>{try{const u=new URL(value);return u.protocol==='http:'&&['127.0.0.1','localhost','[::1]','::1'].includes(u.hostname);}catch{return false;}};
 export function imageProviderConfig(env){
- const base=String(env.IMAGE_BASE_URL||'http://127.0.0.1:8188').replace(/\/$/,'');const checkpoint=String(env.IMAGE_MODEL||'sdxl_lightning_4step.safetensors');const model=providerConfig(env);let ollamaBase='';try{if(localHttp(model.base))ollamaBase=new URL(model.base).origin;}catch{}
- const ready=env.VEYRO_IMAGES_ENABLED==='true'&&env.IMAGE_PROVIDER==='comfyui-local'&&localHttp(base)&&/^[\w .()-]+\.safetensors$/i.test(checkpoint)&&env.MODEL_PROVIDER==='local'&&Boolean(ollamaBase)&&Boolean(model.model);
+ const base=String(env.IMAGE_BASE_URL||'http://127.0.0.1:8188').replace(/\/$/,'');const checkpoint=String(env.IMAGE_MODEL||'sdxl_lightning_4step.safetensors');const model=providerConfig(env);let ollamaBase='';try{if(model.kind==='local'&&localHttp(model.base))ollamaBase=new URL(model.base).origin;}catch{}
+ const modelReady=model.ready&&(Boolean(ollamaBase)||['runpod','ollama-remote'].includes(model.kind));
+ const ready=env.VEYRO_IMAGES_ENABLED==='true'&&env.IMAGE_PROVIDER==='comfyui-local'&&localHttp(base)&&/^[\w .()-]+\.safetensors$/i.test(checkpoint)&&modelReady&&Boolean(model.model);
  return {ready,base,checkpoint,ollamaBase,model:model.model};
 }
 export const imageReady=env=>imageProviderConfig(env).ready;
