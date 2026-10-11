@@ -8,9 +8,11 @@ const files = [
   ['src/frontend/app.js', 'dist/site/app.js'],
   ['src/frontend/components/studio.js', 'dist/site/studio.js'],
   ['src/frontend/components/chat.js', 'dist/site/chat.js'],
+  ['src/frontend/components/video.js', 'dist/site/video.js'],
   ['src/frontend/components/knowledge.js', 'dist/site/knowledge.js'],
   ['src/frontend/styles/base.css', 'dist/site/styles.css'],
   ['src/frontend/styles/cinematic.css', 'dist/site/cinematic.css'],
+  ['src/frontend/styles/video.css', 'dist/site/video.css'],
   ['public/assets/cinematic.webp', 'dist/site/cinematic.webp'],
   ['public/assets/veyro-mascots.jpg', 'dist/site/veyro-mascots.jpg'],
 ];
