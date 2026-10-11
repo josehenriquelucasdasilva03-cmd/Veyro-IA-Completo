@@ -66,3 +66,23 @@ test('Cloudflare Access mode refuses video generation without per-account rate l
   await assert.rejects(videoRoutes(arg),/Muitas solicitações/);
   assert.equal(called,1);
 });
+
+test('video playback supports safe byte ranges without leaking engine credentials',async()=>{
+  const originalFetch=globalThis.fetch,env=config(),job='00000000-0000-4000-8000-000000000001';
+  let upstreamRange;
+  globalThis.fetch=async(url,init)=>{
+    upstreamRange=init.headers.Range;
+    return new Response(new Uint8Array([0,1,2,3]),{status:206,headers:{
+      'Content-Type':'video/mp4','Content-Range':'bytes 0-3/100','Content-Length':'4'
+    }});
+  };
+  try{
+    const req=new Request('https://veyro.test/api/preview',{headers:{Range:'bytes=0-3'}});
+    const result=await videoRoutes({req,env,user:'alice',projectId:'project',action:'video-jobs/'+job+'/result'});
+    assert.equal(result.status,206);
+    assert.equal(result.headers.get('Content-Range'),'bytes 0-3/100');
+    assert.equal((await result.arrayBuffer()).byteLength,4);
+    assert.equal(upstreamRange,'bytes=0-3');
+    await assert.rejects(videoRoutes({req:new Request('https://veyro.test/api/preview',{headers:{Range:'bytes=0-3,8-12'}}),env,user:'alice',projectId:'project',action:'video-jobs/'+job+'/result'}),/Faixa de vídeo inválida/);
+  }finally{globalThis.fetch=originalFetch;}
+});

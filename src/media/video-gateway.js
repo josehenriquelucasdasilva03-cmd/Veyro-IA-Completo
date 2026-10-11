@@ -18,11 +18,15 @@ async function scopedId(user,projectId){
   const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(user+'\0'+projectId));
   return 'p-'+Array.from(new Uint8Array(digest),x=>x.toString(16).padStart(2,'0')).join('');
 }
-async function upstream(env,path,method='GET',payload=null,isVideo=false){
+async function upstream(env,path,method='GET',payload=null,isVideo=false,rangeHeader=null){
   const c=videoConfig(env);
   assert(c.ready,'O motor de vídeo está desativado neste ambiente.',503);
   const headers={Authorization:'Bearer '+c.token,Accept:isVideo?'video/mp4':'application/json'};
-  const opts={method,headers,signal:AbortSignal.timeout(15000),redirect:'error'};
+  const opts={method,headers,signal:AbortSignal.timeout(isVideo?180000:15000),redirect:'error'};
+  if(isVideo&&rangeHeader!==null){
+    assert(/^bytes=(?:\d+-\d*|-\d+)$/.test(rangeHeader),'Faixa de vídeo inválida.',416);
+    headers.Range=rangeHeader;
+  }
   if(payload!==null){headers['Content-Type']='application/json';opts.body=JSON.stringify(payload);}
   let response;
   try{response=await fetch(c.base+path,opts);}
@@ -35,6 +39,11 @@ async function upstream(env,path,method='GET',payload=null,isVideo=false){
     assert((response.headers.get('Content-Type')||'').split(';')[0].trim()==='video/mp4','Vídeo retornado é inválido.',502);
     const size=Number(response.headers.get('Content-Length')||0);
     assert(Number.isFinite(size)&&size<=maxBytes,'Arquivo de vídeo muito grande.',502);
+    if(response.status===206){
+      const contentRange=response.headers.get('Content-Range')||'';
+      const match=contentRange.match(/^bytes (\d+)-(\d+)\/(\d+)$/);
+      assert(match&&Number(match[2])>=Number(match[1])&&Number(match[3])<=maxBytes,'Faixa retornada inválida.',502);
+    }
     assert(response.body,'Vídeo vazio.',502);
     let used=0;
     const stream=response.body.pipeThrough(new TransformStream({transform(chunk,controller){
@@ -42,7 +51,11 @@ async function upstream(env,path,method='GET',payload=null,isVideo=false){
       if(used>maxBytes)controller.error(new Error('Video size limit'));
       else controller.enqueue(chunk);
     }}));
-    return new Response(stream,{headers:{'Content-Type':'video/mp4','Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
+    const outgoing={'Content-Type':'video/mp4','Cache-Control':'private, no-store',
+      'X-Content-Type-Options':'nosniff','Accept-Ranges':'bytes'};
+    if(response.status===206)outgoing['Content-Range']=response.headers.get('Content-Range');
+    if(response.headers.has('Content-Length'))outgoing['Content-Length']=response.headers.get('Content-Length');
+    return new Response(stream,{status:response.status,headers:outgoing});
   }
   let data;
   try{const txt=await response.text();assert(txt.length<=32000,'Resposta muito grande.',502);data=JSON.parse(txt);}
@@ -82,7 +95,7 @@ export async function videoRoutes({req,env,user,projectId,action,readBody}){
   assert(parts&&validId.test(parts[1]),'Identificador de vídeo inválido.',404);
   const id=parts[1],type=parts[2];
   if(!type&&req.method==='GET')return upstream(env,'/internal/video/jobs/'+id+qs);
-  if(type==='result'&&req.method==='GET')return upstream(env,'/internal/video/jobs/'+id+'/result'+qs,'GET',null,true);
+  if(type==='result'&&req.method==='GET')return upstream(env,'/internal/video/jobs/'+id+'/result'+qs,'GET',null,true,req.headers.get('Range'));
   if(type==='cancel'&&req.method==='POST')return upstream(env,'/internal/video/jobs/'+id+'/cancel'+qs,'POST');
   throw new AppError('Método não permitido.',405);
 }
