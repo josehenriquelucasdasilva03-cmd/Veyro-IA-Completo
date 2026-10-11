@@ -1,6 +1,7 @@
 """Local-only Whisper transcription service for Veyro IA."""
 from __future__ import annotations
-import cgi
+from email.parser import BytesParser
+from email.policy import default
 import io
 import json
 import os
@@ -54,6 +55,40 @@ def transcribe(data: bytes, language: str):
     return {"text": text, "language": info.language, "durationSeconds": round(info.duration, 2)}
 
 
+def parse_audio_form(raw: bytes, content_type: str):
+    """Parse one bounded multipart upload without the removed Python cgi module."""
+    if not content_type.lower().startswith('multipart/form-data;'):
+        raise ValueError("O envio deve ser multipart.")
+    if len(raw) > MAX_BYTES + 65536:
+        raise ValueError("Corpo acima do limite.")
+    preamble = ("Content-Type: " + content_type + "\r\nMIME-Version: 1.0\r\n\r\n").encode('latin-1')
+    message = BytesParser(policy=default).parsebytes(preamble + raw)
+    if not message.is_multipart() or message.defects:
+        raise ValueError("Formulário multipart inválido.")
+    parts = {}
+    for part in message.iter_parts():
+        if part.defects or part.is_multipart() or part.get_content_disposition() != "form-data":
+            raise ValueError("Campo multipart inválido.")
+        name = part.get_param("name", header="content-disposition")
+        if name not in ("file", "language") or name in parts:
+            raise ValueError("Campo multipart desconhecido ou repetido.")
+        payload = part.get_payload(decode=True)
+        if not isinstance(payload, bytes):
+            raise ValueError("Conteúdo multipart inválido.")
+        parts[name] = (part.get_content_type(), payload)
+    if "file" not in parts:
+        raise ValueError("Áudio ausente.")
+    mime, audio = parts["file"]
+    if mime not in ALLOWED_TYPES:
+        raise ValueError("Formato de áudio não aceito.")
+    if not audio or len(audio) > MAX_BYTES:
+        raise ValueError("Áudio acima do limite.")
+    language = parts.get("language", ("text/plain", b"auto"))[1].decode("utf-8")
+    if language not in LANGUAGES:
+        raise ValueError("Idioma inválido.")
+    return audio, language
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = "VeyroSpeech/1.0"
 
@@ -81,18 +116,10 @@ class Handler(BaseHTTPRequestHandler):
         if not WORKER.acquire(blocking=False):
             return self.reply(429, {"error": "Outro áudio está sendo processado."})
         try:
-            form = cgi.FieldStorage(fp=self.rfile, headers=self.headers, environ={"REQUEST_METHOD": "POST", "CONTENT_TYPE": self.headers.get("Content-Type", ""), "CONTENT_LENGTH": str(length)})
-            if "file" not in form or not getattr(form["file"], "file", None):
-                return self.reply(400, {"error": "Áudio ausente."})
-            part = form["file"]
-            if part.type not in ALLOWED_TYPES:
-                return self.reply(415, {"error": "Formato de áudio não aceito."})
-            data = part.file.read(MAX_BYTES + 1)
-            if not data or len(data) > MAX_BYTES:
-                return self.reply(413, {"error": "Áudio acima do limite de 15 MB."})
-            language = form.getfirst("language", "auto")
-            if language not in LANGUAGES:
-                return self.reply(400, {"error": "Idioma inválido."})
+            try:
+                data, language = parse_audio_form(self.rfile.read(length), self.headers.get("Content-Type", ""))
+            except ValueError:
+                return self.reply(400, {"error": "Áudio ou formulário inválido. Confira o formato e o limite de 15 MB."})
             try:
                 seconds = duration_of(data)
             except Exception:

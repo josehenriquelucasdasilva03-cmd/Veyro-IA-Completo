@@ -6,7 +6,7 @@ await import('./build.mjs');
 const {default:worker}=await import('../dist/server/index.js');
 const port=Number(process.env.PORT||4173);if(!Number.isInteger(port)||port<1024||port>65535)throw Error('PORT deve estar entre 1024 e 65535.');
 const store=await createLocalStorage('.local'),jobs=new Set();
-const env={...process.env,DB:store.DB,BUCKET:store.BUCKET};
+const env={...process.env,VEYRO_AUTH_MODE:'local',DB:store.DB,BUCKET:store.BUCKET};
 const ctx={waitUntil(p){const safe=Promise.resolve(p).catch(()=>{});jobs.add(safe);safe.finally(()=>jobs.delete(safe));}};
 const server=createServer(async(req,res)=>{
  try{

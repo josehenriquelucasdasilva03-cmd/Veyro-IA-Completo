@@ -17,7 +17,7 @@ async function prepareTool(db,env,p,user,name,args,attachments){
  if(name==='open_video_editor')return {type:'editor',request:cleanText(args.request||'Editar vídeo')};
  assert(name==='prepare_image','Ferramenta não reconhecida.',502);const settings={prompt:args.prompt,operation:args.operation||'generate',count:args.count||1,preserve:args.preserve||'',sourceId:args.sourceId||'',sceneId:'',size:'1024x1024'};
  if(settings.operation!=='generate'&&!settings.sourceId)settings.sourceId=attachments.find(a=>/^image\/(png|jpeg|webp)$/.test(a.mime))?.id||'';
- if(settings.operation!=='generate'&&!settings.sourceId)return {type:'photo',needsSource:true,prompt:settings.prompt,operation:settings.operation,count:settings.count};
+ if(settings.operation!=='generate')return {type:'photo',unavailable:true,needsSource:!settings.sourceId,prompt:settings.prompt,operation:settings.operation,count:settings.count,message:'Edição e aprimoramento ainda não estão disponíveis neste provedor. Nenhum processamento foi realizado.'};
  const job=await createPhotoJob(db,env,p,user,{id:crypto.randomUUID(),settings});return {type:'photo',jobId:job.id,prompt:settings.prompt,count:settings.count,status:job.status};
 }
 export async function streamChat(req,env,db,c,user,b,ctx){
