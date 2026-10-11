@@ -68,3 +68,97 @@ body[data-mascot-state=done] .mascot-hero{filter:brightness(1.12) drop-shadow(0 
 @media(prefers-reduced-motion:reduce){.mascot-portrait,.mascot-option{transition:none!important;animation:none!important}body[data-mascot-state] .mascot-hero{animation:none!important;transform:none!important}}
 .voice-profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:13px 0}.voice-profile-card{min-width:0;padding:13px;border:1px solid #ffffff20;border-radius:13px;background:#111517}.voice-profile-card.selected{border-color:#dfbf58;box-shadow:0 0 18px #d5aa3020}.voice-card-heading{display:flex;align-items:center;justify-content:space-between;gap:7px}.voice-card-heading strong{font-size:15px}.voice-card-heading small{color:#d3c27e}.voice-profile-card p{margin:9px 0;color:#b8c0c1;font-size:12px}.voice-profile-card code{display:block;overflow-wrap:anywhere;color:#8eb5d6;font-size:10px;margin:5px 0 10px}.voice-profile-card>button{display:block;width:100%;margin-top:7px}.voice-select,.voice-demo{padding:9px 10px;border:1px solid #4b493d;border-radius:9px;background:#191b1b;color:#eee;font-size:12px}.voice-profile-card.selected .voice-select{border-color:#d0ad41;color:#f1db8b}.voice-provider-status{padding:10px 12px;border:1px solid #ffffff19;border-radius:10px;background:#ffffff06;color:#bbc3c6;font-size:12px;line-height:1.5}.voice-demo-status{min-height:20px;margin:8px 0;color:#d5c382;font-size:12px}.voice-setting{display:flex;flex-direction:column;gap:9px;margin:14px 0;color:#ddd;font-size:13px}.voice-setting output{float:right;color:#e8cf77}.voice-setting input[type=range]{width:100%;height:24px;padding:0;margin:0;accent-color:#e7c557;background:transparent}.voice-setting select{margin:0!important}.voice-auto-setting{display:flex!important;flex-direction:row;align-items:center;gap:10px;padding:11px;border:1px solid #ffffff20;border-radius:10px;color:#e5e5df;font-size:13px}.voice-auto-setting input[type=checkbox]{display:block!important;width:19px!important;height:19px!important;margin:0!important;accent-color:#e5c24f}.voice-privacy{margin:12px 0;color:#999f9f;font-size:11px;line-height:1.55}.assistant-author .message-speech{margin-left:0}.assistant-author{flex-wrap:wrap}.assistant-author .message-speech{padding:6px 8px}
 @media(max-width:600px){.voice-profile-grid{grid-template-columns:1fr}.voice-profile-card{padding:11px}.voice-card-heading strong{font-size:14px}.assistant-author{gap:6px}.assistant-author .message-author{font-size:10px}.assistant-author .message-speech{font-size:10px}}
+
+
+/*
+ * Veyro IA · acabamento espacial da conversa (design v1).
+ * Para trocar a paisagem pela arte oficial dos planetas, altere somente
+ * --veyro-chat-background-image após incorporar o arquivo ao build.
+ */
+:root {
+  --veyro-chat-gold: #d0b169;
+  --veyro-chat-gold-soft: rgba(208, 177, 105, .58);
+  --veyro-chat-background-image: url('/cinematic.webp');
+}
+
+/* O mesmo fundo permanece visível ao entrar no histórico do chat. */
+body[data-mode="chat"] .welcome-backdrop {
+  background-image:
+    linear-gradient(180deg, rgba(5, 8, 12, .54), rgba(4, 7, 11, .22) 42%, rgba(3, 6, 9, .85)),
+    var(--veyro-chat-background-image);
+  background-position: center 43%;
+  background-size: cover;
+  opacity: .94;
+  filter: brightness(.88) saturate(.86);
+  transition: opacity .45s ease, filter .55s ease;
+}
+body[data-mode="chat"]:not(.welcome-state) .welcome-backdrop {
+  opacity: .55;
+  filter: brightness(.45) saturate(.75);
+}
+body[data-mode="chat"].welcome-state.welcome-intro .welcome-backdrop,
+body[data-mode="chat"].welcome-state.welcome-settled .welcome-backdrop {
+  opacity: 1;
+}
+
+/* Acabamento dourado com alto contraste para as mensagens. */
+body[data-mode="chat"] .chat-message.assistant .chat-message-content {
+  color: #f5f6f7;
+  background: rgba(10, 13, 17, .92);
+  border: 1px solid var(--veyro-chat-gold-soft);
+  border-radius: 18px;
+  padding: 15px 18px;
+  box-shadow: 0 10px 26px rgba(0,0,0,.23), inset 0 1px 0 rgba(255,236,181,.05);
+}
+body[data-mode="chat"] .chat-message.user .chat-message-content {
+  color: #fff;
+  background: rgba(16, 19, 23, .94);
+  border-color: var(--veyro-chat-gold-soft);
+  box-shadow: 0 8px 20px rgba(0,0,0,.2);
+}
+body[data-mode="chat"] .chat-message.notice .chat-message-content {
+  background: rgba(13,16,19,.92);
+  border-color: rgba(208,177,105,.45);
+}
+body[data-mode="chat"] .message-body {
+  color: #f4f4f5;
+}
+
+/* Caixa de texto, círculo preto, seta branca e contornos dourados. */
+body[data-mode="chat"] .composer {
+  border: 1px solid var(--veyro-chat-gold);
+  background: rgba(10, 13, 17, .96);
+  box-shadow: 0 0 0 1px rgba(208,177,105,.10), 0 10px 32px rgba(0,0,0,.42);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+body[data-mode="chat"] .composer:focus-within {
+  border-color: #f0d78c;
+  box-shadow: 0 0 0 2px rgba(208,177,105,.18), 0 12px 32px rgba(0,0,0,.5);
+}
+body[data-mode="chat"] .send {
+  background: #060709;
+  border: 1.5px solid var(--veyro-chat-gold);
+  border-radius: 50%;
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(255,237,178,.07);
+  transition: background .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+body[data-mode="chat"] .send svg {
+  stroke: #fff;
+  filter: none;
+}
+body[data-mode="chat"] .send:hover:not(:disabled),
+body[data-mode="chat"] .send:focus-visible {
+  background: #161710;
+  border-color: #f0d78c;
+  box-shadow: 0 0 0 3px rgba(208,177,105,.14);
+}
+body[data-mode="chat"] .send:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+@media(prefers-reduced-motion:reduce) {
+  body[data-mode="chat"] .welcome-backdrop,
+  body[data-mode="chat"] .composer,
+  body[data-mode="chat"] .send { transition: none; }
+}
