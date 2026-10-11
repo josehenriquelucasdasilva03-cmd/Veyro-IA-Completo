@@ -72,3 +72,7 @@ A interface, identidade e hospedagem oficial não foram modificadas. O adaptador
 No terminal Vast.ai o usuário confirmou Ollama em `127.0.0.1:21434`, `GET /api/tags` com 200 e `qwen3.5:35b`. A porta 11434 respondeu com Caddy 401; isso **não** prova que a URL externa ou o proxy estejam prontos para inferência remota. O endpoint HTTPS autenticado e as credenciais privadas ainda não foram fornecidos nem configurados; o site público permanece desconectado dessa GPU. Consulte `docs/VAST_AI.md` para os próximos passos e cuidados.
 
 O script de build tolera a ausência do manifesto privado `.openai/hosting.json` nesta cópia GitHub; quando presente, ele continua sendo copiado. Nenhuma identidade de hospedagem foi inventada ou publicada.
+
+## Preparação do Worker Cloudflare de teste
+
+A integração do backend com o Worker `veyroia-test` está preparada no branch da PR: build próprio, autenticação por Cloudflare Access, configuração remota Vast/Qwen e D1 para histórico. A publicação depende de conectar o repositório/branch ao Worker, criar e vincular uma D1 de teste, configurar URL HTTPS e credenciais Basic no painel e habilitar Access. Ainda não foi feita publicação ou chamada autenticada ao Qwen pelo Worker. O Site oficial continua fora desta alteração. As instruções atualizadas estão em `docs/CLOUDFLARE_TEST_WORKER.md`.

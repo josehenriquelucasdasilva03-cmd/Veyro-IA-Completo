@@ -42,3 +42,5 @@ O projeto continua sendo Veyro IA. O manifesto `.openai/hosting.json` aponta par
 O manifesto `docs/SNAPSHOT.json` registra hashes dos arquivos da cópia, sem incluir a si próprio. Após editar, hashes diferentes são esperados; gere novo manifesto apenas quando fechar uma nova versão de teste.
 
 A pasta é código, não uma exportação dos seus dados. Se você precisar de backup de conversas, arquivos enviados e banco de produção, peça essa operação separadamente.
+
+- Para publicar a PR #2 apenas no Worker isolado `veyroia-test`, siga `docs/CLOUDFLARE_TEST_WORKER.md`. Use Workers Builds conectado somente ao branch `feat/vast-qwen35-remote-20261010`; configure o D1 ID e a URL HTTPS do Ollama como variáveis de build, as credenciais Basic como Secrets no Worker, habilite Cloudflare Access para o seu e-mail e aplique as migrações de D1. O arquivo Wrangler gerado contém o nome do Worker de teste e é ignorado pelo Git. Não conecte `main` nem faça merge/publicação no Site oficial.

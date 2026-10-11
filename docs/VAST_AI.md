@@ -80,3 +80,7 @@ Antes de ativar o chat remoto ainda faltam:
 4. Testar, a partir do ambiente do backend, a validação TLS, o `GET /v1/models` autenticado e uma requisição `POST /v1/chat/completions` com streaming. Só depois disso abrir o chat no navegador e enviar uma mensagem.
 
 Não publique credenciais nem envie-as pelo chat. O backend Veyro deve ser o único componente que conhece as credenciais do Caddy.
+
+## Cloudflare Worker de teste
+
+Para servir a interface e o backend juntos no Worker `veyroia-test`, configure o runtime conforme `docs/CLOUDFLARE_TEST_WORKER.md`. Esse caminho usa `MODEL_PROVIDER=vast`, `MODEL_NAME=qwen3.5:35b`, Basic Auth no servidor e Cloudflare Access na entrada do chat. Guarde o usuário e a senha do Caddy como **Secrets** nas configurações do Worker. O valor de `MODEL_BASE_URL` deve ser apenas a URL HTTPS até `/v1`, sem credenciais, query string ou token.

@@ -15,6 +15,14 @@
 
 `scripts/build.mjs` mantém os mesmos endereços públicos (`/app.js`, `/chat.js`, `/styles.css`, etc.) embora os arquivos editáveis estejam organizados em subpastas. O build incorpora a interface no Worker ESM em `dist/server/index.js`.
 
+## Deploy de teste Cloudflare Worker
+
+`scripts/prepare-cloudflare-worker.mjs` gera uma configuração Wrangler temporária para o Worker `veyroia-test`, com D1 `DB`, migrações e o modelo `vast / qwen3.5:35b`. O ID D1 e a URL HTTPS sem credenciais entram como variáveis de build; o arquivo gerado `wrangler.jsonc` é ignorado pelo Git. Usuário e senha Basic são segredos do runtime e Wrangler bloqueia deploy sem eles.
+
+`VEYRO_AUTH_MODE=cloudflare-access` faz o router exigir `ctx.access.getIdentity()` fornecido pelo Cloudflare Access. O e-mail autenticado é normalizado e transformado em SHA-256 para formar o ID de usuário no D1; o Worker não confia em cabeçalhos de identidade recebidos do cliente. Para testar no `workers.dev`, habilite Access no próprio Worker e limite a política ao e-mail do proprietário. O código preserva o caminho padrão de autenticação do Sites quando a variável não está ativa. O Worker compila e serve a interface e as APIs no mesmo domínio, evitando CORS e segredos no navegador.
+
+O deploy aplica as migrações D1 apenas na base separada de teste antes de atualizar `veyroia-test`. O bucket R2 é opcional para conversas de texto; upload de mídia requer binding R2 e não faz parte do teste inicial.
+
 ## Servidor e APIs
 
 `src/api/router.js` exporta `fetch(request, env, ctx)`. Serve os arquivos públicos e direciona chamadas `/api/`.

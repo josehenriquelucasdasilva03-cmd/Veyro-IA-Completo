@@ -220,3 +220,9 @@ Inclui fontes, imagem de interface, dependências fixadas no `package-lock.json`
 A identidade do Site existente está em `.openai/hosting.json` para uma publicação futura autorizada. Esse identificador não é uma senha. **Não use essa configuração para publicar durante os testes.**
 
 `docs/SOURCE_MAP.json` permite relacionar os caminhos antigos aos novos. `docs/SNAPSHOT.json` registra os arquivos e seus hashes SHA-256 na data da entrega. O histórico de implementação anterior foi preservado em `docs/IMPLEMENTATION_HISTORY.md` e serve como referência histórica, não como instrução para publicar.
+
+## Worker de teste Cloudflare
+
+O branch da PR pode ser conectado somente ao Worker isolado `veyroia-test`. O build compila a interface junto com o backend; D1 guarda conversas/projetos e Cloudflare Access protege o endereço `workers.dev`. O modo Cloudflare deriva um identificador interno por hash do e-mail autenticado e nunca confia em cabeçalhos enviados pelo navegador. A configuração gerada é ignorada pelo Git, usa apenas o D1 de teste e exige os segredos Basic do modelo antes do deploy.
+
+Consulte [docs/CLOUDFLARE_TEST_WORKER.md](docs/CLOUDFLARE_TEST_WORKER.md) para conectar esta branch, preparar D1, habilitar Access e inserir credenciais no painel. Use apenas a branch de teste. Não conecte a branch `main` nem altere o Site oficial.
