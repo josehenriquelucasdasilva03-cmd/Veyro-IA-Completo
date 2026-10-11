@@ -2,7 +2,7 @@ import {knowledgeRoutes,embedConfig,saveMemory,forgetMemory} from '../memory/kno
 import {researchRoutes} from '../research/research.js';
 import {researchConfig} from '../research/web-gateway.js';
 import {conversationRoutes} from '../history/conversations.js';
-import {providerConfig} from '../core/model-provider.js';
+import {ModelProvider,providerConfig} from '../core/model-provider.js';
 import {profileRoutes} from './profile.js';
 import {photoReady,createPhotoJob,runPhotoSlot,readJob} from '../media/photo.js';
 import {sourceIds,intentHint} from '../media/studio-domain.js';
@@ -13,6 +13,7 @@ import {languageRoute} from './language.js';
 import {crewAiReady} from '../agents/crewai-provider.js';
 import {ttsRoute} from './tts.js';
 import {ttsReady} from '../tts/provider.js';
+import {cloudflareAccessUser} from './cloudflare-access.js';
 const assets=typeof __ASSETS__==='undefined'?{}:__ASSETS__;
 const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 async function body(req){assert(Number(req.headers.get('content-length')||0)<=150000,'Pedido muito grande.',413);let raw=await req.text();assert(raw.length<=150000,'Pedido muito grande.',413);try{return JSON.parse(raw);}catch{throw new AppError('Pedido inválido.');}}
@@ -30,11 +31,12 @@ export default {async fetch(req,env,ctx){
  const url=new URL(req.url),path=url.pathname;
  try{
   if(!path.startsWith('/api/')){const key=path==='/'?'/index.html':path;assert(assets[key]!==undefined,'Página não encontrada.',404);if(typeof assets[key]==='object'){const a=assets[key];return new Response(Uint8Array.from(atob(a.base64),c=>c.charCodeAt(0)),{headers:{'Content-Type':a.type,'Cache-Control':'public, max-age=86400'}});}return new Response(assets[key],{headers:{'Content-Type':key.endsWith('.js')?'text/javascript; charset=utf-8':key.endsWith('.css')?'text/css; charset=utf-8':'text/html; charset=utf-8','Cache-Control':'no-cache','X-Content-Type-Options':'nosniff','Referrer-Policy':'same-origin','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self' https://chatgpt.com"}});}
-  const user=req.headers.get('oai-authenticated-user-id');assert(user,'Entre novamente para acessar seus projetos.',401);
+  const user=env.VEYRO_AUTH_MODE==='cloudflare-access'?await cloudflareAccessUser(ctx):req.headers.get('oai-authenticated-user-id');assert(user,'Acesse este Worker pelo Cloudflare Access para continuar.',401);
   if(!['GET','HEAD'].includes(req.method)){const origin=req.headers.get('origin');assert(!origin||origin===url.origin,'Origem não permitida.',403);assert(req.headers.get('x-veyro-request')==='1','Pedido não permitido.',403);}
   const db=database(env);
   const tts=await ttsRoute(req,env,path);if(tts)return tts;
   const language=await languageRoute(req,env,path);if(language)return language;
+  if(path==='/api/model/health'&&req.method==='GET'){const provider=new ModelProvider(env);return json({provider:provider.config.kind,...await provider.health()});}
   if(path==='/api/status')return json({chat:providerConfig(env).ready,chatProvider:providerConfig(env).kind,video:false,images:photoReady(env),tts:ttsReady(env),ttsProvider:env.TTS_PROVIDER||'azure',storage:Boolean(env.BUCKET),version:'0.7.0',research:researchConfig(env),agents:crewAiReady(env),embeddings:embedConfig(env).ready,knowledge:env.VEYRO_KNOWLEDGE_ENABLED==='true'});
   const conversation=await conversationRoutes(req,env,db,user,path,body,ctx);if(conversation)return conversation;
   const knowledge=await knowledgeRoutes(req,env,db,user,path,body);if(knowledge)return knowledge;

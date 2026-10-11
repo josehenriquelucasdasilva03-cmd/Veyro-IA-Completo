@@ -14,5 +14,6 @@ assets['/cinematic.webp']={base64:(await readFile('public/assets/cinematic.webp'
 assets['/veyro-mascots.jpg']={base64:(await readFile('public/assets/veyro-mascots.jpg')).toString('base64'),type:'image/jpeg'};
 await rm('dist',{recursive:true,force:true});await mkdir('dist/server',{recursive:true});await mkdir('dist/.openai',{recursive:true});
 await build({entryPoints:['src/api/router.js'],outfile:'dist/server/index.js',bundle:true,format:'esm',platform:'browser',target:'es2022',define:{__ASSETS__:JSON.stringify(assets)}});
-await copyFile('.openai/hosting.json','dist/.openai/hosting.json');
+try{await copyFile('.openai/hosting.json','dist/.openai/hosting.json');}
+catch(error){if(error.code!=='ENOENT')throw error;console.warn('Manifesto de hospedagem ausente nesta cópia: build local sem identidade de publicação.');}
 console.log('Build local concluído. Nenhuma publicação foi realizada.');

@@ -13,7 +13,8 @@
     "test:reader": "python3 services/web-reader/test_reader.py",
     "test:agents": "python3 services/agents/test_server.py",
     "test:local": "node --test tests/local-runtime.test.mjs",
-    "test:speech": "node scripts/test-speech.mjs"
+    "test:speech": "node scripts/test-speech.mjs",
+    "cloudflare:prepare": "node scripts/prepare-cloudflare-worker.mjs"
   },
   "devDependencies": {
     "drizzle-kit": "0.31.10",
