@@ -15,6 +15,7 @@ import {ttsRoute} from './tts.js';
 import {ttsReady} from '../tts/provider.js';
 import {cloudflareAccessUser} from './cloudflare-access.js';
 import {validFileSignature} from './file-validation.js';
+import {videoConfigured,videoRoutes} from '../media/video-gateway.js';
 const assets=typeof __ASSETS__==='undefined'?{}:__ASSETS__;
 const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 async function body(req){assert(Number(req.headers.get('content-length')||0)<=150000,'Pedido muito grande.',413);let raw=await req.text();assert(raw.length<=150000,'Pedido muito grande.',413);try{return JSON.parse(raw);}catch{throw new AppError('Pedido inválido.');}}
@@ -44,7 +45,7 @@ export default {async fetch(req,env,ctx){
   const tts=await ttsRoute(req,env,path);if(tts)return tts;
   const language=await languageRoute(req,env,path);if(language)return language;
   if(path==='/api/model/health'&&req.method==='GET'){const provider=new ModelProvider(env);return json({provider:provider.config.kind,...await provider.health()});}
-  if(path==='/api/status')return json({chat:providerConfig(env).ready,chatProvider:providerConfig(env).kind,video:false,images:photoReady(env),tts:ttsReady(env),ttsProvider:env.TTS_PROVIDER||'azure',storage:Boolean(env.BUCKET),version:'0.7.0',research:researchConfig(env),agents:crewAiReady(env),embeddings:embedConfig(env).ready,knowledge:env.VEYRO_KNOWLEDGE_ENABLED==='true'});
+  if(path==='/api/status')return json({chat:providerConfig(env).ready,chatProvider:providerConfig(env).kind,video:videoConfigured(env),images:photoReady(env),tts:ttsReady(env),ttsProvider:env.TTS_PROVIDER||'azure',storage:Boolean(env.BUCKET),version:'0.7.0',research:researchConfig(env),agents:crewAiReady(env),embeddings:embedConfig(env).ready,knowledge:env.VEYRO_KNOWLEDGE_ENABLED==='true'});
   const conversation=await conversationRoutes(req,env,db,user,path,body,ctx);if(conversation)return conversation;
   const knowledge=await knowledgeRoutes(req,env,db,user,path,body);if(knowledge)return knowledge;
   const research=await researchRoutes(req,env,db,user,path,body);if(research)return research;
@@ -54,6 +55,7 @@ export default {async fetch(req,env,ctx){
    if(req.method==='POST'){const b=await body(req),id=crypto.randomUUID(),now=Date.now();await db.run('INSERT INTO projects(id,user_id,title,state,created_at,updated_at) VALUES(?,?,?,?,?,?)',id,user,cleanText(b.title||'Novo projeto',100),JSON.stringify(cleanState()),now,now);return json({id},201);}
   }
   const match=path.match(/^\/api\/projects\/([^/]+)(?:\/(.*))?$/);assert(match,'Não encontrado.',404);const [,id,action='']=match;const p=await own(db,id,user);
+  const video=await videoRoutes({req,env,user,projectId:id,action,readBody:body});if(video)return video;
   if(!action){if(req.method==='GET'){
     await db.run("UPDATE runs SET status='FAILED',error='Processamento interrompido. Reenvie o pedido.',updated_at=? WHERE project_id=? AND status IN ('RUNNING','QUEUED') AND updated_at<?",Date.now(),id,Date.now()-90000);
     await db.run("UPDATE media_jobs SET status='FAILED',error='Processamento interrompido. Resultados salvos foram preservados; verifique antes de criar outro pedido.',updated_at=? WHERE project_id=? AND status='RUNNING' AND updated_at<?",Date.now(),id,Date.now()-180000);
