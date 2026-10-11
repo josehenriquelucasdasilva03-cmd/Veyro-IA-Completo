@@ -14,6 +14,7 @@ import {crewAiReady} from '../agents/crewai-provider.js';
 import {ttsRoute} from './tts.js';
 import {ttsReady} from '../tts/provider.js';
 import {cloudflareAccessUser} from './cloudflare-access.js';
+import {enforceSecurityLimits,logRoute,secureResponse} from './security.js';
 import {validFileSignature} from './file-validation.js';
 const assets=typeof __ASSETS__==='undefined'?{}:__ASSETS__;
 const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
@@ -28,10 +29,10 @@ async function saveState(db,p,state,title,revision,label='Versão salva'){
  ]);assert(result[1].meta.changes===1,'Este projeto mudou em outra aba. Reabra o projeto.',409);
  return {revision:revision+1};
 }
-export default {async fetch(req,env,ctx){
+async function handleRequest(req,env,ctx){
  const url=new URL(req.url),path=url.pathname;
  try{
-  if(!path.startsWith('/api/')){const key=path==='/'?'/index.html':path;assert(assets[key]!==undefined,'Página não encontrada.',404);if(typeof assets[key]==='object'){const a=assets[key];return new Response(Uint8Array.from(atob(a.base64),c=>c.charCodeAt(0)),{headers:{'Content-Type':a.type,'Cache-Control':'public, max-age=86400'}});}return new Response(assets[key],{headers:{'Content-Type':key.endsWith('.js')?'text/javascript; charset=utf-8':key.endsWith('.css')?'text/css; charset=utf-8':'text/html; charset=utf-8','Cache-Control':'no-cache','X-Content-Type-Options':'nosniff','Referrer-Policy':'same-origin','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self' https://chatgpt.com"}});}
+  if(!path.startsWith('/api/')){const key=path==='/'?'/index.html':path;assert(assets[key]!==undefined,'Página não encontrada.',404);if(typeof assets[key]==='object'){const a=assets[key];return new Response(Uint8Array.from(atob(a.base64),c=>c.charCodeAt(0)),{headers:{'Content-Type':a.type,'Cache-Control':'public, max-age=86400'}});}return new Response(assets[key],{headers:{'Content-Type':key.endsWith('.js')?'text/javascript; charset=utf-8':key.endsWith('.css')?'text/css; charset=utf-8':'text/html; charset=utf-8','Cache-Control':'no-cache','X-Content-Type-Options':'nosniff','Referrer-Policy':'same-origin','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self' https://chatgpt.com"}});}
   // Explicitly restrict trusted identity headers to trusted dispatchers.
   const mode=env.VEYRO_AUTH_MODE;
   const localHost=['127.0.0.1','localhost','[::1]','::1'].includes(url.hostname);
@@ -41,6 +42,7 @@ export default {async fetch(req,env,ctx){
   assert(user,'Sua sessão não foi autenticada.',401);
   if(!['GET','HEAD'].includes(req.method)){const origin=req.headers.get('origin');assert(!origin||origin===url.origin,'Origem não permitida.',403);assert(req.headers.get('x-veyro-request')==='1','Pedido não permitido.',403);}
   const db=database(env);
+  await enforceSecurityLimits(req,env,db,user,path);
   const tts=await ttsRoute(req,env,path);if(tts)return tts;
   const language=await languageRoute(req,env,path);if(language)return language;
   if(path==='/api/model/health'&&req.method==='GET'){const provider=new ModelProvider(env);return json({provider:provider.config.kind,...await provider.health()});}
@@ -101,5 +103,6 @@ export default {async fetch(req,env,ctx){
    return new Response(object.body,{status,headers});
   }
   throw new AppError('Recurso não encontrado.',404);
- }catch(e){if(!(e instanceof AppError))console.error('veyro_request_failed',{path,error:e.name});return json({error:e instanceof AppError?e.message:'Não foi possível concluir. Seus dados na tela foram preservados; tente novamente.'},e.status||500);}
-}};
+ }catch(e){if(!(e instanceof AppError))console.error('veyro_request_failed',{route:logRoute(path),errorName:e?.name||'Error'});return json({error:e instanceof AppError?e.message:'Não foi possível concluir. Seus dados na tela foram preservados; tente novamente.'},e.status||500);}
+}
+export default {async fetch(req,env,ctx){return secureResponse(await handleRequest(req,env,ctx),req);}};

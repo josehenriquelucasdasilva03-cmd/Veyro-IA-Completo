@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, index, primaryKey } from 'drizzle-orm/sqlite-core';
 export const projects=sqliteTable('projects',{
  id:text('id').primaryKey(),userId:text('user_id').notNull(),title:text('title').notNull(),
  state:text('state').notNull(),revision:integer('revision').notNull().default(0),createdAt:integer('created_at').notNull(),updatedAt:integer('updated_at').notNull()
@@ -52,3 +52,11 @@ export const knowledgeJobs=sqliteTable('knowledge_jobs',{
 export const researchCache=sqliteTable('research_cache',{
  id:text('id').primaryKey(),userId:text('user_id').notNull(),value:text('value').notNull(),expiresAt:integer('expires_at').notNull()
 });
+
+export const securityQuotas=sqliteTable('security_quotas',{
+ userId:text('user_id').notNull(),
+ periodKey:text('period_key').notNull(),
+ bucket:text('bucket').notNull(),
+ used:integer('used').notNull().default(0),
+ updatedAt:integer('updated_at').notNull()
+},t=>[primaryKey({columns:[t.userId,t.periodKey,t.bucket]})]);
