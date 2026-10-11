@@ -40,7 +40,20 @@ function toolCard(tool){if(tool.type==='research')return researchCard(tool);cons
  else card.append(el('small',tool.needsSource?'Adicione a foto pelo + e escolha a referência.':'Pedido salvo no Photo Studio.'));
  card.append(button('Ajustar pedido',()=>studioRoute('photo',tool.prompt||''),'small-button'));return card;
 }
-function updateStreamingBody(message){const row=[...$('chat-log').children].find(el=>el.dataset.message===message.id);if(row)richText(row.querySelector('.message-body'),message.text);else renderChatMessages();const workspace=$('workspace');if(workspace.scrollHeight-workspace.scrollTop-workspace.clientHeight<240)workspace.scrollTop=workspace.scrollHeight;}
+let streamingRenderFrame=0,streamingRenderMessage=null;
+function updateStreamingBody(message){
+ streamingRenderMessage=message;
+ if(streamingRenderFrame)return;
+ streamingRenderFrame=requestAnimationFrame(()=>{
+  streamingRenderFrame=0;
+  const pending=streamingRenderMessage;streamingRenderMessage=null;
+  if(!pending)return;
+  const row=[...$('chat-log').children].find(el=>el.dataset.message===pending.id);
+  if(row)richText(row.querySelector('.message-body'),pending.text);else renderChatMessages();
+  const workspace=$('workspace');
+  if(workspace.scrollHeight-workspace.scrollTop-workspace.clientHeight<240)workspace.scrollTop=workspace.scrollHeight;
+ });
+}
 async function readChatStream(response,onEvent){if(!response.ok){const e=await response.json();throw Error(e.error||'Não foi possível enviar.');}const reader=response.body.getReader(),decoder=new TextDecoder();let buffer='',terminal=false;try{for(;;){const {value,done}=await reader.read();buffer+=done?decoder.decode():decoder.decode(value,{stream:true});buffer=buffer.replace(/\r/g,'');let boundary;while((boundary=buffer.indexOf('\n\n'))>=0){const block=buffer.slice(0,boundary);buffer=buffer.slice(boundary+2);const event=block.split('\n').find(l=>l.startsWith('event:'))?.slice(6).trim();const data=block.split('\n').filter(l=>l.startsWith('data:')).map(l=>l.slice(5)).join('\n');if(event&&data){const parsed=JSON.parse(data);await onEvent(event,parsed);if(['done','waiting','error','cancelled'].includes(event))terminal=true;}}if(done)break;}if(!terminal)throw Error('A conexão caiu antes de concluir a resposta.');}finally{reader.releaseLock();}}
 async function sendChat(text,attachmentIds){if(state.busy||!state.conversationId)return;if(!text&&!state.files.length)throw Error('Escreva uma mensagem ou adicione um arquivo.');await saveChatDraft();await save();const cid=state.conversationId,requestId=crypto.randomUUID(),now=Date.now(),ids=attachmentIds||state.files.map(f=>f.id),assistant={id:requestId,role:'assistant',text:'',status:'RUNNING',created_at:now+1};
  state.chatMessages.push({id:requestId+'-user',role:'user',text,status:'COMPLETE',attachments:state.allAssets.filter(a=>ids.includes(a.id)),created_at:now},assistant);renderChatMessages();$('workspace').scrollTop=$('workspace').scrollHeight;setMascotState('thinking');busy(true);$('new-chat').disabled=true;$('prompt').disabled=true;$('stop-response').hidden=false;$('send').hidden=true;chatController=new AbortController();chatRequestId=requestId;feedback('');

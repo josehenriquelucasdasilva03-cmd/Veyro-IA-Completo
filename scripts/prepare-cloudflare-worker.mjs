@@ -20,7 +20,8 @@ export function makeCloudflareWorkerConfig({databaseId,modelBaseUrl}){
    MODEL_AUTH_TYPE:'basic',
    MODEL_TIMEOUT_MS:'180000',
    VEYRO_CHAT_ENABLED:'true',
-   VEYRO_AUTH_MODE:'cloudflare-access'
+   VEYRO_AUTH_MODE:'cloudflare-access',
+   VEYRO_FAST_RESPONSES:'true'
   },
   ratelimits:[
     {name:'API_RATE_LIMITER',namespace_id:'81026011',simple:{limit:300,period:60}},
