@@ -33,7 +33,14 @@ async function handleRequest(req,env,ctx){
  const url=new URL(req.url),path=url.pathname;
  try{
   if(!path.startsWith('/api/')){const key=path==='/'?'/index.html':path;assert(assets[key]!==undefined,'Página não encontrada.',404);if(typeof assets[key]==='object'){const a=assets[key];return new Response(Uint8Array.from(atob(a.base64),c=>c.charCodeAt(0)),{headers:{'Content-Type':a.type,'Cache-Control':'public, max-age=86400'}});}return new Response(assets[key],{headers:{'Content-Type':key.endsWith('.js')?'text/javascript; charset=utf-8':key.endsWith('.css')?'text/css; charset=utf-8':'text/html; charset=utf-8','Cache-Control':'no-cache','X-Content-Type-Options':'nosniff','Referrer-Policy':'same-origin','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self' https://chatgpt.com"}});}
-  const user=env.VEYRO_AUTH_MODE==='cloudflare-access'?await cloudflareAccessUser(ctx):req.headers.get('oai-authenticated-user-id');assert(user,'Acesse este Worker pelo Cloudflare Access para continuar.',401);
+  // Reject implicit header trust. Only explicit, restricted modes may authenticate.
+  const mode=env.VEYRO_AUTH_MODE;
+  assert(['cloudflare-access','sites','local'].includes(mode),'Autenticação não configurada neste ambiente.',503);
+  const localHost=['localhost','127.0.0.1','[::1]','::1'].includes(url.hostname);
+  assert(mode!=='local'||localHost,'Modo local não pode ser publicado.',403);
+  const user=mode==='cloudflare-access'?await cloudflareAccessUser(ctx):
+    mode==='sites'||(mode==='local'&&localHost)?req.headers.get('oai-authenticated-user-id'):null;
+  assert(user,'Entre novamente para acessar seus projetos.',401);
   if(!['GET','HEAD'].includes(req.method)){const origin=req.headers.get('origin');assert(!origin||origin===url.origin,'Origem não permitida.',403);assert(req.headers.get('x-veyro-request')==='1','Pedido não permitido.',403);}
   const db=database(env);
   await enforceSecurityLimits(req,env,db,user,path);
