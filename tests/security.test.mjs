@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import {setup} from './helpers.mjs';
 import worker from '../src/api/router.js';
 import {requestBucket,enforceSecurityLimits,logRoute} from '../src/api/security.js';
-import {matchesUploadSignature} from '../src/api/upload-validation.js';
+import {validFileSignature} from '../src/api/file-validation.js';
 import {untrustedContext,guardedMessages} from '../src/core/untrusted.js';
 
-const png=new Uint8Array([137,80,78,71,13,10,26,10,0,0,0,0,1,2,3,4]);
+const png=Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/mz8AAAAASUVORK5CYII='),c=>c.charCodeAt(0));
 const allowed={limit:async()=>({success:true})};
 function request(path,headers={},method='GET',body){
  return new Request('https://veyro.test'+path,{method,headers:{'x-veyro-request':'1',origin:'https://veyro.test',...headers},body});
@@ -44,10 +44,10 @@ test('quota reservations are per identity and atomic',async()=>{
 });
 
 test('file signature validation rejects MIME spoofing',()=>{
- assert.equal(matchesUploadSignature('image/png',png),true);
- assert.equal(matchesUploadSignature('image/jpeg',png),false);
- assert.equal(matchesUploadSignature('image/png',new Uint8Array([1,2,3,4])),false);
- assert.equal(matchesUploadSignature('image/webp',new TextEncoder().encode('RIFFxxxxWEBPmore')),true);
+ assert.equal(validFileSignature('image/png',png),true);
+ assert.equal(validFileSignature('image/jpeg',png),false);
+ assert.equal(validFileSignature('image/png',new Uint8Array([1,2,3,4])),false);
+ assert.equal(validFileSignature('image/webp',new TextEncoder().encode('RIFFxxxxWEBPmore')),false);
 });
 
 test('fake image upload is rejected before storage; response has secure headers',async()=>{

@@ -24,6 +24,19 @@ class SpeechConfigurationTests(unittest.TestCase):
         self.assertEqual(calls[0][0], ('127.0.0.1', 9876))
         self.assertIs(calls[0][1], server.Handler)
 
+    def test_multipart_form_works_without_cgi(self):
+        boundary = "veyro-test"
+        raw = (
+            b'--veyro-test\r\nContent-Disposition: form-data; name="language"\r\n\r\npt\r\n'
+            b'--veyro-test\r\nContent-Disposition: form-data; name="file"; filename="record.webm"\r\n'
+            b'Content-Type: audio/webm\r\n\r\nvideo-placeholder\r\n--veyro-test--\r\n'
+        )
+        audio, language = server.parse_audio_form(raw, f"multipart/form-data; boundary={boundary}")
+        self.assertEqual(audio, b"video-placeholder")
+        self.assertEqual(language, "pt")
+        with self.assertRaises(ValueError):
+            server.parse_audio_form(raw, "text/plain")
+
     def test_missing_token_prevents_service_start(self):
         with patch.object(server, 'TOKEN', ''):
             with self.assertRaises(SystemExit):

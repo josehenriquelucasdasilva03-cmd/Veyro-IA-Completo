@@ -1,8 +1,8 @@
 # Endurecimento de segurança do Veyro IA
 
 ## Escopo e preservação
-Esta proposta parte da branch feat/vast-qwen35-remote-20261010 do PR #2.
-Nenhuma mudança é aplicada ao site oficial, a main, aos segredos, ao login Google/GitHub ou ao PR #2.
+Esta proposta foi preparada originalmente sobre o PR #2 e integrada com as correções do PR #3 em uma branch de revisão destinada à main. Veja docs/MAIN_INTEGRATION_SECURITY.md.
+Nenhuma mudança é aplicada ao site oficial, à main, aos segredos ou ao login Google/GitHub em desenvolvimento. As branches originais permanecem intactas.
 O PR desta proposta deve permanecer draft até auditoria e testes reais.
 O trabalho paralelo de OAuth e cadastro deve ser integrado separadamente sem criar cabeçalho de identidade controlável pelo usuário.
 
