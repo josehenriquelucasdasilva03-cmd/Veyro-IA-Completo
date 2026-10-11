@@ -55,3 +55,14 @@ test('rejects nonvideo media response',async()=>{
   try{await assert.rejects(videoRoutes({req:new Request('https://veyro.test/'),env,user:'alice',projectId:'1',action:'video-jobs/00000000-0000-4000-8000-000000000001/result'}),/inválido/);}
   finally{globalThis.fetch=old;}
 });
+
+test('Cloudflare Access mode refuses video generation without per-account rate limiting',async()=>{
+  const env={...config(),VEYRO_AUTH_MODE:'cloudflare-access'};
+  const q=new Request('https://veyro.test/api/video-jobs',{method:'POST'});
+  const arg={req:q,env,user:'cf-safe-id',projectId:'proj1',action:'video-jobs',readBody:async()=>({prompt:'Um pássaro voando'})};
+  await assert.rejects(videoRoutes(arg),/Limitação de vídeo não configurada/);
+  let called=0;
+  env.VEYRO_VIDEO_RATE_LIMITER={limit:async ({key})=>{called++;assert.equal(key,'video:cf-safe-id');return {success:false};}};
+  await assert.rejects(videoRoutes(arg),/Muitas solicitações/);
+  assert.equal(called,1);
+});

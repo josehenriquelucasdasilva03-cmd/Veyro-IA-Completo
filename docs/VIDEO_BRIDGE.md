@@ -9,3 +9,4 @@ Backend secrets: `VEYRO_VIDEO_ENABLED=true` (only after tests), `VEYRO_VIDEO_BAS
 Pending for public launch: Cloudflare Access real tests, Cloudflare rate limiter and PR #7 security integration, actual GPU workflow validation, provider-wide spending limits, distributed jobs, object storage R2 instead of proxy-only MP4 transfer, and a mature media transcoding/validation pipeline.
 
 Run Node 24+: `npm ci && npm test && npm run build`. Never merge or publish without explicit authorization.
+For Cloudflare Access mode, new video submissions additionally require the bound `VEYRO_VIDEO_RATE_LIMITER` with `.limit({key})`: the route fails closed without it. A rate limiter controls bursts, not GPU billing; configure global spending thresholds in the GPU provider separately.

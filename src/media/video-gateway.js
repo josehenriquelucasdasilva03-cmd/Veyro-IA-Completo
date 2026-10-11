@@ -66,6 +66,14 @@ export async function videoRoutes({req,env,user,projectId,action,readBody}){
       assert(['preview_480p','quality_720p'].includes(profile),'Perfil inválido.');
       const key=input.idempotencyKey;
       assert(key===undefined||(typeof key==='string'&&/^[A-Za-z0-9_-]{12,100}$/.test(key)),'Identificador inválido.');
+      // A public Cloudflare Access Worker must fail closed without a video-specific
+      // rate limiter, independent of the model/chat rate-limiting bindings.
+      if(env.VEYRO_AUTH_MODE==='cloudflare-access'){
+        const limiter=env.VEYRO_VIDEO_RATE_LIMITER;
+        assert(limiter&&typeof limiter.limit==='function','Limitação de vídeo não configurada.',503);
+        const limit=await limiter.limit({key:'video:'+user});
+        assert(limit?.success===true,'Muitas solicitações de vídeo. Tente novamente mais tarde.',429);
+      }
       return upstream(env,'/internal/video/jobs','POST',{user_id:userId,prompt,profile,idempotency_key:key||crypto.randomUUID()});
     }
     throw new AppError('Método não permitido.',405);
