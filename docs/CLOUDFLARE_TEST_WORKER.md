@@ -42,3 +42,7 @@ Se a autenticação do modelo falhar, o Caddy pode estar com outro usuário/senh
 - Até executar esses passos, não há teste real do Qwen pelo navegador.
 - Para impedir deployments inadvertidos, deixe Workers Builds ligado apenas ao branch de teste. Este documento não pede merge e não modifica a hospedagem oficial.
 
+
+## Proteção adicional no PR de segurança, ainda não publicada
+
+A configuração gerada inclui bindings API_RATE_LIMITER, MODEL_RATE_LIMITER e UPLOAD_RATE_LIMITER. Verifique a disponibilidade e a exclusividade de namespace_id em sua conta. Sem o binding API o Worker privado bloqueia requisições de API (fail closed). A base D1 recebe migração 0004 com contadores de uso por identidade e períodos UTC. Veja docs/SECURITY_HARDENING.md antes de qualquer implantação.
