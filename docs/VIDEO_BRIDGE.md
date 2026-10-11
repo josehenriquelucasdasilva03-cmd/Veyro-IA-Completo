@@ -10,3 +10,5 @@ Pending for public launch: Cloudflare Access real tests, Cloudflare rate limiter
 
 Run Node 24+: `npm ci && npm test && npm run build`. Never merge or publish without explicit authorization.
 For Cloudflare Access mode, new video submissions additionally require the bound `VEYRO_VIDEO_RATE_LIMITER` with `.limit({key})`: the route fails closed without it. A rate limiter controls bursts, not GPU billing; configure global spending thresholds in the GPU provider separately.
+
+Playback MP4 uses streaming with a 180-second transfer timeout and supports strictly validated single HTTP byte-range requests (206) for seeking. Multi-range requests are rejected. Large videos must migrate to R2 or another object storage delivery path before public launch.
