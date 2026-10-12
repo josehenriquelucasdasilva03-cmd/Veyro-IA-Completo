@@ -8,7 +8,7 @@
     "setup": "node scripts/setup.mjs",
     "model:download": "node --env-file-if-exists=.env scripts/model-download.mjs",
     "db:generate": "drizzle-kit generate",
-    "test": "node --test tests/*.test.mjs",
+    "test": "node scripts/build.mjs && node scripts/build-netlify.mjs && node --test --test-concurrency=1 tests/*.test.mjs",
     "dev": "node --env-file-if-exists=.env scripts/dev.mjs",
     "test:reader": "python3 services/web-reader/test_reader.py",
     "test:agents": "python3 services/agents/test_server.py",
