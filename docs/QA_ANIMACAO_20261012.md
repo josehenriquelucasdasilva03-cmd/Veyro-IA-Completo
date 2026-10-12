@@ -7,3 +7,5 @@ Defeito analisado: builds estáticos Netlify ou GitHub Pages não incluem API; o
 Verificação automática: Node 24, npm test, bundle, build estático, navegador Chromium real nos tamanhos desktop 1440x900 e Android 393x851, disponibilidade de elementos, ausência de pageerrors, falta de overflow horizontal, menu no celular, interação e reduced-motion.
 
 Não confundir teste de navegador em CI com testes de GPU, autenticação, desempenho de dispositivos reais e integração com nova implementação de animações produzida em outro chat. Sem medidas reais de frame rate, memória, travamentos prolongados e teste de hardware, não se deve declarar garantia numérica de 80%. QA com aparelho físico e fluxo completo continua obrigatório.
+
+A bateria de browser também verifica três recarregamentos consecutivos sem duplicar as camadas e um cenário de conversa autenticada simulada (API mockada), incluindo saída da tela inicial e escurecimento de fundo. Uma simulação de API **não certifica** autenticação real.
