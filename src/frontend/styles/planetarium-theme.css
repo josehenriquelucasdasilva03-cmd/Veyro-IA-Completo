@@ -135,3 +135,60 @@ body[data-mode="chat"] .composer .translate-input{color:#bbbaba}
  body[data-mode="chat"] .suggestions button{transition:none!important;transform:none!important}
  body[data-mode="chat"] .composer::after{animation:none!important}
 }
+
+/* Mobile chat composer: full-width message text and keyboard-safe docking. */
+@media(max-width:899px){
+  /* Keep the composer above the keyboard; .screen uses the VisualViewport height. */
+  body[data-mode="chat"] .dock{
+    flex:0 0 auto;
+    margin-top:auto;
+    min-width:0;
+    padding-top:6px;
+  }
+  body[data-mode="chat"] .composer{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    grid-template-rows:auto auto auto;
+    align-items:stretch;
+    gap:3px!important;
+    padding:8px 11px 9px!important;
+    max-height:calc(var(--viewport-height) - 86px);
+  }
+  body[data-mode="chat"] .composer .attachments{
+    grid-column:1!important;
+    grid-row:1!important;
+  }
+  body[data-mode="chat"] .composer textarea{
+    grid-column:1!important;
+    grid-row:2!important;
+    min-width:0;
+    width:100%;
+    min-height:44px!important;
+    max-height:min(150px,calc(var(--viewport-height) * .24))!important;
+    padding:8px 9px!important;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+  }
+  body[data-mode="chat"] .composer .composer-bottom{
+    display:flex!important;
+    grid-column:1!important;
+    grid-row:3!important;
+    align-items:center;
+    justify-content:flex-start;
+    gap:7px;
+    min-width:0;
+    padding-top:2px;
+  }
+  body[data-mode="chat"] .composer .send{margin-left:auto}
+}
+@media(max-width:380px){
+  body[data-mode="chat"] .composer .composer-bottom{gap:4px}
+  body[data-mode="chat"] .composer .voice-language{width:45px}
+}
+body.veyro-keyboard-open[data-mode="chat"] .dock{
+  padding-bottom:4px;
+}
+body.veyro-keyboard-open[data-mode="chat"] .feedback:not(.error){
+  display:none;
+}
+
