@@ -18,7 +18,7 @@ test('static chat accepts user message visually without fake AI or backend calls
  assert.match(app,/function sendPreviewMessage\(text\)/);
  assert.match(app,/role:'user',text,status:'COMPLETE'/);
  assert.match(app,/Nenhuma resposta foi gerada|nenhuma resposta foi gerada|nenhuma resposta foi gerada|nenhuma resposta foi gerada|nenhuma resposta foi gerada|nenhuma resposta foi gerada/i);
- assert.match(app,/if\(IS_STATIC_PREVIEW\)\{sendPreviewMessage\(text\);return;\}/);
+ assert.match(app,/if\(IS_STATIC_PREVIEW\)\{if\(QWEN_PAGES\)await sendGithubQwen\(text\);else sendPreviewMessage\(text\);return;\}/);
  assert.match(app,/if\(IS_STATIC_PREVIEW\)startStaticPreview\(\)/);
  assert.match(chat,/if\(IS_STATIC_PREVIEW\)\{chatDraftDirty=false;return;\}/);
  assert.match(chat,/if\(!IS_STATIC_PREVIEW\)handle\(loadProfile\)/);
