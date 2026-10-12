@@ -21,13 +21,23 @@
   if(en>pt&&en>es&&en>=2)return 'en-US';
   return 'pt-BR';
  }
+ // Browser voices are an accessibility fallback, not Kokoro neural voices.
+ // Prefer installed high-quality voices when advertised by the OS. Never
+ // select an unrelated language just because a saved voice name matches.
+ function listForLocale(locale){
+  const prefix=locale.slice(0,2).toLowerCase();
+  return safeVoices().filter(v=>String(v.lang||'').toLowerCase().startsWith(prefix))
+   .sort((a,b)=>{
+    const score=v=>(String(v.lang).toLowerCase()===locale.toLowerCase()?25:0)
+      +(/natural|neural|premium|enhanced/i.test(v.name)?30:0)
+      +(/google|microsoft|siri/i.test(v.name)?10:0)
+      +(v.localService===false?3:0);
+    return score(b)-score(a);
+   });
+ }
  function chooseVoice(locale,name=''){
-  const list=safeVoices();
-  return list.find(v=>v.name===name&&v.lang?.toLowerCase().startsWith(locale.slice(0,2).toLowerCase()))
-   ||list.find(v=>v.name===name)
-   ||list.find(v=>v.lang?.toLowerCase()===locale.toLowerCase())
-   ||list.find(v=>v.lang?.toLowerCase().startsWith(locale.slice(0,2).toLowerCase()))
-   ||null;
+  const options=listForLocale(locale);
+  return options.find(v=>v.name===name)||options[0]||null;
  }
  const notify=(session,status)=>{
   if(active!==session)return;
@@ -125,6 +135,6 @@
   }
   return false;
  }
- window.VeyroVoice={supported,voices:safeVoices,startText,startStream,pushToken,finish,pause,resume,stop,
+ window.VeyroVoice={supported,voices:safeVoices,voicesForLocale:listForLocale,startText,startStream,pushToken,finish,pause,resume,stop,
   status:()=>active?.status||'idle',detectLanguage,supportedLocales};
 })();
