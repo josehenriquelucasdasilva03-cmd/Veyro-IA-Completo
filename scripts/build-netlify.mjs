@@ -22,6 +22,10 @@ const files = [
   ['dist/cosmos3d.js', 'dist/site/cosmos3d.js'],
   ['public/assets/cinematic.webp', 'dist/site/cinematic.webp'],
   ['public/assets/veyro-mascots.jpg', 'dist/site/veyro-mascots.jpg'],
+  ...['black','blue','green','red'].flatMap(mascot=>['avatar','card'].map(type=>[
+   'public/assets/veyro-'+mascot+'-'+type+'.webp',
+   'dist/site/veyro-'+mascot+'-'+type+'.webp'
+  ])),
 ];
 
 await rm('dist/site', { recursive: true, force: true });

@@ -1,9 +1,9 @@
-# Fix: mascotes não aparecem no GitHub Pages
+# Mascotes 3D ilustrados: correção de recorte e seleção
 
-Causa: `src/frontend/styles/cinematic.css` carregava o sprite dos mascotes por `url('/veyro-mascots.jpg')`, apontando para a raiz de `github.io`, fora da pasta de projeto `/Veyro-IA-Completo/`.
+Diagnóstico (12/10/2026): `veyro-mascots.jpg` contém quatro robôs numa única imagem 1536x1152. A imagem era servida (HTTP 200) em GitHub Pages e Netlify, mas o recorte por `background-position` e porcentagens de tamanho não aparecia no celular. Resultado observado: quatro cartões com retângulos escuros.
 
-Correção: `url('./veyro-mascots.jpg')`. Como `cinematic.css` e `veyro-mascots.jpg` são copiados juntos para a raiz de `dist/site`, essa URL funciona no GitHub Pages, no Netlify e no Worker que serve esses dois recursos no mesmo nível.
+Correção: converter a imagem existente em **quatro retratos e quatro imagens de corpo individuais** em WebP. Os cartões usam `veyro-[cor]-card.webp` com `background-size:contain`; avatar de chat e prévia usam `veyro-[cor]-avatar.webp` com `cover`. A página e Worker recebem todos os arquivos pelos builds separados e caminhos relativos. São imagens estáticas com aparência 3D; **não são modelos 3D animados**.
 
-Validação: arquivo físico em `public/assets/veyro-mascots.jpg`, script de build copiando-o, CSS apontando relativamente, testes para os quatro perfis (Black, Blue, Green, Prime). No celular, testar a imagem circular superior, avatar nas respostas e opções do botão **Trocar**.
+Cores e personagens: Black, Blue, Green, Red. O antigo "Prime" foi corrigido para "Red" e a preferência anterior `prime` é migrada em memória para `red`. O arquivo original permanece por compatibilidade, mas não é usado para a exibição dos mascotes.
 
-Isso corrige o sprite 2D usado como retrato. Não é uma implantação de malhas de robôs 3D nem um mecanismo 3D interativo. O Qwen e o login não mudaram.
+Verificações: testes confirmam assinaturas reais WebP, oito arquivos presentes, quatro opções, CSS sem sprite e inclusão nos builds. No telefone, testar botão "Trocar", miniaturas, preview e avatar nas respostas. Os Workers de Qwen/autenticação não foram alterados.

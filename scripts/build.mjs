@@ -20,6 +20,12 @@ const entries={
 const assets={};for(const [url,path]of Object.entries(entries))assets[url]=await readFile(path,'utf8');
 assets['/cinematic.webp']={base64:(await readFile('public/assets/cinematic.webp')).toString('base64'),type:'image/webp'};
 assets['/veyro-mascots.jpg']={base64:(await readFile('public/assets/veyro-mascots.jpg')).toString('base64'),type:'image/jpeg'};
+for(const mascot of ['black','blue','green','red']){
+ for(const type of ['avatar','card']){
+  const file='/veyro-'+mascot+'-'+type+'.webp';
+  assets[file]={base64:(await readFile('public/assets'+file)).toString('base64'),type:'image/webp'};
+ }
+}
 await rm('dist',{recursive:true,force:true});await mkdir('dist/server',{recursive:true});await mkdir('dist/.openai',{recursive:true});
 // Bundle Three.js locally. No external CDN is needed and CSP stays self-only.
 const threeBundle=await build({entryPoints:['src/frontend/components/cosmos3d.js'],bundle:true,minify:true,write:false,format:'esm',platform:'browser',target:'es2022'});

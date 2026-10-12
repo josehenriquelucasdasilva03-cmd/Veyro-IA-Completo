@@ -1,22 +1,40 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync, existsSync} from 'node:fs';
-const css=readFileSync('src/frontend/styles/cinematic.css','utf8');
-const build=readFileSync('scripts/build-netlify.mjs','utf8');
-const worker=readFileSync('scripts/build.mjs','utf8');
-test('mascot sprite uses a relative asset path for GitHub Pages project subdirectory',()=>{
- assert.match(css,/\.mascot-portrait\{[^\n]*background-image:url\('\.\/veyro-mascots\.jpg'\)/);
- assert.doesNotMatch(css,/url\(['"]?\/veyro-mascots\.jpg/);
- const projectSite=new URL('./veyro-mascots.jpg','https://example.github.io/Veyro-IA-Completo/cinematic.css');
- assert.equal(projectSite.pathname,'/Veyro-IA-Completo/veyro-mascots.jpg');
+const read=path=>readFileSync(path,'utf8');
+const css=read('src/frontend/styles/cinematic.css');
+const build=read('scripts/build-netlify.mjs');
+const worker=read('scripts/build.mjs');
+
+test('all four selectable mascots have individual valid WebP card and avatar assets',()=>{
+ const html=read('src/frontend/index.html');
+ for(const mascot of ['black','blue','green','red']){
+  assert.match(html,new RegExp('data-mascot-choice="'+mascot+'"'));
+  for(const type of ['avatar','card']){
+   const file='public/assets/veyro-'+mascot+'-'+type+'.webp';
+   assert.ok(existsSync(file),file+' missing');
+   const content=readFileSync(file);
+   assert.equal(content.toString('ascii',0,4),'RIFF');
+   assert.equal(content.toString('ascii',8,12),'WEBP');
+   assert.ok(content.length>1000);
+   assert.ok(css.includes("url('./veyro-"+mascot+"-"+type+".webp')"));
+  }
+ }
+ assert.doesNotMatch(html,/data-mascot-choice="prime"/);
 });
-test('sprite is bundled for Cloudflare and copied to static Netlify or Pages',()=>{
- assert.ok(existsSync('public/assets/veyro-mascots.jpg'));
- assert.match(build,/\['public\/assets\/veyro-mascots\.jpg', 'dist\/site\/veyro-mascots\.jpg'\]/);
- assert.match(worker,/assets\['\/veyro-mascots\.jpg'\]/);
+test('CSS uses independent images rather than a 4-sprite crop on mobile',()=>{
+ assert.doesNotMatch(css,/background-image:url\('\.\/veyro-mascots\.jpg'\)/);
+ assert.match(css,/\.mascot-card-portrait\{[^}]*background-size:contain/);
+ assert.match(css,/\.mascot-preview-portrait\{[^}]*background-size:cover/);
+ assert.match(css,/\.mascot-portrait\{[^}]*background-size:cover/);
+ assert.match(css,/\.mascot-portrait\[data-mascot=red\]/);
 });
-test('all four mascot slots share the fixed sprite and remain selectable',()=>{
- for(const id of ['blue','green','prime'])assert.ok(css.includes('[data-mascot='+id+']'));
- const html=readFileSync('src/frontend/index.html','utf8');
- for(const id of ['black','blue','green','prime'])assert.ok(html.includes('data-mascot-choice="'+id+'"'));
+test('static and Worker builds contain all new assets',()=>{
+ assert.match(build,/flatMap\(mascot=>/);
+ assert.match(worker,/assets\[file\]/);
+ const html=read('src/frontend/index.html');
+ assert.ok(html.includes('Escolha seu Veyro'));
+ const chat=read('src/frontend/components/chat.js');
+ assert.match(chat,/red:\{name:'Veyro Red'/);
+ assert.match(chat,/storedMascot==='prime'\?'red':'black'/);
 });
