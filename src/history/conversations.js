@@ -1,7 +1,7 @@
 import {guardedMessages} from '../core/untrusted.js';
 import {detectMemory,applyMemoryIntent,memoryPool} from '../memory/knowledge.js';
 import {buildContext,scheduleKnowledge} from '../core/context.js';
-import {webDecision,runResearch} from '../research/research.js';
+import {webDecision,needsWeb,runResearch} from '../research/research.js';
 import {assert,AppError,cleanText,memoryCommand} from '../core/domain.js';
 import {own} from '../storage/db.js';
 import {ModelProvider,providerConfig} from '../core/model-provider.js';
@@ -39,7 +39,7 @@ export async function streamChat(req,env,db,c,user,b,ctx){
     const previous=await db.all("SELECT role,text FROM (SELECT role,text,created_at FROM chat_messages WHERE conversation_id=? AND id!=? AND status='COMPLETE' ORDER BY created_at DESC LIMIT 12) ORDER BY created_at",c.id,requestId+'-user');
     const memoryIntent=await detectMemory(env,text,previous,await memoryPool(db,user,p.id,c.id),control.signal);
     const memoryReply=await applyMemoryIntent(db,env,user,c,memoryIntent,previous);
-    const researchWanted=await webDecision(env,text,control.signal);
+    const researchWanted=env.VEYRO_FAST_RESPONSES==='true'?needsWeb(text):await webDecision(env,text,control.signal);
     if(memoryReply&&!researchWanted){textOut=memoryReply;await persist('COMPLETE','notice');emit('notice',{text:textOut});emit('done',{messageId:requestId});return;}
     if(researchWanted){const research=await runResearch(db,env,user,{query:text,mode:b.researchMode||'STANDARD',conversationId:c.id},emit,control.signal);toolOut={type:'research',id:research.id,status:research.status,sources:research.sources,report:research.report};await db.run('UPDATE chat_messages SET research_id=? WHERE id=?',research.id,requestId);textOut=(memoryReply?memoryReply+'\n\n':'')+(research.answer||research.error||'Pesquisa não concluída.');const terminal=research.status==='COMPLETE'?'COMPLETE':research.status==='WAITING'?'WAITING':research.status==='CANCELLED'?'CANCELLED':research.status==='INSUFFICIENT'?'COMPLETE':'FAILED';await persist(terminal,terminal==='COMPLETE'?'assistant':'notice');emit('notice',{text:textOut,role:terminal==='COMPLETE'?'assistant':'notice'});emit('tool',toolOut);emit(terminal==='COMPLETE'?'done':terminal==='WAITING'?'waiting':terminal==='CANCELLED'?'cancelled':'error',{messageId:requestId,message:research.error});return;}
     const provider=new ModelProvider(env),config=providerConfig(env);
@@ -51,7 +51,7 @@ export async function streamChat(req,env,db,c,user,b,ctx){
     const level=complexity(text);let toolCount=0;
     for await(const event of provider.stream({instructions,messages:guardedMessages(history,context,{role:'user',content:text||'Analise os anexos disponíveis.',images}),tools:[imageTool,videoTool],maxTokens:level==='FAST'?700:level==='DEEP'?3500:2000},{requestId,signal:control.signal})){
      if(control.signal.aborted)throw new AppError('Resposta interrompida.',499);
-     if(event.type==='token'){textOut+=event.text;assert(textOut.length<=24000,'A resposta ultrapassou o limite.',502);emit('token',{text:event.text});if(Date.now()-lastSave>1200){await persist('RUNNING');lastSave=Date.now();}}
+     if(event.type==='token'){textOut+=event.text;assert(textOut.length<=24000,'A resposta ultrapassou o limite.',502);emit('token',{text:event.text});if(Date.now()-lastSave>2200){await persist('RUNNING');lastSave=Date.now();}}
      if(event.type==='tool'&&toolCount++===0){toolOut=await prepareTool(db,env,p,user,event.name,event.args,attachments);emit('tool',toolOut);}
     }
     assert(textOut||toolOut,'O modelo não retornou uma resposta.',502);if(control.signal.aborted||(await db.first('SELECT status FROM chat_messages WHERE id=?',requestId))?.status==='CANCELLED')throw new AppError('Resposta interrompida.',499);await persist('COMPLETE');emit('done',{messageId:requestId});

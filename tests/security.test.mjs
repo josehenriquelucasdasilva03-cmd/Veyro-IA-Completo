@@ -12,6 +12,16 @@ function request(path,headers={},method='GET',body){
  return new Request('https://veyro.test'+path,{method,headers:{'x-veyro-request':'1',origin:'https://veyro.test',...headers},body});
 }
 
+test('authentication fails closed without an explicit mode and local mode blocks public hosts',async()=>{
+ const env=setup();delete env.VEYRO_AUTH_MODE;
+ const spoof={'oai-authenticated-user-id':'forged'};
+ assert.equal((await worker.fetch(request('/api/projects',spoof),env)).status,503);
+ env.VEYRO_AUTH_MODE='local';
+ assert.equal((await worker.fetch(request('/api/projects',spoof),env)).status,403);
+ env.VEYRO_AUTH_MODE='cloudflare-access';
+ assert.equal((await worker.fetch(request('/api/projects',spoof),env)).status,401);
+});
+
 test('signed Cloudflare Access identity required; spoofed headers never authenticate',async()=>{
  const env=setup();Object.assign(env,{VEYRO_AUTH_MODE:'cloudflare-access',API_RATE_LIMITER:allowed,MODEL_RATE_LIMITER:allowed,UPLOAD_RATE_LIMITER:allowed});
  const spoof={'oai-authenticated-user-id':'spoofed-user'};
