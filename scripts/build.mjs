@@ -8,6 +8,7 @@ const entries={
  '/boot-intro.css':'src/frontend/styles/boot-intro.css',
  '/studio.js':'src/frontend/components/studio.js',
  '/chat.js':'src/frontend/components/chat.js',
+ '/voice-manager.js':'src/frontend/components/voice-manager.js',
  '/video.js':'src/frontend/components/video.js',
  '/knowledge.js':'src/frontend/components/knowledge.js',
  '/styles.css':'src/frontend/styles/base.css',

@@ -11,6 +11,7 @@ const files = [
   ['src/frontend/styles/boot-intro.css', 'dist/site/boot-intro.css'],
   ['src/frontend/components/studio.js', 'dist/site/studio.js'],
   ['src/frontend/components/chat.js', 'dist/site/chat.js'],
+  ['src/frontend/components/voice-manager.js', 'dist/site/voice-manager.js'],
   ['src/frontend/components/video.js', 'dist/site/video.js'],
   ['src/frontend/components/knowledge.js', 'dist/site/knowledge.js'],
   ['src/frontend/styles/base.css', 'dist/site/styles.css'],
