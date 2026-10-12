@@ -1,0 +1,106 @@
+/* Veyro IA / Solar System UI. Real 3D when WebGL is supported, CSS-only fallback otherwise. */
+:root{--veyro-gold:#d7b66d;--veyro-edge:#c7a059;--veyro-ink:#05070b}
+body[data-mode="chat"] .welcome-backdrop{
+  background:
+    radial-gradient(ellipse at 44% 44%,#b18a4740,transparent 42%),
+    radial-gradient(ellipse at 82% 14%,#283d6436,transparent 43%),
+    radial-gradient(ellipse at 12% 80%,#7e512b2a,transparent 45%),
+    linear-gradient(135deg,#010205,#090d17 53%,#020306);
+  overflow:hidden;isolation:isolate;
+}
+body[data-mode="chat"].welcome-state .welcome-backdrop{opacity:1}
+body[data-mode="chat"]:not(.welcome-state) .welcome-backdrop{
+  opacity:.18;filter:brightness(.55) saturate(.85);
+}
+/* Static fallback for unsupported graphics, reduced motion and data-saving mode. */
+.veyro-cosmos-fallback{position:absolute;inset:0;pointer-events:none;opacity:.8}
+.veyro-cosmos-fallback::before{
+ content:"";position:absolute;inset:-25%;
+ background:
+   radial-gradient(circle at 64% 22%,#c19b68 0 9px,#8b6e4930 13px,transparent 15px),
+   radial-gradient(circle at 19% 35%,#d8aa73 0 24px,#3f332a 37px,transparent 44px),
+   radial-gradient(circle at 85% 54%,#b57d55 0 36px,#4f302b 48px,transparent 53px),
+   radial-gradient(circle at 16% 77%,#3079ac 0 13px,#102e55 22px,transparent 25px),
+   radial-gradient(circle at 77% 81%,#265c9c 0 16px,#15254a 22px,transparent 26px),
+   radial-gradient(circle at 50% 53%,#a27b431e 0 16%,transparent 35%);
+}
+.veyro-cosmos-fallback::after{
+ content:"";position:absolute;left:50%;top:50%;width:min(760px,150vw);aspect-ratio:1;
+ border:1px solid #dbbc7652;border-radius:50%;transform:translate(-50%,-50%) scaleY(.5) rotate(-12deg);
+ box-shadow:0 0 0 68px #bd994618,0 0 0 138px #bd994612,0 0 0 200px #bd99460c;
+}
+.veyro-webgl-ready .veyro-cosmos-fallback{opacity:0}
+.veyro-cosmos-canvas{
+ position:absolute;inset:0;width:100%;height:100%;display:block;
+ pointer-events:none;opacity:0;transition:opacity .65s ease;
+}
+.veyro-webgl-ready .veyro-cosmos-canvas{opacity:.95}
+body[data-mode="chat"].welcome-state .welcome-title h1{
+ color:#fff;font-weight:400!important;
+ text-shadow:0 5px 28px #000,0 0 23px #d0a9616b;
+}
+body[data-mode="chat"].welcome-state .welcome-title p{
+ color:#e9e7e3;text-shadow:0 2px 15px #000;
+}
+/* Existing welcome title and suggestions are displayed on top of the planet scene. */
+body[data-mode="chat"] .welcome-title{position:relative;z-index:2}
+body[data-mode="chat"] .suggestions{position:relative;z-index:2}
+body[data-mode="chat"] .suggestions button{
+ background:linear-gradient(142deg,#0d111bd9,#07090ebf);
+ border:1px solid #c6a4625c;
+ box-shadow:0 10px 26px #0007;
+ backdrop-filter:blur(12px);
+}
+body[data-mode="chat"] .suggestions button:hover,
+body[data-mode="chat"] .suggestions button:focus-visible{
+ border-color:var(--veyro-gold);
+}
+/* The three dots open the existing project options menu, not a duplicate menu. */
+.veyro-header-options{
+ position:absolute;right:86px;top:50%;transform:translateY(-50%);
+ width:40px;height:40px;display:grid;place-items:center;
+ border:1px solid #cca75f9c;border-radius:50%;
+ background:#05070bdf;color:#f5f3ee;font-size:19px;letter-spacing:.5px;
+ line-height:1;z-index:3;backdrop-filter:blur(10px);
+}
+.veyro-header-options:hover{border-color:#f0d393;background:#15120d}
+.veyro-header-options:focus-visible{outline:2px solid #f3d68d;outline-offset:3px}
+body[data-mode="chat"] .composer{
+ border:1.4px solid #d1a958b0;
+ background:linear-gradient(145deg,#11151bed,#06080be8);
+ box-shadow:0 8px 32px #000a,0 0 23px #d8aa4d19;
+ backdrop-filter:blur(16px);
+}
+body[data-mode="chat"] .composer:focus-within{border-color:#f1d489;box-shadow:0 0 0 2px #cfb26a2b,0 10px 30px #0009}
+body[data-mode="chat"] .composer textarea{color:#fff}
+body[data-mode="chat"] .composer textarea::placeholder{color:#c4c1bb}
+body[data-mode="chat"] .send{
+ border:1.5px solid #d9b56a!important;border-radius:50%!important;
+ background:#040609!important;color:#fff!important;
+ box-shadow:inset 0 0 0 2px #101217,0 0 15px #a9822e28!important;
+}
+body[data-mode="chat"] .send svg{stroke:#fff!important;fill:none!important}
+body[data-mode="chat"] .send:focus-visible{outline:2px solid #f2d796;outline-offset:2px}
+body[data-mode="chat"] .chat-message.user .chat-message-content,
+body[data-mode="chat"] .chat-message.notice .chat-message-content,
+body[data-mode="chat"] .chat-message.assistant .chat-message-content{
+ background:#090e15e8;border:1px solid #bb974c85;color:#f8f8f7;
+ border-radius:17px;backdrop-filter:blur(10px);
+}
+body[data-mode="chat"] .chat-message.assistant .chat-message-content{padding:15px 18px;border-color:#a98a4b50}
+@media(max-width:899px){
+ .veyro-header-options{right:64px;width:36px;height:36px}
+ .header .brand{font-size:19px;letter-spacing:3px}
+ .veyro-cosmos-canvas{opacity:.9}
+ .veyro-webgl-ready .veyro-cosmos-canvas{opacity:.91}
+}
+@media(max-width:380px){
+ .veyro-header-options{right:58px;width:34px;height:34px}
+ .header .brand{font-size:16px;letter-spacing:2px}
+}
+@media(prefers-reduced-motion:reduce){
+ .veyro-cosmos-canvas{display:none!important}
+ .veyro-cosmos-fallback{opacity:.7!important}
+ .veyro-webgl-ready .veyro-cosmos-fallback{opacity:.7!important}
+ .veyro-cosmos-canvas,.veyro-cosmos-fallback{animation:none!important;transition:none!important}
+}

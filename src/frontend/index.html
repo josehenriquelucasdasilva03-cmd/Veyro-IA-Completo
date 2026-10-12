@@ -8,10 +8,12 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23060606'/%3E%3Cpath d='M25 17 47 32 25 47Z' fill='%23ffd600'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="cinematic.css">
+  <link rel="stylesheet" href="cosmos.css">
   <script src="studio.js" defer></script>
   <script src="chat.js" defer></script>
   <script src="knowledge.js" defer></script>
   <script src="app.js" defer></script>
+  <script src="cosmos-loader.js" defer></script>
 </head>
 <body data-mode="chat">
   <svg class="svg-defs" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs>
@@ -36,7 +38,7 @@
   </aside>
   <div class="screen">
     <div class="welcome-backdrop" aria-hidden="true"></div>
-    <header class="header"><button class="brand" id="home-chat" aria-label="Voltar à conversa"><span>VEYRO <em>IA</em></span></button><button id="new-chat" class="new-chat" aria-label="Nova conversa"><svg><use href="#i-pen"/></svg></button></header>
+    <header class="header"><button class="brand" id="home-chat" aria-label="Voltar à conversa"><span>VEYRO <em>IA</em></span></button><button id="header-options" class="veyro-header-options" type="button" aria-label="Mais opções" title="Mais opções">•••</button><button id="new-chat" class="new-chat" aria-label="Nova conversa"><svg><use href="#i-pen"/></svg></button></header>
     <main id="workspace" class="workspace">
       <div class="project-bar"><input id="project-title" aria-label="Nome do projeto" maxlength="100" value="Novo projeto"><button id="save" type="button">Salvar</button></div>
       <div class="workspace-meta"><span id="save-status" role="status">Abrindo seus projetos…</span><span>Sem áudio · até 30 s</span></div>

@@ -11,6 +11,9 @@ const files = [
   ['src/frontend/components/knowledge.js', 'dist/site/knowledge.js'],
   ['src/frontend/styles/base.css', 'dist/site/styles.css'],
   ['src/frontend/styles/cinematic.css', 'dist/site/cinematic.css'],
+  ['src/frontend/styles/cosmos.css', 'dist/site/cosmos.css'],
+  ['src/frontend/components/cosmos-loader.js', 'dist/site/cosmos-loader.js'],
+  ['dist/cosmos3d.js', 'dist/site/cosmos3d.js'],
   ['public/assets/cinematic.webp', 'dist/site/cinematic.webp'],
   ['public/assets/veyro-mascots.jpg', 'dist/site/veyro-mascots.jpg'],
 ];
