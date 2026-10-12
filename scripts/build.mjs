@@ -5,9 +5,11 @@ const entries={
  '/app.js':'src/frontend/app.js',
  '/studio.js':'src/frontend/components/studio.js',
  '/chat.js':'src/frontend/components/chat.js',
+ '/scene.js':'src/frontend/components/scene.js',
  '/knowledge.js':'src/frontend/components/knowledge.js',
  '/styles.css':'src/frontend/styles/base.css',
- '/cinematic.css':'src/frontend/styles/cinematic.css'
+ '/cinematic.css':'src/frontend/styles/cinematic.css',
+ '/scene.css':'src/frontend/styles/scene.css'
 };
 const assets={};for(const [url,path]of Object.entries(entries))assets[url]=await readFile(path,'utf8');
 assets['/cinematic.webp']={base64:(await readFile('public/assets/cinematic.webp')).toString('base64'),type:'image/webp'};
