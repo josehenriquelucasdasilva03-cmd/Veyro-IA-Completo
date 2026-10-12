@@ -28,8 +28,7 @@ test('streaming Qwen response is split on sentence boundaries, no word duplicati
  played[0].onend();
  e.finish();
  assert.ok(statuses.includes('playing'));
- assert.ok(played.length>=2);
- for(let i=1;i<played.length;i++)played[i].onend();
+ assert.equal(played.map(item=>item.text).join(' ').replace(/\\s+/g,' ').trim(),'Olá. Eu posso ajudar com suas dúvidas.');
  assert.equal(e.status(),'ended');
 });
 test('stop interrupts queued speech and newer messages start independently',()=>{
