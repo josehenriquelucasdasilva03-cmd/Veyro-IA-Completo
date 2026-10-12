@@ -6,6 +6,8 @@ import { dirname } from 'node:path';
 const files = [
   ['src/frontend/index.html', 'dist/site/index.html'],
   ['src/frontend/app.js', 'dist/site/app.js'],
+  ['src/frontend/components/boot-intro.js', 'dist/site/boot-intro.js'],
+  ['src/frontend/styles/boot-intro.css', 'dist/site/boot-intro.css'],
   ['src/frontend/components/studio.js', 'dist/site/studio.js'],
   ['src/frontend/components/chat.js', 'dist/site/chat.js'],
   ['src/frontend/components/video.js', 'dist/site/video.js'],

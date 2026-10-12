@@ -3,6 +3,8 @@ import {readFile,writeFile,mkdir,rm,copyFile} from 'node:fs/promises';
 const entries={
  '/index.html':'src/frontend/index.html',
  '/app.js':'src/frontend/app.js',
+ '/boot-intro.js':'src/frontend/components/boot-intro.js',
+ '/boot-intro.css':'src/frontend/styles/boot-intro.css',
  '/studio.js':'src/frontend/components/studio.js',
  '/chat.js':'src/frontend/components/chat.js',
  '/video.js':'src/frontend/components/video.js',
