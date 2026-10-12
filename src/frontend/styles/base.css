@@ -16,3 +16,27 @@ input,select{font:inherit;color:inherit}button:disabled{opacity:.5}.nav-button,.
 .auth-login-link{display:block;margin:25px auto 16px;padding:15px;border-radius:10px;color:#111;background:#f1ce59;font-weight:700;text-decoration:none}
 .auth-login-link:focus-visible{outline:3px solid #fff;outline-offset:4px}
 .auth-note{font-size:13px}
+
+/* Initial entrance and secure login gate. */
+.auth-gate [hidden]{display:none!important}
+body.auth-pending{overflow:hidden}
+.auth-gate{isolation:isolate;background:#04060b}
+.auth-intro{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden;background:radial-gradient(ellipse at 50% 42%,#26395b66,transparent 56%),radial-gradient(circle at 52% 44%,#a6864120,transparent 48%),#04060b}
+.auth-ring{position:absolute;display:block;width:min(78vw,510px);aspect-ratio:1;border:1px solid #d8b56399;border-radius:50%;pointer-events:none;animation:veyro-entry-orbit 16s ease-in-out both}
+.auth-ring-two{width:min(94vw,670px);opacity:.5}
+.auth-planet{position:absolute;width:clamp(130px,28vw,280px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 23% 25%,#f3dba6,#977246 30%,#333548 60%,#060c18 85%);box-shadow:0 0 70px #c89e3928,25px 15px 70px #000a inset;pointer-events:none;animation:veyro-entry-planet 16s ease-in-out both}
+.auth-intro-content{position:relative;z-index:2;display:grid;justify-items:center;gap:12px;padding:25px;text-align:center}
+.auth-eyebrow{font-size:11px;letter-spacing:.22em;color:#d8b96b}
+.auth-intro h1{font-size:clamp(38px,7vw,78px);letter-spacing:.15em;font-weight:500;margin:15px 0;color:#fff;text-shadow:0 5px 26px #000;animation:veyro-entry-logo 16s both}
+.auth-intro h1 em{font-style:normal;color:#e2c55b}
+.auth-intro p{color:#f2e2be;font-size:13px;letter-spacing:.14em;margin:0 0 28px}
+.auth-secondary,.auth-retry{display:inline-block;padding:12px 18px;border-radius:11px;border:1px solid #bea66b89;background:#0b1019d9;color:#efdb99;text-decoration:none;cursor:pointer;font-size:14px}
+.auth-alternative{display:block;margin:0 auto 18px}
+.auth-retry{margin:7px auto 0;border:0;text-decoration:underline}
+.auth-retry-button{width:100%;font:inherit;cursor:pointer;border:0}
+.auth-panel h2{font-size:clamp(24px,4vw,32px);margin:12px 0 16px}
+.auth-secondary:focus-visible,.auth-retry:focus-visible,.auth-retry-button:focus-visible{outline:3px solid white;outline-offset:3px}
+@keyframes veyro-entry-orbit{0%{opacity:0;transform:rotate(-40deg) scaleY(.58) scale(.6)}25%{opacity:.9}100%{opacity:.9;transform:rotate(35deg) scaleY(.58) scale(1.1)}}
+@keyframes veyro-entry-planet{0%{opacity:.2;transform:scale(.75) translateX(-26px)}33%{opacity:1}100%{opacity:.83;transform:scale(1.07) translateX(11px)}}
+@keyframes veyro-entry-logo{0%{opacity:0;transform:translateY(20px);filter:blur(7px)}27%{opacity:1;transform:none;filter:none}100%{opacity:1}}
+@media(prefers-reduced-motion:reduce){.auth-ring,.auth-planet,.auth-intro h1{animation:none!important}}

@@ -13,17 +13,42 @@
   <script src="studio.js" defer></script>
   <script src="chat.js" defer></script>
   <script src="knowledge.js" defer></script>
+  <script src="auth-flow.js" defer></script>
   <script src="app.js" defer></script>
   <script src="video.js" defer></script>
   <script src="cosmos-loader.js" defer></script>
 </head>
 <body data-mode="chat">
-  <section id="auth-gate" class="auth-gate" aria-labelledby="auth-title" hidden>
-    <div class="auth-panel">
-      <h1 id="auth-title">Entrar no Veyro IA</h1>
-      <p>Sua sessão não está autenticada. Reabra a página protegida para entrar.</p>
-      <a class="auth-login-link" href="/">Reabrir login seguro</a>
-      <p class="auth-note">Google e GitHub aparecem na tela do Cloudflare Access apenas quando configurados. Prévias estáticas não oferecem login.</p>
+  <section id="auth-gate" class="auth-gate" aria-label="Entrada e autenticação">
+    <div id="auth-intro" class="auth-intro" aria-labelledby="auth-intro-title">
+      <span class="auth-ring auth-ring-one" aria-hidden="true"></span>
+      <span class="auth-ring auth-ring-two" aria-hidden="true"></span>
+      <span class="auth-planet" aria-hidden="true"></span>
+      <div class="auth-intro-content">
+        <span class="auth-eyebrow">01 / ENTRADA</span>
+        <h1 id="auth-intro-title">VEYRO <em>IA</em></h1>
+        <p>Inteligência em movimento.</p>
+        <button id="auth-skip" class="auth-secondary" type="button">Pular introdução</button>
+      </div>
+    </div>
+    <div id="auth-check" class="auth-panel" role="status" aria-live="polite" hidden>
+      <span class="auth-eyebrow">VERIFICAÇÃO</span><h2>Conferindo sua sessão…</h2>
+      <p>Os projetos serão carregados somente depois da autenticação.</p>
+    </div>
+    <div id="auth-login" class="auth-panel" aria-labelledby="auth-title" hidden>
+      <span class="auth-eyebrow">02 / GOOGLE · 03 / CÓDIGO</span>
+      <h2 id="auth-title">Entrar no Veyro IA</h2>
+      <p>Escolha sua conta Google ou receba um código único no painel seguro do Cloudflare Access.</p>
+      <a class="auth-login-link" href="/api/auth/continue">Continuar para Google</a>
+      <a class="auth-secondary auth-alternative" href="/api/auth/continue">Entrar com código</a>
+      <p class="auth-note">Google e código são opções do provedor de autenticação. A verificação adicional, se exigida, deve ser configurada nele. A Veyro não coleta senhas nem códigos.</p>
+      <button id="auth-retry" class="auth-retry" type="button">Já entrei · verificar novamente</button>
+    </div>
+    <div id="auth-unavailable" class="auth-panel" aria-labelledby="auth-error-title" hidden>
+      <span class="auth-eyebrow">CONEXÃO</span><h2 id="auth-error-title">Não foi possível verificar o acesso</h2>
+      <p>Servidor temporariamente indisponível ou prévia estática sem backend.</p>
+      <a class="auth-secondary auth-alternative" href="/api/auth/continue">Abrir o login seguro</a>
+      <button id="auth-retry-error" class="auth-login-link auth-retry-button" type="button">Tentar novamente</button>
     </div>
   </section>
   <svg class="svg-defs" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs>

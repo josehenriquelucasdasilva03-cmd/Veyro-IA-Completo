@@ -5,6 +5,7 @@ import { dirname } from 'node:path';
 // needs its own compatible runtime and bindings; this script does not expose it.
 const files = [
   ['src/frontend/index.html', 'dist/site/index.html'],
+  ['src/frontend/auth-flow.js', 'dist/site/auth-flow.js'],
   ['src/frontend/app.js', 'dist/site/app.js'],
   ['src/frontend/components/studio.js', 'dist/site/studio.js'],
   ['src/frontend/components/chat.js', 'dist/site/chat.js'],
