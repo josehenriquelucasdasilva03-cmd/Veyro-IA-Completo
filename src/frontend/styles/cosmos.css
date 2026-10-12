@@ -104,3 +104,151 @@ body[data-mode="chat"] .chat-message.assistant .chat-message-content{padding:15p
  .veyro-webgl-ready .veyro-cosmos-fallback{opacity:.7!important}
  .veyro-cosmos-canvas,.veyro-cosmos-fallback{animation:none!important;transition:none!important}
 }
+
+/* Veyro IA 3D evolution: honors the existing structure and color identity. */
+body[data-mode="chat"] .welcome-backdrop{
+  transition:opacity 1s ease, filter 1s ease, transform 1s cubic-bezier(.2,.75,.2,1);
+}
+body[data-mode="chat"]:not(.welcome-state) .welcome-backdrop{
+  opacity:.39;filter:brightness(.65) saturate(.78) blur(.7px);
+  transform:scale(.88) translateY(-4%);
+}
+body[data-mode="chat"]:not(.welcome-state) .veyro-cosmos-canvas,
+body[data-mode="chat"]:not(.welcome-state) .veyro-cosmos-fallback{
+  transform:scale(.74);transform-origin:center 48%;
+  transition:transform 1.1s cubic-bezier(.2,.75,.25,1),opacity .8s ease;
+}
+body[data-mode="chat"]:not(.welcome-state) .veyro-cosmos-canvas{opacity:.68}
+body[data-mode="chat"]:not(.welcome-state) .veyro-webgl-ready .veyro-cosmos-canvas{opacity:.68}
+body.welcome-state.welcome-intro .welcome-backdrop{
+  animation:veyro-eight-second-camera 8s cubic-bezier(.18,.82,.2,1) both;
+}
+body.welcome-state.welcome-intro .welcome-backdrop::before{
+  animation:veyro-depth-glide 8s cubic-bezier(.18,.82,.2,1) both;
+}
+@keyframes veyro-eight-second-camera{
+  0%{opacity:.25;transform:scale(1.22) translate3d(-1.8%,0,0);filter:brightness(.65)}
+  38%{opacity:1;filter:brightness(.89)}
+  75%{transform:scale(1.09) translate3d(.5%,0,0);filter:brightness(.96)}
+  100%{opacity:1;transform:scale(1.075) translate3d(.55%,0,0);filter:brightness(1)}
+}
+body.welcome-state.welcome-intro .logo-veyro{
+  animation:veyro-logo-left 2.9s cubic-bezier(.15,.78,.16,1) 1.3s both;
+}
+body.welcome-state.welcome-intro .logo-ia{
+  animation:veyro-logo-right 2.9s cubic-bezier(.15,.78,.16,1) 1.5s both;
+}
+body.welcome-state.welcome-intro .sun-arc-top{
+  animation:veyro-ring-draw 2.75s cubic-bezier(.13,.74,.25,1) .95s both;
+}
+body.welcome-state.welcome-intro .sun-arc-bottom{
+  animation:veyro-ring-draw 2.75s cubic-bezier(.13,.74,.25,1) 1.2s both;
+}
+body.welcome-state.welcome-intro .welcome-title>p{
+  animation:veyro-caption-in 1.1s ease 4.2s both;
+}
+body.welcome-state.welcome-intro .suggestions button:nth-child(1){animation-delay:5s}
+body.welcome-state.welcome-intro .suggestions button:nth-child(2){animation-delay:5.15s}
+body.welcome-state.welcome-intro .suggestions button:nth-child(3){animation-delay:5.3s}
+body.welcome-state.welcome-intro .suggestions button:nth-child(4){animation-delay:5.45s}
+body.welcome-state.welcome-intro .suggestions button:nth-child(5){animation-delay:5.6s}
+body.welcome-state.welcome-intro .dock .composer{
+  animation:veyro-composer-in 1s cubic-bezier(.2,.8,.2,1) 6s both;
+}
+.veyro-logo-particles{
+  position:absolute;left:50%;top:48%;width:0;height:0;
+  overflow:visible;pointer-events:none;z-index:1;
+}
+.veyro-logo-particles i{
+  position:absolute;left:0;top:0;display:block;width:3px;height:3px;
+  border-radius:50%;
+  background:#ffe1a1;opacity:0;
+  box-shadow:0 0 9px #eac26b,0 0 19px #c89c48;
+}
+body.welcome-state.welcome-intro .veyro-logo-particles i{
+  animation:veyro-gold-particle-collapse 4.8s cubic-bezier(.2,.75,.2,1) var(--spark-delay) both;
+}
+@keyframes veyro-gold-particle-collapse{
+  0%{opacity:0;transform:translate3d(var(--spark-x),var(--spark-y),0) scale(.5)}
+  23%{opacity:.85}
+  72%{opacity:.97}
+  100%{opacity:0;transform:translate3d(0,0,0) scale(.15)}
+}
+body[data-mode="chat"] .composer{
+  position:relative;
+  transform-style:preserve-3d;
+  box-shadow:0 22px 43px #000b,0 5px 0 #bc955119,0 0 27px #c8a56030;
+  border:1.5px solid #e0bf77c4;
+  background:linear-gradient(155deg,#1b2330e8,#050609f5 77%);
+  backdrop-filter:blur(19px);
+  transition:border-color .2s ease,box-shadow .25s ease,translate .25s ease;
+}
+body[data-mode="chat"] .composer:focus-within{
+  translate:0 -3px;
+  box-shadow:0 25px 49px #000c,0 4px 0 #bc95512b,0 0 30px #c8a56042;
+}
+body[data-mode="chat"] .dock{filter:drop-shadow(0 17px 26px #0007)}
+body[data-mode="chat"] .send{box-shadow:0 3px 10px #000a,inset 0 0 0 1px #bb94501f!important}
+/* The existing project dialog becomes a right-side animated drawer only when opened via ... */
+#panel.veyro-options-drawer[open]{
+  position:fixed;inset:0 0 0 auto;margin:0;
+  width:min(420px,100vw);height:100dvh;max-height:100dvh;
+  border-radius:22px 0 0 22px;
+  border:1px solid #bc995c90;border-right:0;
+  padding:24px max(20px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom));
+  background:linear-gradient(160deg,#151923f9,#080a0dfd 69%);
+  box-shadow:-25px 0 75px #000a,inset 1px 0 0 #d5b46f26;
+  animation:veyro-options-enter .4s cubic-bezier(.16,.8,.2,1) both;
+}
+#panel.veyro-options-drawer[open] .panel-head{
+  top:-24px;background:#11141c;
+  border-bottom:1px solid #b48d493b;
+}
+#panel.veyro-options-drawer[open] #panel-body>button{
+  display:block;width:100%;margin:8px 0;padding:12px 14px;
+  text-align:left;background:#131821;border:1px solid #a9864c55;
+  border-radius:12px;
+}
+#panel.veyro-options-drawer[open] #panel-body>button:hover{
+  border-color:#d4af67;
+}
+@keyframes veyro-options-enter{
+  from{opacity:.7;transform:translate3d(100%,0,0)}
+  to{opacity:1;transform:translate3d(0,0,0)}
+}
+@media(max-width:899px){
+  .veyro-logo-particles{top:45%}
+  body[data-mode="chat"] .dock{filter:none}
+}
+@media(max-width:480px){
+  #panel.veyro-options-drawer[open]{border-radius:16px 0 0 16px}
+  body[data-mode="chat"] .composer{box-shadow:0 11px 25px #000b,0 3px 0 #b995511e}
+}
+@media(prefers-reduced-motion:reduce){
+  body.welcome-state.welcome-intro .welcome-backdrop,
+  body.welcome-state.welcome-intro .welcome-backdrop::before,
+  body.welcome-state.welcome-intro .logo-veyro,
+  body.welcome-state.welcome-intro .logo-ia,
+  body.welcome-state.welcome-intro .sun-arc,
+  body.welcome-state.welcome-intro .welcome-title>p,
+  body.welcome-state.welcome-intro .suggestions button,
+  body.welcome-state.welcome-intro .dock .composer{
+    animation:none!important;
+  }
+  .veyro-logo-particles{display:none!important}
+  #panel.veyro-options-drawer[open]{animation:none!important}
+  body[data-mode="chat"] .composer{transition:none!important}
+  body[data-mode="chat"] .composer:focus-within{translate:0}
+}
+
+
+/* Users can skip the eight-second entrance without affecting chat state. */
+.veyro-skip-intro{
+  position:absolute;right:0;top:5px;z-index:4;display:none;
+  border:1px solid #d1aa6266;border-radius:999px;
+  background:#090b11c9;color:#ddd5c4;
+  font-size:12px;padding:8px 13px;
+}
+body.welcome-state.welcome-intro .veyro-skip-intro{display:block}
+.veyro-skip-intro:focus-visible{outline:2px solid #f1d285;outline-offset:3px}
+@media(max-width:899px){.veyro-skip-intro{top:10px;right:4px}}

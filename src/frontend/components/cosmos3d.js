@@ -83,6 +83,23 @@ export function mountCosmos(host){
   sun.position.set(-3.6,1.5,8);
   scene.add(ambient,sun);
   const group=new THREE.Group();scene.add(group);
+  const extraGeometries=[];
+  const extraMaterials=[];
+  const hologramRings=[];
+  // Fine holographic orbital lines: limited geometry for stable mobile performance.
+  for(const [radius,tilt,shade] of [[1.85,.27,0xdab970],[2.38,-.38,0x74a7bc],[3.02,.66,0xd2b270]]){
+    const geometry=new THREE.TorusGeometry(radius,.015,4,mobile?80:140);
+    const material=new THREE.MeshBasicMaterial({
+      color:shade,transparent:true,opacity:mobile?.36:.49,
+      depthWrite:false,side:THREE.DoubleSide
+    });
+    const ring=new THREE.Mesh(geometry,material);
+    ring.rotation.x=tilt;
+    group.add(ring);
+    hologramRings.push(ring);
+    extraGeometries.push(geometry);
+    extraMaterials.push(material);
+  }
 
   const starCount=mobile?125:220;
   const positions=new Float32Array(starCount*3);
@@ -114,6 +131,7 @@ export function mountCosmos(host){
       points.push(p.clone());
     }
     const orbitGeometry=new THREE.BufferGeometry().setFromPoints(points);
+    extraGeometries.push(orbitGeometry);
     group.add(new THREE.LineLoop(orbitGeometry,goldMaterial));
     const geometry=new THREE.SphereGeometry(body.size,mobile?20:36,mobile?14:22);
     const map=textureFor(body);
@@ -130,7 +148,7 @@ export function mountCosmos(host){
     planets.push({body,sphere,map,geometry});
   }
 
-  let width=0,height=0,frame=0,active=false,disposed=false,last=0,rotationX=0,rotationY=0,tiltX=0,tiltY=0;
+  let width=0,height=0,frame=0,active=false,desiredActive=false,disposed=false,last=0,tiltX=0,tiltY=0;
   const point=new THREE.Vector3();
   function resize(){
     if(disposed)return;
@@ -158,28 +176,33 @@ export function mountCosmos(host){
     }
     group.rotation.x+=(tiltX-group.rotation.x)*.055;
     group.rotation.y+=(tiltY-group.rotation.y)*.055;
+    group.position.x+=((tiltY*.8)-group.position.x)*.04;
+    group.position.y+=((-tiltX*.5)-group.position.y)*.04;
+    hologramRings.forEach((ring,index)=>{ring.rotation.z=seconds*(index%2?-.019:.015);});
     renderer.render(scene,camera);
     if(active&&!document.hidden)frame=requestAnimationFrame(paint);
   }
   function setActive(next){
     if(disposed)return;
-    const allowed=next&&!document.hidden&&!matchMedia('(prefers-reduced-motion: reduce)').matches;
-    active=Boolean(allowed);
+    desiredActive=Boolean(next);
+    active=desiredActive&&!document.hidden&&!matchMedia('(prefers-reduced-motion: reduce)').matches;
     if(!frame)frame=requestAnimationFrame(paint);
   }
   const move=event=>{
     if(!active)return;
     const rect=host.getBoundingClientRect();
     if(!rect.width||!rect.height)return;
-    rotationX=max((event.clientY-rect.top)/rect.height-.5,-.5,.5);
-    rotationY=max((event.clientX-rect.left)/rect.width-.5,-.5,.5);
-    tiltX=rotationX*.12;tiltY=rotationY*.18;
+    if(event.pointerType==='touch'&&!event.isPrimary)return;
+    const px=max((event.clientX-rect.left)/rect.width-.5,-.5,.5);
+    const py=max((event.clientY-rect.top)/rect.height-.5,-.5,.5);
+    tiltX=py*(event.pointerType==='touch'?.3:.15);
+    tiltY=px*(event.pointerType==='touch'?.4:.21);
   };
   const reset=()=>{tiltX=0;tiltY=0;};
   window.addEventListener('pointermove',move,{passive:true});
   window.addEventListener('pointerup',reset,{passive:true});
   window.addEventListener('blur',reset);
-  const visibility=()=>setActive(active&&!document.hidden);
+  const visibility=()=>setActive(desiredActive);
   document.addEventListener('visibilitychange',visibility);
   const observer=new ResizeObserver(resize);
   observer.observe(host);
@@ -198,6 +221,8 @@ export function mountCosmos(host){
         geometry.dispose();map.dispose();sphere.material.dispose();
         for(const child of sphere.children){child.geometry.dispose();child.material.dispose();}
       }
+      extraGeometries.forEach(item=>item.dispose());
+      extraMaterials.forEach(item=>item.dispose());
       coreGeometry.dispose();coreMaterial.dispose();goldMaterial.dispose();starsGeometry.dispose();
       renderer.dispose();renderer.domElement.remove();
     }
