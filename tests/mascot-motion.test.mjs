@@ -7,7 +7,7 @@ test('all mascot animations output finite joint positions',()=>{
  for(const name of MOTIONS){
   for(const t of [0,.1,1.5,7.3,200]){
    const pose=poseAt(name,t);
-   assert.equal(Object.keys(pose).length,17);
+   assert.equal(Object.keys(pose).length,22);
    for(const [key,value] of Object.entries(pose))
     assert.ok(Number.isFinite(value),name+' '+key+' must be finite');
   }
@@ -49,15 +49,29 @@ test('prefers-reduced-motion, limits and lifecycle are respected',()=>{
  const engine=readFileSync(new URL('../src/frontend/components/mascot3d.js',import.meta.url),'utf8');
  const ui=readFileSync(new URL('../src/frontend/components/mascot-ui.js',import.meta.url),'utf8');
  const html=readFileSync(new URL('../src/frontend/index.html',import.meta.url),'utf8');
- assert.match(engine,/const target=poseAt\(current,reduced\?0:clock\)/);
+ assert.match(engine,/const target=poseAt\(current,reduced\?0:clock\+phase\)/);
  assert.match(engine,/if\(!reduced\)schedule\(\)/);
  assert.match(engine,/pause,resume/);
  assert.match(engine,/setSpeed\(next\)/);
  assert.match(engine,/const geometries=new Set\(\)/);
- assert.match(ui,/attributeFilter:\['data-mascot-state'\]/);
- assert.match(ui,/generation\+\+/);
+ assert.match(ui,/attributeFilter:\['data-mascot-state','data-mode'\]/);
+ assert.match(ui,/tickets\[key\]\+\+/);
  assert.match(ui,/if\(auto.checked\)auto.checked=false/);
  assert.equal((html.match(/id="mascot-status"/g)||[]).length,1);
  assert.equal((html.match(/id="mascot-3d-status"/g)||[]).length,1);
  assert.match(html,/id="mascot-speed"/);
+});
+
+test('idle character visibly animates in three-dimensional poses',()=>{
+ const start=poseAt('idle',0),later=poseAt('idle',.9);
+ assert.ok(Math.abs(start.turn-later.turn)>.05);
+ assert.ok(Math.abs(start.headZ-later.headZ)>.05);
+ assert.ok(Math.abs(start.leftX-later.leftX)>.05);
+ assert.ok(Math.abs(start.y-later.y)>.02);
+});
+test('forearms participate in the waving, thinking and typing actions',()=>{
+ assert.ok(poseAt('waving',1).rightElbowX<-.8);
+ assert.ok(poseAt('thinking',1).rightElbowX<-.5);
+ assert.ok(poseAt('typing',1).leftElbowX<-.6);
+ assert.ok(poseAt('typing',1).rightElbowX<-.6);
 });

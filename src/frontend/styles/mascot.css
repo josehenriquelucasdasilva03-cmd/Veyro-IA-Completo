@@ -3,3 +3,27 @@
 .mascot-panel input[type=range]{min-height:30px;cursor:pointer}
 .mascot-panel :focus-visible{outline:2px solid #f0d28b;outline-offset:2px}
 .mascot-panel .mascot-stage:focus-visible{outline:2px solid #f0d28b}
+
+/* A versão 3D aparece na própria conversa e na escolha dos personagens. */
+.mascot-hero,.mascot-preview-portrait{position:relative;overflow:hidden;isolation:isolate}
+.mascot-hero.veyro-3d-active,.mascot-preview-portrait.veyro-3d-active{
+ background-image:none!important;background-color:#090e16;
+ animation:none!important;transform:none!important;filter:none!important;
+}
+.mascot-hero canvas,.mascot-preview-portrait canvas{
+ position:absolute;inset:0;display:block;width:100%!important;height:100%!important;
+ pointer-events:none;border-radius:inherit;
+}
+.mascot-hero{width:78px;height:86px;border-radius:17px}
+.mascot-preview-portrait{width:126px;height:140px;border-radius:15px}
+@media(max-width:899px){
+ .mascot-hero{width:65px;height:74px;border-radius:13px}
+ .mascot-preview-portrait{width:104px;height:120px}
+}
+@media(max-width:420px){
+ .mascot-hero{width:56px;height:64px;border-radius:12px}
+ .mascot-preview-portrait{width:92px;height:106px}
+}
+@media(prefers-reduced-motion:reduce){
+ .mascot-hero.veyro-3d-active,.mascot-preview-portrait.veyro-3d-active{animation:none!important}
+}
