@@ -8,10 +8,24 @@ function button(text,fn,cls='text-button'){const b=el('button',text,cls);b.type=
 async function handle(fn){try{return await fn();}catch(e){feedback(e.message,true);if($('panel').open){let error=$('panel-error');if(!error){error=el('p',undefined,'error');error.id='panel-error';error.setAttribute('role','alert');$('panel-body').prepend(error);}error.textContent=e.message;}}}
 function feedback(text,error=false){$('feedback').textContent=text|| (state.chat?'IA conectada · revise as propostas antes de aplicar':'IA ainda não conectada · você pode salvar e editar');$('feedback').classList.toggle('error',error);}
 function showLoginGate(){const gate=$('auth-gate');if(gate)gate.hidden=false;}
-async function api(path,options={}){const headers={'X-Veyro-Request':'1',...options.headers};if(options.body&&!(options.body instanceof FormData)){headers['Content-Type']='application/json';options.body=JSON.stringify(options.body);}let response;try{response=await fetch('/api/'+path,{...options,headers});}catch{throw Error('Sem conexão. Suas mudanças continuam na tela. Tente salvar novamente.');}if(response.status===401){showLoginGate();throw Error('Sua sessão expirou ou não foi autenticada.');}
-const contentType=response.headers.get('content-type')||'';
-if(!contentType.includes('application/json')){showLoginGate();throw Error('A autenticação precisa ser renovada no navegador.');}
-const data=await response.json();if(!response.ok)throw Error(data.error||'Não foi possível concluir.');return data;}
+function isCloudflareAccessRedirect(response){
+ if(!response.redirected)return false;
+ try{const u=new URL(response.url,location.href);return u.hostname.endsWith('.cloudflareaccess.com')||u.pathname.startsWith('/cdn-cgi/access/');}
+ catch{return false;}
+}
+async function api(path,options={}){
+ const headers={'X-Veyro-Request':'1',...options.headers};
+ if(options.body&&!(options.body instanceof FormData)){headers['Content-Type']='application/json';options.body=JSON.stringify(options.body);}
+ let response;
+ try{response=await fetch('/api/'+path,{...options,headers});}
+ catch{throw Error('API inacessível. Verifique a rede e o Worker de teste; prévias estáticas não oferecem login nem chat real.');}
+ if(response.status===401||isCloudflareAccessRedirect(response)){showLoginGate();throw Error('Sua sessão expirou. Reabra a página protegida para entrar.');}
+ const contentType=response.headers.get('content-type')||'';
+ if(!contentType.includes('application/json'))throw Error('O endereço atual não está entregando a API do Veyro IA. Prévia estática não autentica usuários.');
+ const data=await response.json().catch(()=>{throw Error('O servidor retornou JSON inválido.');});
+ if(!response.ok)throw Error(data.error||'Não foi possível concluir.');
+ return data;
+}
 const route=action=>'projects/'+state.id+(action?'/'+action:'');
 function payload(){return {format:state.format,duration:state.duration,original:state.mode==='create'&&state.step!=='review'?$('prompt').value:state.original,draft:state.mode==='create'&&state.step==='review'?$('prompt').value:state.draft,scenes:state.scenes,fileIds:state.files.map(f=>f.id),review:$('review-toggle').checked,visualStyle:state.visualStyle,characters:state.characters,constraints:state.constraints,photo:{...state.photo,prompt:state.mode==='photo'?$('prompt').value:state.photo.prompt},editor:{...state.editor,request:state.mode==='editor'?$('prompt').value:state.editor.request}};}
 function changed(){state.dirty=true;changeNumber++;$('save-status').textContent='Alterações na tela';clearTimeout(autosave);autosave=setTimeout(()=>handle(()=>save()),1200);}
