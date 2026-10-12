@@ -166,3 +166,18 @@ body[data-mode="chat"] .send:disabled {
   body[data-mode="chat"] .composer,
   body[data-mode="chat"] .send { transition: none; }
 }
+
+/* Spoken reply visibly reacts to actual browser/remote audio state. Static avatar
+   pulses only; true skeletal lip sync requires a future rigged 3D model. */
+body[data-mascot-state=reading] .mascot-hero{position:relative;isolation:isolate}
+body[data-mascot-state=reading] .mascot-hero::after{
+ content:'';position:absolute;left:33%;bottom:7%;width:34%;height:6%;border-radius:60%;
+ background:rgba(247,214,136,.75);box-shadow:0 0 6px #e7c37a;
+ animation:veyro-mouth-wave .32s ease-in-out infinite alternate
+}
+@keyframes veyro-mouth-wave{from{transform:scaleY(.55);opacity:.3}to{transform:scaleY(1.65);opacity:1}}
+body[data-voice-performance=economico] .mascot-hero,
+body[data-voice-performance=economico] .mascot-hero::after{animation:none!important}
+body[data-voice-performance=maximo][data-mascot-state=reading] .mascot-hero{filter:drop-shadow(0 0 13px #dfba78)}
+@media(prefers-reduced-motion:reduce){body[data-mascot-state=reading] .mascot-hero::after{animation:none!important}}
+@media(max-width:420px){#mascot-voice-settings{font-size:15px;min-width:31px;padding:7px 5px}}

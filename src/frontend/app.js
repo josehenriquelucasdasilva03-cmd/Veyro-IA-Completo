@@ -225,9 +225,11 @@ async function sendGithubQwen(text){
  const prior=approvedMemories?[{role:'user',content:'Preferências que salvei: '+approvedMemories},...earlier]:earlier;
  const now=Date.now(),user={id:crypto.randomUUID(),role:'user',text,status:'COMPLETE',created_at:now};
  const reply={id:crypto.randomUUID(),role:'assistant',text:'',status:'RUNNING',created_at:now+1};
- state.chatMessages.push(user,reply);renderChatMessages();busy(true);feedback('Aguardando resposta do Qwen…');
+ stopSpeech();state.chatMessages.push(user,reply);renderChatMessages();busy(true);feedback('Aguardando resposta do Qwen…');
+ const speechStreaming=startQwenSpeech(reply.id);
  try{
-  await bridge.send(text,prior,piece=>{reply.text+=piece;renderChatMessages();});
+  await bridge.send(text,prior,piece=>{reply.text+=piece;if(speechStreaming)feedQwenSpeech(piece);renderChatMessages();});
+  if(speechStreaming)finishQwenSpeech();
   reply.status='COMPLETE';$('prompt').value='';state.chatDraft='';chatDraftDirty=false;
   if(historyAvailable&&selectedSavedConversation){
    try{
@@ -242,6 +244,7 @@ async function sendGithubQwen(text){
    }
   }else feedback('Resposta recebida, mas o histórico não está disponível nesta sessão.',true);
  }catch(error){
+  stopSpeech();
   state.chatMessages=state.chatMessages.filter(m=>m!==reply);
   state.chatMessages.push({id:crypto.randomUUID(),role:'notice',text:'Envio não concluído: '+(error.message||'falha no backend')+'. Confira a sessão e tente novamente.',status:'COMPLETE',created_at:Date.now()+1});
   feedback(error.message||'Envio não concluído.',true);
@@ -286,6 +289,7 @@ function startStaticPreview(){
   $('prompt').focus();
  };
  renderChatMessages();
+ if(QWEN_PAGES){$('voice-input').disabled=false;$('voice-input').title='Ditado por voz, quando suportado pelo navegador';}
  if(QWEN_PAGES)setupQwenLogin();
  else feedback('Prévia de interface. Envie uma mensagem para testá-la visualmente, sem conexão com a IA.');
 }
