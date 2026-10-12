@@ -16,19 +16,20 @@ export function pocketTtsBase(env){const base=String(env.POCKET_TTS_BASE_URL||'h
  * A browser never talks to the model directly.
  */
 export function kokoroTtsBase(env){
- const base=String(env.KOKORO_TTS_BASE_URL||'').trim().replace(/\\/+$/,'');
- if(!base||/[\\r\\n]/.test(base))return '';
+ const base=String(env.KOKORO_TTS_BASE_URL||'').trim().replace(/[/]+$/,'');
+ if(!base||base.includes(String.fromCharCode(10))||base.includes(String.fromCharCode(13)))return '';
  try{
   const url=new URL(base);
   if(url.username||url.password||url.search||url.hash||url.pathname!=='/'||base!==url.origin)return '';
   if(url.protocol==='http:'&&loopbackHost(url.hostname))return base;
   if(url.protocol!=='https:')return '';
-  if(!/^[a-z0-9-]+(?:\\.[a-z0-9-]+)+$/i.test(url.hostname)
+  if(!/^[a-z0-9-]+(?:[.][a-z0-9-]+)+$/i.test(url.hostname)
      ||/^[0-9.]+$/.test(url.hostname)
-     ||/\\.(?:localhost|local|internal|test|invalid)$/i.test(url.hostname)
+     ||/[.](?:localhost|local|internal|test|invalid)$/i.test(url.hostname)
      ||url.hostname==='localhost')return '';
   const key=env.KOKORO_TTS_API_KEY;
-  if(typeof key!=='string'||key.length<16||key.length>512||/[\\r\\n]/.test(key))return '';
+  if(typeof key!=='string'||key.length<16||key.length>512
+     ||key.includes(String.fromCharCode(10))||key.includes(String.fromCharCode(13)))return '';
   return base;
  }catch{return '';}
 }
