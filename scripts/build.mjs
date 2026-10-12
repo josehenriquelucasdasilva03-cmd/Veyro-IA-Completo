@@ -5,9 +5,11 @@ const entries={
  '/app.js':'src/frontend/app.js',
  '/studio.js':'src/frontend/components/studio.js',
  '/chat.js':'src/frontend/components/chat.js',
+ '/video.js':'src/frontend/components/video.js',
  '/knowledge.js':'src/frontend/components/knowledge.js',
  '/styles.css':'src/frontend/styles/base.css',
  '/cinematic.css':'src/frontend/styles/cinematic.css',
+ '/video.css':'src/frontend/styles/video.css',
  '/cosmos.css':'src/frontend/styles/cosmos.css',
  '/cosmos-loader.js':'src/frontend/components/cosmos-loader.js'
 };
