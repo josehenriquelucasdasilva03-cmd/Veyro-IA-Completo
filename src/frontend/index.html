@@ -9,11 +9,13 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="cinematic.css">
   <link rel="stylesheet" href="cosmos.css">
+  <link rel="stylesheet" href="model3d.css">
   <script src="studio.js" defer></script>
   <script src="chat.js" defer></script>
   <script src="knowledge.js" defer></script>
   <script src="app.js" defer></script>
   <script src="cosmos-loader.js" defer></script>
+  <script src="model3d-ui.js" defer></script>
 </head>
 <body data-mode="chat">
   <svg class="svg-defs" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs>
@@ -32,7 +34,7 @@
   <button id="sidebar-toggle" class="menu-toggle" aria-label="Abrir menu" aria-controls="sidebar" aria-expanded="true"><svg><use href="#i-menu"/></svg></button>
   <button id="sidebar-overlay" class="sidebar-overlay" aria-label="Fechar menu" hidden></button>
   <aside id="sidebar" class="sidebar" aria-label="Menu e conversas"><button id="sidebar-close" aria-label="Fechar menu">×</button>
-    <nav class="sidebar-nav" aria-label="Recursos"><button id="nav-images"><svg><use href="#i-image"/></svg>Imagens</button><button id="nav-videos"><svg><use href="#i-video"/></svg>Vídeos</button><button id="nav-agents"><svg><use href="#i-agents"/></svg>Agentes</button></nav>
+    <nav class="sidebar-nav" aria-label="Recursos"><button id="nav-images"><svg><use href="#i-image"/></svg>Imagens</button><button id="nav-videos"><svg><use href="#i-video"/></svg>Vídeos</button><button id="nav-3d" type="button" aria-label="Abrir estúdio 3D">◇ 3D</button><button id="nav-agents"><svg><use href="#i-agents"/></svg>Agentes</button></nav>
     <div class="recent-conversations" id="recent-conversations" aria-label="Conversas recentes"></div>
     <div class="sidebar-bottom"><button id="profile-open" class="profile-button" aria-label="Abrir meu perfil"><span id="profile-avatar"><svg><use href="#i-user"/></svg></span><span id="profile-name" class="sr-only">Meu perfil</span></button><button id="project-options" class="project-options" aria-label="Opções do projeto">•••</button></div>
   </aside>
@@ -42,7 +44,7 @@
     <main id="workspace" class="workspace">
       <div class="project-bar"><input id="project-title" aria-label="Nome do projeto" maxlength="100" value="Novo projeto"><button id="save" type="button">Salvar</button></div>
       <div class="workspace-meta"><span id="save-status" role="status">Abrindo seus projetos…</span><span>Sem áudio · até 30 s</span></div>
-      <nav class="tools" aria-label="Ferramentas do projeto"><button id="projects-open" class="nav-button" type="button">Projetos</button><button id="create-mode" aria-pressed="true">Criar</button><button id="photo-mode" aria-pressed="false">Photo Studio</button><button id="editor-mode" aria-pressed="false">Editor</button><button id="chat-mode" aria-pressed="false">Conversar</button><button id="memories-open">Memórias</button><button id="versions-open">Versões</button><button id="activity-open">Atividade</button></nav>
+      <nav class="tools" aria-label="Ferramentas do projeto"><button id="projects-open" class="nav-button" type="button">Projetos</button><button id="create-mode" aria-pressed="true">Criar</button><button id="model3d-open" type="button">3D Studio</button><button id="photo-mode" aria-pressed="false">Photo Studio</button><button id="editor-mode" aria-pressed="false">Editor</button><button id="chat-mode" aria-pressed="false">Conversar</button><button id="memories-open">Memórias</button><button id="versions-open">Versões</button><button id="activity-open">Atividade</button></nav>
       <section id="photo-view" class="studio-view" hidden>
         <span class="eyebrow">VEYRO PHOTO STUDIO</span><h1>Uma imagem. Sua intenção.</h1>
         <p class="review-help">Gere imagens localmente com SDXL-Lightning. A edição de imagens enviadas ainda não está conectada.</p>
@@ -123,5 +125,24 @@
   </div>
   <dialog id="panel" aria-labelledby="panel-title"><div class="panel-head"><h2 id="panel-title"></h2><button id="panel-close" type="button" aria-label="Fechar">×</button></div><div id="panel-body"></div></dialog>
   <dialog id="mascot-picker" class="mascot-picker" aria-labelledby="mascot-picker-title"><div class="panel-head"><h2 id="mascot-picker-title">Escolha seu Veyro</h2><button id="mascot-close" type="button" aria-label="Fechar">×</button></div><p class="mascot-intro">Seu mascote representa visualmente a mesma inteligência Veyro. Sua conversa continua intacta ao trocar de personagem.</p><div class="mascot-options" role="group" aria-label="Mascotes Veyro"><button type="button" class="mascot-option" data-mascot-choice="black" aria-pressed="false"><span class="mascot-portrait mascot-card-portrait" data-mascot="black" role="img" aria-label="Robô preto Veyro Black"></span><strong>Veyro Black</strong><small>Analítico · confiante</small></button><button type="button" class="mascot-option" data-mascot-choice="blue" aria-pressed="false"><span class="mascot-portrait mascot-card-portrait" data-mascot="blue" role="img" aria-label="Robô azul Veyro Blue"></span><strong>Veyro Blue</strong><small>Curioso · tecnológico</small></button><button type="button" class="mascot-option" data-mascot-choice="green" aria-pressed="false"><span class="mascot-portrait mascot-card-portrait" data-mascot="green" role="img" aria-label="Robô verde Veyro Green"></span><strong>Veyro Green</strong><small>Tranquilo · prestativo</small></button><button type="button" class="mascot-option" data-mascot-choice="prime" aria-pressed="false"><span class="mascot-portrait mascot-card-portrait" data-mascot="prime" role="img" aria-label="Robô multicolorido Veyro Prime"></span><strong>Veyro Prime</strong><small>Premium · tecnológico</small></button></div><div class="mascot-preview"><div class="mascot-portrait mascot-preview-portrait" data-mascot="black" role="img" aria-label="Prévia do mascote"></div><div><span class="eyebrow">SEU COMPANHEIRO</span><h3 id="mascot-preview-name">Veyro Black</h3><p id="mascot-greeting">Olá! Estou pronto para conversar com você.</p></div></div><button id="mascot-confirm" class="mascot-confirm" type="button">Conversar com este Veyro</button></dialog>
+
+  <dialog id="model3d-dialog" aria-labelledby="model3d-title">
+    <div class="model3d-head"><div><h2 id="model3d-title">VEYRO 3D Studio</h2><p>Objetos, ícones tridimensionais e relevo de imagens. Tudo no navegador.</p></div><button id="model3d-close" type="button" aria-label="Fechar editor 3D">×</button></div>
+    <div class="model3d-layout">
+      <div class="model3d-controls">
+        <label>Descreva seu objeto<textarea id="model3d-prompt" maxlength="500" placeholder="Ex.: robô metálico, planeta com anéis, foguete..."></textarea></label>
+        <label>Modelo<select id="model3d-preset"><option value="auto">Detectar pela descrição</option><option value="robot">Robô</option><option value="planet">Planeta</option><option value="rocket">Foguete</option><option value="car">Carro</option><option value="house">Casa</option><option value="tree">Árvore</option><option value="heart">Coração</option><option value="star">Estrela</option><option value="medal">Medalha ou logo</option><option value="cube">Cubo</option><option value="sphere">Esfera</option><option value="torus">Anel</option><option value="abstract">Abstrato</option></select></label>
+        <div class="model3d-pair"><label>Estilo<select id="model3d-style"><option value="model">Modelo 3D</option><option value="icon">Ícone 3D</option><option value="hologram">Holográfico</option></select></label><label>Cor<input id="model3d-color" type="color" value="#d3af69"></label></div>
+        <button id="model3d-generate" type="button">Criar modelo 3D</button>
+        <label>Converter imagem em relevo<input id="model3d-import" type="file" accept="image/png,image/jpeg,image/webp"></label>
+        <p class="model3d-hint">A descrição usa uma biblioteca inicial de formatos. O relevo da foto depende do brilho; não recria a profundidade real da imagem.</p>
+      </div>
+      <div class="model3d-display">
+        <div id="model3d-preview" aria-label="Prévia 3D interativa"></div>
+        <div class="model3d-downloads"><button id="model3d-glb" type="button">Exportar GLB</button><button id="model3d-png" type="button">Exportar PNG</button></div>
+        <p id="model3d-status" role="status">Editor pronto para abrir.</p>
+      </div>
+    </div>
+  </dialog>
 </body>
 </html>

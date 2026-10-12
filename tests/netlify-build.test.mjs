@@ -10,6 +10,7 @@ test('build do Netlify publica a página inicial e todos os arquivos referenciad
     'dist/site/chat.js', 'dist/site/knowledge.js', 'dist/site/styles.css',
     'dist/site/cinematic.css', 'dist/site/cinematic.webp', 'dist/site/veyro-mascots.jpg',
   ];
+  required.push('dist/site/model3d-ui.js', 'dist/site/model3d-engine.js', 'dist/site/model3d.css');
   for (const file of required) await access(file);
 
   const html = await readFile('dist/site/index.html', 'utf8');
