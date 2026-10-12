@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json.schemastore.org/wrangler.json",
+  "name": "veyro-history-test",
+  "main": "./index.js",
+  "compatibility_date": "2026-10-12",
+  "workers_dev": true,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "veyro-auth-test",
+      "database_id": "b1048d20-6ba7-4f70-a9ca-de7aa75d990b"
+    }
+  ]
+}
