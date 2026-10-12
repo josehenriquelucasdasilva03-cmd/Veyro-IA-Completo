@@ -23,6 +23,7 @@ const threeScript=threeBundle.outputFiles[0].text;
 assets['/cosmos3d.js']=threeScript;
 const model3DBundle=await build({entryPoints:['src/frontend/components/model3d-engine.js'],bundle:true,minify:true,write:false,format:'esm',platform:'browser',target:'es2022'});
 assets['/model3d-engine.js']=model3DBundle.outputFiles[0].text;
+await writeFile('dist/model3d-engine.js',model3DBundle.outputFiles[0].text);
 
 await writeFile('dist/cosmos3d.js',threeScript);
 
