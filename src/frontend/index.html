@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="video.css">
   <link rel="stylesheet" href="cosmos.css">
   <link rel="stylesheet" href="planetarium-theme.css">
+  <link rel="stylesheet" href="mascot.css">
   <script src="boot-intro.js" defer></script>
   <script src="qwen-pages.js" defer></script>
   <script src="studio.js" defer></script>
@@ -21,6 +22,7 @@
   <script src="app.js" defer></script>
   <script src="video.js" defer></script>
   <script src="cosmos-loader.js" defer></script>
+  <script src="mascot-ui.js" defer></script>
 </head>
 <body data-mode="chat">
   <!-- Entrada autônoma: aparece antes do backend, inclusive em prévias estáticas. -->
@@ -174,5 +176,17 @@
   </div>
   <dialog id="panel" aria-labelledby="panel-title"><div class="panel-head"><h2 id="panel-title"></h2><button id="panel-close" type="button" aria-label="Fechar">×</button></div><div id="panel-body"></div></dialog>
   <dialog id="mascot-picker" class="mascot-picker" aria-labelledby="mascot-picker-title"><div class="panel-head"><h2 id="mascot-picker-title">Escolha seu Veyro</h2><button id="mascot-close" type="button" aria-label="Fechar">×</button></div><p class="mascot-intro">Seu mascote representa visualmente a mesma inteligência Veyro. Sua conversa continua intacta ao trocar de personagem.</p><div class="mascot-options" role="group" aria-label="Mascotes Veyro"><button type="button" class="mascot-option" data-mascot-choice="black" aria-pressed="false"><span class="mascot-portrait mascot-card-portrait" data-mascot="black" role="img" aria-label="Robô preto Veyro Black"></span><strong>Veyro Black</strong><small>Analítico · confiante</small></button><button type="button" class="mascot-option" data-mascot-choice="blue" aria-pressed="false"><span class="mascot-portrait mascot-card-portrait" data-mascot="blue" role="img" aria-label="Robô azul Veyro Blue"></span><strong>Veyro Blue</strong><small>Curioso · tecnológico</small></button><button type="button" class="mascot-option" data-mascot-choice="green" aria-pressed="false"><span class="mascot-portrait mascot-card-portrait" data-mascot="green" role="img" aria-label="Robô verde Veyro Green"></span><strong>Veyro Green</strong><small>Tranquilo · prestativo</small></button><button type="button" class="mascot-option" data-mascot-choice="red" aria-pressed="false"><span class="mascot-portrait mascot-card-portrait" data-mascot="red" role="img" aria-label="Robô branco e vermelho Veyro Red"></span><strong>Veyro Red</strong><small>Dinâmico · criativo</small></button></div><div class="mascot-preview"><div class="mascot-portrait mascot-preview-portrait" data-mascot="black" role="img" aria-label="Prévia do mascote"></div><div><span class="eyebrow">SEU COMPANHEIRO</span><h3 id="mascot-preview-name">Veyro Black</h3><p id="mascot-greeting">Olá! Estou pronto para conversar com você.</p></div></div><button id="mascot-confirm" class="mascot-confirm" type="button">Conversar com este Veyro</button></dialog>
+  <!-- Visualizador interativo 3D, separado do login, do Qwen e da introdução. -->
+  <button id="mascot-toggle" class="mascot-toggle" type="button" aria-controls="mascot-panel" aria-expanded="false" title="Abrir mascote 3D">🤖 <span>Movimentos 3D</span></button>
+  <section id="mascot-panel" class="mascot-panel" aria-label="Controles do mascote 3D" hidden>
+    <header class="mascot-header"><strong>VEYRO · Mascote 3D</strong><button type="button" id="mascot-3d-close" aria-label="Fechar controles 3D">×</button></header>
+    <div id="mascot-stage" class="mascot-stage" role="img" aria-label="Visualizador tridimensional interativo do mascote Veyro"></div>
+    <label>Personagem <select id="mascot-character"><option value="black">Black</option><option value="blue">Blue</option><option value="green">Green</option><option value="red">Red</option></select></label>
+    <label>Movimento <select id="mascot-action"><option value="idle">Movimento natural</option><option value="thinking">Pensando</option><option value="typing">Digitando</option><option value="dancing">Dançando</option><option value="celebrating">Comemorando</option><option value="waving">Acenando</option><option value="walking">Caminhando</option><option value="sleeping">Dormindo</option><option value="surprised">Surpreso</option><option value="talking">Conversando</option><option value="spinning">Girando em 3D</option></select></label>
+    <label>Tamanho <input id="mascot-scale" type="range" min="70" max="130" value="100"></label>
+    <label>Velocidade <input id="mascot-speed" type="range" min="50" max="150" step="10" value="100" aria-label="Velocidade dos movimentos"></label>
+    <label class="mascot-check"><input id="mascot-auto" type="checkbox" checked> Reagir à conversa automaticamente</label>
+    <p id="mascot-3d-status" role="status">Abra o visualizador para controlar os movimentos.</p>
+  </section>
 </body>
 </html>

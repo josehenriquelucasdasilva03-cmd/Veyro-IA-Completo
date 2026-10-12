@@ -16,7 +16,9 @@ const entries={
  '/video.css':'src/frontend/styles/video.css',
  '/cosmos.css':'src/frontend/styles/cosmos.css',
  '/planetarium-theme.css':'src/frontend/styles/planetarium-theme.css',
- '/cosmos-loader.js':'src/frontend/components/cosmos-loader.js'
+ '/cosmos-loader.js':'src/frontend/components/cosmos-loader.js',
+ '/mascot-ui.js':'src/frontend/components/mascot-ui.js',
+ '/mascot.css':'src/frontend/styles/mascot.css'
 };
 const assets={};for(const [url,path]of Object.entries(entries))assets[url]=await readFile(path,'utf8');
 assets['/cinematic.webp']={base64:(await readFile('public/assets/cinematic.webp')).toString('base64'),type:'image/webp'};
@@ -32,6 +34,9 @@ await rm('dist',{recursive:true,force:true});await mkdir('dist/server',{recursiv
 const threeBundle=await build({entryPoints:['src/frontend/components/cosmos3d.js'],bundle:true,minify:true,write:false,format:'esm',platform:'browser',target:'es2022'});
 const threeScript=threeBundle.outputFiles[0].text;
 assets['/cosmos3d.js']=threeScript;
+const mascotBundle=await build({entryPoints:['src/frontend/components/mascot3d.js'],bundle:true,minify:true,write:false,format:'esm',platform:'browser',target:'es2022'});
+assets['/mascot3d.js']=mascotBundle.outputFiles[0].text;
+await writeFile('dist/mascot3d.js',mascotBundle.outputFiles[0].text);
 await writeFile('dist/cosmos3d.js',threeScript);
 
 await build({entryPoints:['src/api/router.js'],outfile:'dist/server/index.js',bundle:true,format:'esm',platform:'browser',target:'es2022',define:{__ASSETS__:JSON.stringify(assets)}});
