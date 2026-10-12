@@ -17,6 +17,7 @@ const files = [
   ['src/frontend/styles/cinematic.css', 'dist/site/cinematic.css'],
   ['src/frontend/styles/video.css', 'dist/site/video.css'],
   ['src/frontend/styles/cosmos.css', 'dist/site/cosmos.css'],
+  ['src/frontend/styles/planetarium-theme.css', 'dist/site/planetarium-theme.css'],
   ['src/frontend/components/cosmos-loader.js', 'dist/site/cosmos-loader.js'],
   ['dist/cosmos3d.js', 'dist/site/cosmos3d.js'],
   ['public/assets/cinematic.webp', 'dist/site/cinematic.webp'],
