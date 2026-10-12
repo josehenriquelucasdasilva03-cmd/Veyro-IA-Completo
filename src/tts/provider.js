@@ -10,7 +10,29 @@ export const VOICE_PROFILES=Object.freeze({
 
 const loopbackHost=host=>['localhost','127.0.0.1','::1'].includes(host);
 export function pocketTtsBase(env){const base=String(env.POCKET_TTS_BASE_URL||'http://127.0.0.1:8000').replace(/\/+$/,'');try{const url=new URL(base);if(url.protocol==='http:'&&loopbackHost(url.hostname)&&!url.username&&!url.password&&!url.search&&!url.hash)return base;}catch{}return '';}
-export function ttsReady(env){const provider=env.TTS_PROVIDER||'azure';if(provider==='pocket')return Boolean(pocketTtsBase(env));const key=env.AZURE_SPEECH_KEY;return provider==='azure'&&typeof key==='string'&&key.length>0&&key.length<=256&&!/[\r\n]/.test(key)&&/^[a-z0-9-]{2,64}$/i.test(env.AZURE_SPEECH_REGION||'');}
+/**
+ * Kokoro accepts a loopback endpoint in local development. In cloud deployments,
+ * only a HTTPS hostname protected by a backend-only bearer secret is accepted.
+ * A browser never talks to the model directly.
+ */
+export function kokoroTtsBase(env){
+ const base=String(env.KOKORO_TTS_BASE_URL||'').trim().replace(/\\/+$/,'');
+ if(!base||/[\\r\\n]/.test(base))return '';
+ try{
+  const url=new URL(base);
+  if(url.username||url.password||url.search||url.hash||url.pathname!=='/'||base!==url.origin)return '';
+  if(url.protocol==='http:'&&loopbackHost(url.hostname))return base;
+  if(url.protocol!=='https:')return '';
+  if(!/^[a-z0-9-]+(?:\\.[a-z0-9-]+)+$/i.test(url.hostname)
+     ||/^[0-9.]+$/.test(url.hostname)
+     ||/\\.(?:localhost|local|internal|test|invalid)$/i.test(url.hostname)
+     ||url.hostname==='localhost')return '';
+  const key=env.KOKORO_TTS_API_KEY;
+  if(typeof key!=='string'||key.length<16||key.length>512||/[\\r\\n]/.test(key))return '';
+  return base;
+ }catch{return '';}
+}
+export function ttsReady(env){const provider=env.TTS_PROVIDER||'azure';if(provider==='kokoro')return Boolean(kokoroTtsBase(env));if(provider==='pocket')return Boolean(pocketTtsBase(env));const key=env.AZURE_SPEECH_KEY;return provider==='azure'&&typeof key==='string'&&key.length>0&&key.length<=256&&!/[\r\n]/.test(key)&&/^[a-z0-9-]{2,64}$/i.test(env.AZURE_SPEECH_REGION||'');}
 const escapeXml=value=>value.replace(/[<>&'\"]/g,char=>({'<':'&lt;','>':'&gt;','&':'&amp;',"'":'&apos;','\"':'&quot;'}[char]));
 const boundedInt=(value,min,max,fallback)=>Number.isInteger(value)?Math.max(min,Math.min(max,value)):fallback;
 
@@ -49,4 +71,57 @@ export class PocketTtsProvider extends TtsProvider{
  }
 }
 
-export function createTtsProvider(env){const provider=env.TTS_PROVIDER||'azure';if(provider==='azure')return new AzureSpeechProvider(env);if(provider==='pocket')return new PocketTtsProvider(env);throw new AppError('Este provedor de voz não está disponível nesta versão.',503);}
+export class KokoroTtsProvider extends TtsProvider{
+ constructor(env){
+  super();
+  this.base=kokoroTtsBase(env);
+  this.key=env.KOKORO_TTS_API_KEY||'';
+  this.remote=this.base.startsWith('https://');
+ }
+ async synthesize({text,profile,rateAdjustment=0}){
+  assert(this.base,'Kokoro não configurado com um endereço privado válido.',503);
+  // Three native pt-BR voicepacks: two male, one female. Iris shares pf_dora,
+  // with a subtle speed difference. Never claim four different voicepacks.
+  const config={
+   atlas:{voice:'pm_alex',speed:.96},
+   neo:{voice:'pm_santa',speed:1.01},
+   luna:{voice:'pf_dora',speed:.98},
+   iris:{voice:'pf_dora',speed:1.045}
+  }[profile];
+  assert(config,'Escolha um dos quatro mascotes para sintetizar a voz.');
+  const speed=Math.max(.85,Math.min(1.15,config.speed*(1+boundedInt(rateAdjustment,-15,15,0)/100)));
+  const body=JSON.stringify({model:'kokoro',voice:config.voice,input:text,
+    response_format:'mp3',speed:Number(speed.toFixed(3))});
+  const headers={'Content-Type':'application/json'};
+  if(this.remote)headers.Authorization='Bearer '+this.key;
+  let response;
+  try{
+   response=await fetch(this.base+'/v1/audio/speech',{
+    method:'POST',headers,body,redirect:'error',signal:AbortSignal.timeout(60000)
+   });
+  }catch{throw new AppError('O servidor Kokoro não respondeu. A resposta em texto continua disponível.',503);}
+  if(response.status===429)throw new AppError('Muitas solicitações de voz. Aguarde um pouco.',429);
+  if(response.status===401||response.status===403)throw new AppError('Autenticação do servidor de voz indisponível. Verifique a configuração privada.',503);
+  assert(response.ok,'Não foi possível gerar áudio neural. A resposta em texto continua disponível.',502);
+  const contentType=(response.headers.get('content-type')||'').toLowerCase();
+  assert(contentType.includes('audio/mpeg')||contentType.includes('audio/mp3')||contentType.includes('application/octet-stream'),'Kokoro retornou um formato diferente de MP3.',502);
+  const reader=response.body?.getReader();assert(reader,'O servidor Kokoro retornou áudio vazio.',502);
+  const chunks=[];let size=0;
+  try{
+   for(;;){
+    const {done,value}=await reader.read();if(done)break;
+    size+=value.byteLength;
+    if(size>8*1024*1024){await reader.cancel();throw new AppError('Áudio maior que 8 MB.',502);}
+    chunks.push(value);
+   }
+  }finally{reader.releaseLock();}
+  assert(size>0,'O servidor Kokoro retornou áudio vazio.',502);
+  // Avoid forwarding untrusted server-controlled headers or personal text.
+  return new Response(new Blob(chunks,{type:'audio/mpeg'}),{headers:{
+   'Content-Type':'audio/mpeg','Cache-Control':'no-store',
+   'X-Content-Type-Options':'nosniff','Content-Length':String(size)
+  }});
+ }
+}
+
+export function createTtsProvider(env){const provider=env.TTS_PROVIDER||'azure';if(provider==='kokoro')return new KokoroTtsProvider(env);if(provider==='azure')return new AzureSpeechProvider(env);if(provider==='pocket')return new PocketTtsProvider(env);throw new AppError('Este provedor de voz não está disponível nesta versão.',503);}

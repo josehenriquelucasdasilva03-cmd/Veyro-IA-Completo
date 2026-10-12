@@ -33,3 +33,7 @@
 - `tests/voice-ui-integration.test.mjs`
 
 **Observação:** o objetivo das dez decisões está registrado aqui; a fase atual prioriza voz funcional e controles. As decisões que exigem infraestrutura, modelos 3D e vozes profissionais continuam pendentes.
+
+
+## Preparação posterior: voz natural
+Foi preparado `TTS_PROVIDER=kokoro` em branch isolada, mais um ranking de vozes pt-BR no navegador. A integração do Worker público ao Kokoro não foi publicada. Consulte `docs/KOKORO_NEURAL_TTS.md`.
