@@ -41,6 +41,15 @@ async function handleRequest(req,env,ctx){
   assert(mode!=='local'||localHost,'Modo de desenvolvimento não pode ser exposto publicamente.',403);
   const user=mode==='cloudflare-access'?await cloudflareAccessUser(ctx):mode==='sites'||(mode==='local'&&localHost)?req.headers.get('oai-authenticated-user-id'):null;
   assert(user,'Sua sessão não foi autenticada.',401);
+  // The trusted dispatcher/Access verifies user identity; the browser cannot forge this check.
+  if(path==='/api/auth/session'){
+   assert(req.method==='GET','Método não permitido.',405);
+   return json({authenticated:true});
+  }
+  if(path==='/api/auth/continue'){
+   assert(req.method==='GET','Método não permitido.',405);
+   return Response.redirect(url.origin+'/',303);
+  }
   if(!['GET','HEAD'].includes(req.method)){const origin=req.headers.get('origin');assert(!origin||origin===url.origin,'Origem não permitida.',403);assert(req.headers.get('x-veyro-request')==='1','Pedido não permitido.',403);}
   const db=database(env);
   await enforceSecurityLimits(req,env,db,user,path);

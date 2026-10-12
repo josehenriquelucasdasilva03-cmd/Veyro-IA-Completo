@@ -2,6 +2,7 @@ import {build} from 'esbuild';
 import {readFile,writeFile,mkdir,rm,copyFile} from 'node:fs/promises';
 const entries={
  '/index.html':'src/frontend/index.html',
+ '/auth-flow.js':'src/frontend/auth-flow.js',
  '/app.js':'src/frontend/app.js',
  '/studio.js':'src/frontend/components/studio.js',
  '/chat.js':'src/frontend/components/chat.js',
