@@ -1,5 +1,6 @@
 const {test,expect}=require('@playwright/test');
-test.beforeEach(async({page})=>{
+test.beforeEach(async({page},testInfo)=>{
+  if(testInfo.title.includes('first-time visitor'))return;
   await page.addInitScript(()=>{try{localStorage.setItem('veyro-mascot-v1','black');}catch{}});
 });
 test('static preview shows welcome screen even when API is offline',async({page})=>{
@@ -87,5 +88,16 @@ test('authenticated mock conversation removes welcome and dims the scene',async(
   await expect(page.locator('.chat-message.user')).toContainText('O plano do projeto');
   await expect(page.locator('body')).not.toHaveClass(/welcome-state/);
   await page.waitForFunction(()=>Number(getComputedStyle(document.querySelector('.welcome-backdrop')).opacity)<.6);
+  expect(errors).toEqual([]);
+});
+
+test('first-time visitor sees the entire intro before mascot selector interrupts',async({page})=>{
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto('/');
+  await expect(page.locator('body')).toHaveClass(/welcome-state/);
+  await expect(page.locator('.logo-veyro')).toBeVisible();
+  await page.waitForTimeout(1200);
+  await expect(page.locator('#mascot-picker')).not.toBeVisible();
+  await expect(page.locator('.veyro-cosmos-layer')).toHaveCount(1);
   expect(errors).toEqual([]);
 });

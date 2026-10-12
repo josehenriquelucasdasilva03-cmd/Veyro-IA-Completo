@@ -9,3 +9,5 @@ Verificação automática: Node 24, npm test, bundle, build estático, navegador
 Não confundir teste de navegador em CI com testes de GPU, autenticação, desempenho de dispositivos reais e integração com nova implementação de animações produzida em outro chat. Sem medidas reais de frame rate, memória, travamentos prolongados e teste de hardware, não se deve declarar garantia numérica de 80%. QA com aparelho físico e fluxo completo continua obrigatório.
 
 A bateria de browser também verifica três recarregamentos consecutivos sem duplicar as camadas e um cenário de conversa autenticada simulada (API mockada), incluindo saída da tela inicial e escurecimento de fundo. Uma simulação de API **não certifica** autenticação real.
+
+Defeito adicional: na primeira visita o diálogo de seleção de mascote era aberto após 350 ms, encobrindo a introdução cinematográfica de 5,2 s. O diálogo agora só aparece depois da introdução, se a tela de boas-vindas continuar aberta, a aba estiver visível e o movimento não tiver sido reduzido. Também existe teste de primeiro acesso sem preferências salvas.

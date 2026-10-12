@@ -12,3 +12,9 @@ test('browser QA cobre desktop, Android, API offline, acessibilidade e interaç�
   assert.match(spec,/API is offline/);assert.match(spec,/reduced motion/);
   assert.match(spec,/horizontal overflow/);
 });
+
+test('primeira visita preserva introdução sem modal prematuro',()=>{
+  const chat=readFileSync('src/frontend/components/chat.js','utf8');
+  assert.match(chat,/5800/);
+  assert.match(chat,/!document\.body\.classList\.contains\('welcome-intro'\)/);
+});
