@@ -71,7 +71,7 @@ test('authenticated mock conversation removes welcome and dims the scene',async(
   const messages=[{id:'m1',role:'user',text:'O plano do projeto',status:'COMPLETE',
     created_at:1760263200000,attachments:[]}];
   await page.route('**/api/**',async route=>{
-    const u=new URL(route.request().url);
+    const u=new URL(route.request().url());
     const path=u.pathname;
     let data;
     if(path==='/api/status')data={chat:true,tts:false,images:false,research:false,embeddings:false,agents:false};
