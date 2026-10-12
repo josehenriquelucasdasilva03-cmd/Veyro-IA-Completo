@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 const source=readFileSync('workers/veyro-history-test/index.js','utf8');
 test('history Worker is valid module and does not expose secrets or passwords',()=>{
- new vm.SourceTextModule(source);
+ new vm.Script(source.replace('export default {','const deployedWorker = {'));
  assert.doesNotMatch(source,/SECRET_KEY=|password=|sk-proj/);
 });
 test('all history and memory SQL operations restrict identity at database layer',()=>{

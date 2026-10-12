@@ -24,6 +24,104 @@ function sendPreviewMessage(text){
  resizeText();
  feedback('Mensagem exibida nesta aba. Backend e Qwen ainda não conectados; isto não é envio real.');
 }
+let savedConversations=[],savedMemories=[],selectedSavedConversation=null,historyAvailable=false;
+function cleanHistoryOnLogout(){
+ savedConversations=[];savedMemories=[];selectedSavedConversation=null;historyAvailable=false;
+ $('recent-conversations').replaceChildren();
+ const memoryButton=$('veyro-qwen-memory-nav');
+ if(memoryButton)memoryButton.disabled=true;
+ $('memories-open').disabled=true;
+}
+async function refreshSavedConversations(){
+ const r=await window.VeyroQwenPages.history('/api/history/conversations');
+ savedConversations=r.conversations||[];
+ const root=$('recent-conversations');
+ root.replaceChildren();
+ for(const item of savedConversations){
+  const line=el('div',undefined,'veyro-history-row');
+  const choice=el('button',item.title||'Nova conversa','veyro-history-choice');
+  choice.type='button';
+  choice.setAttribute('aria-current',String(item.id===selectedSavedConversation));
+  choice.onclick=()=>handle(async()=>{await activateSavedConversation(item.id);closeSidebar();});
+  const remove=el('button','×','veyro-history-delete');
+  remove.type='button';
+  remove.setAttribute('aria-label','Excluir conversa '+item.title);
+  remove.onclick=()=>handle(async()=>{
+   if(!confirm('Excluir esta conversa e todas as mensagens salvas?'))return;
+   await window.VeyroQwenPages.history('/api/history/conversations/'+item.id,{method:'DELETE'});
+   if(selectedSavedConversation===item.id){selectedSavedConversation=null;state.chatMessages=[];renderChatMessages();}
+   await refreshSavedConversations();
+   if(!selectedSavedConversation)await createSavedConversation();
+  });
+  line.append(choice,remove);
+  root.append(line);
+ }
+}
+async function activateSavedConversation(id){
+ const data=await window.VeyroQwenPages.history('/api/history/conversations/'+id);
+ selectedSavedConversation=id;
+ state.chatMessages=(data.messages||[]).map(m=>({
+  id:m.id,role:m.role,text:m.text,status:'COMPLETE',created_at:m.createdAt
+ }));
+ state.chatDraft='';chatDraftDirty=false;$('prompt').value='';
+ renderChatMessages();resizeText();
+ for(const choice of document.querySelectorAll('.veyro-history-choice'))choice.setAttribute('aria-current',String(choice.textContent===(data.conversation?.title||'Nova conversa')));
+ $('save-status').textContent='Histórico salvo na sua conta Veyro';
+}
+async function createSavedConversation(){
+ const r=await window.VeyroQwenPages.history('/api/history/conversations',{method:'POST',body:'{}'});
+ await refreshSavedConversations();
+ await activateSavedConversation(r.conversation.id);
+ feedback('Nova conversa criada. Histórico vinculado à sua conta.');
+}
+function showSavedMemories(){
+ const root=openPanel('Memórias do Veyro IA');
+ root.append(el('p','Você decide o que a IA deve lembrar. As notas ficam na sua conta e podem ajudar nas próximas conversas. Não salve senhas ou dados sensíveis.','review-help'));
+ const input=el('textarea');input.rows=3;input.maxLength=320;
+ input.placeholder='Ex.: Prefiro respostas detalhadas em português.';
+ input.setAttribute('aria-label','Nova memória');
+ const count=el('small','Até 30 memórias de 320 caracteres.');
+ const entries=el('div',undefined,'veyro-memory-list');
+ function render(){
+  entries.replaceChildren();
+  for(const m of savedMemories){
+   const line=el('div',undefined,'veyro-memory-entry');
+   line.append(el('p',m.text),button('Excluir',async()=>{
+    await window.VeyroQwenPages.history('/api/history/memories/'+m.id,{method:'DELETE'});
+    savedMemories=savedMemories.filter(x=>x.id!==m.id);render();
+   },'small-button'));
+   entries.append(line);
+  }
+  if(!entries.children.length)entries.append(el('p','Nenhuma memória salva.'));
+ }
+ const save=button('Guardar memória',async()=>{
+  const text=input.value.trim();
+  if(!text)throw Error('Escreva uma informação para a Veyro lembrar.');
+  const result=await window.VeyroQwenPages.history('/api/history/memories',{method:'POST',body:JSON.stringify({text})});
+  savedMemories.unshift(result.memory);input.value='';render();
+  feedback('Memória salva na sua conta Veyro.');
+ },'text-button');
+ root.append(input,count,save,entries);
+ render();
+}
+async function restoreSavedVeyro(){
+ const bridge=window.VeyroQwenPages;
+ const [conversations,memories]=await Promise.all([
+  bridge.history('/api/history/conversations'),
+  bridge.history('/api/history/memories')
+ ]);
+ savedMemories=memories.memories||[];
+ savedConversations=conversations.conversations||[];
+ historyAvailable=true;
+ if(savedConversations.length){await refreshSavedConversations();await activateSavedConversation(savedConversations[0].id);}
+ else await createSavedConversation();
+ const memoryButton=$('veyro-qwen-memory-nav');
+ if(memoryButton)memoryButton.disabled=false;
+ const memoriesTool=$('memories-open');
+ if(memoriesTool){memoriesTool.disabled=false;memoriesTool.onclick=()=>handle(showSavedMemories);}
+ $('new-chat').onclick=()=>handle(async()=>{await createSavedConversation();closeSidebar();$('prompt').focus();});
+ $('save-status').textContent='Histórico e memórias salvos na sua conta';
+}
 let qwenGateVisible=false;
 function lockQwenChat(locked){
  for(const selector of ['.screen','#sidebar','#sidebar-overlay']){
@@ -65,6 +163,7 @@ function setupQwenLogin(){
   try{await bridge.logout();}
   finally{
    signout.disabled=false;signout.hidden=true;
+   cleanHistoryOnLogout();
    state.chatMessages=[];state.chatDraft='';chatDraftDirty=false;
    $('prompt').value='';
    renderChatMessages();
@@ -76,6 +175,10 @@ function setupQwenLogin(){
   }
  });
  sidebarBottom?.append(signout);
+ const memoryButton=el('button','Memórias','veyro-qwen-memory-nav');
+ memoryButton.type='button';memoryButton.disabled=true;
+ memoryButton.onclick=()=>handle(()=>{showSavedMemories();closeSidebar();});
+ $('sidebar').querySelector('.sidebar-nav')?.append(memoryButton);
  document.addEventListener('veyro:intro-finished',()=>{
   if(qwenGateVisible)showQwenGate();
  });
@@ -92,8 +195,15 @@ function setupQwenLogin(){
    }
    hideQwenGate();
    signout.hidden=false;
-   feedback('Qwen conectado · pronto para conversar.');
-   $('save-status').textContent='Conectado ao Qwen · conversa nesta aba';
+   try{
+    await restoreSavedVeyro();
+    feedback('Qwen conectado · histórico e memória carregados.');
+   }catch(historyError){
+    historyAvailable=false;
+    feedback('Qwen conectado, porém histórico indisponível: '+historyError.message,true);
+    $('save-status').textContent='Histórico indisponível · conversa não será salva';
+    if(!bridge.connected()){signout.hidden=true;showQwenGate();}
+   }
    $('prompt').focus({preventScroll:true});
   }catch(error){
    message.textContent=error.message||'Não foi possível entrar. Confira seus dados e tente novamente.';
@@ -110,19 +220,33 @@ async function sendGithubQwen(text){
   return;
  }
  if(text.length>600)throw Error('O Qwen aceita até 600 caracteres por mensagem.');
- const prior=state.chatMessages.filter(m=>['user','assistant'].includes(m.role)&&m.status==='COMPLETE'&&m.text).slice(-4).map(m=>({role:m.role,content:m.text.slice(0,360)}));
+ const earlier=state.chatMessages.filter(m=>['user','assistant'].includes(m.role)&&m.status==='COMPLETE'&&m.text).slice(-3).map(m=>({role:m.role,content:m.text.slice(0,360)}));
+ const approvedMemories=savedMemories.slice(0,4).map(m=>m.text.replace(/\s+/g,' ').trim()).filter(Boolean).join(' | ').slice(0,285);
+ const prior=approvedMemories?[{role:'user',content:'Preferências que salvei: '+approvedMemories},...earlier]:earlier;
  const now=Date.now(),user={id:crypto.randomUUID(),role:'user',text,status:'COMPLETE',created_at:now};
  const reply={id:crypto.randomUUID(),role:'assistant',text:'',status:'RUNNING',created_at:now+1};
  state.chatMessages.push(user,reply);renderChatMessages();busy(true);feedback('Aguardando resposta do Qwen…');
  try{
   await bridge.send(text,prior,piece=>{reply.text+=piece;renderChatMessages();});
   reply.status='COMPLETE';$('prompt').value='';state.chatDraft='';chatDraftDirty=false;
-  feedback('Resposta recebida do Qwen.');
+  if(historyAvailable&&selectedSavedConversation){
+   try{
+    await bridge.history('/api/history/conversations/'+selectedSavedConversation+'/turns',{
+     method:'POST',body:JSON.stringify({message:text,answer:reply.text,messageId:user.id,answerId:reply.id})
+    });
+    await refreshSavedConversations();
+    $('save-status').textContent='Conversa salva na sua conta Veyro';
+    feedback('Resposta recebida e histórico salvo.');
+   }catch(storageError){
+    feedback('Resposta recebida, mas não foi possível salvar o histórico: '+storageError.message,true);
+   }
+  }else feedback('Resposta recebida, mas o histórico não está disponível nesta sessão.',true);
  }catch(error){
   state.chatMessages=state.chatMessages.filter(m=>m!==reply);
   state.chatMessages.push({id:crypto.randomUUID(),role:'notice',text:'Envio não concluído: '+(error.message||'falha no backend')+'. Confira a sessão e tente novamente.',status:'COMPLETE',created_at:Date.now()+1});
   feedback(error.message||'Envio não concluído.',true);
   if(!bridge.connected()){
+   cleanHistoryOnLogout();
    const signout=document.querySelector('.veyro-qwen-logout');
    if(signout)signout.hidden=true;
    showQwenGate();

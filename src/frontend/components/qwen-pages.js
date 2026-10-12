@@ -7,6 +7,7 @@
  'use strict';
  const OFFICIAL_ORIGIN='https://josehenriquelucasdasilva03-cmd.github.io';
  const WORKER_ORIGIN='https://veyro-auth-test.josehenriquelucasdasilva03.workers.dev';
+ const HISTORY_ORIGIN='https://veyro-history-test.josehenriquelucasdasilva03.workers.dev';
  const enabled=location.origin===OFFICIAL_ORIGIN&&location.pathname.startsWith('/Veyro-IA-Completo/');
  let token=null,user=null;
  function errorText(value,fallback){return typeof value?.error==='string'&&value.error.length<220?value.error:fallback;}
@@ -46,6 +47,18 @@
   if(!previous)return;
   try{await request('/api/auth/logout',{method:'POST',headers:{Authorization:'Bearer '+previous}});}catch{}
  }
+ async function history(path,options={}){
+  if(!token)throw Error('Faça login antes de abrir o histórico.');
+  if(!/^\/api\/history\/(?:conversations|memories)(?:\/[a-f0-9-]{36})?(?:\/turns)?$/.test(path))throw Error('Rota de histórico inválida.');
+  let response;
+  try{response=await fetch(HISTORY_ORIGIN+path,{
+   ...options,mode:'cors',cache:'no-store',credentials:'omit',redirect:'error',
+   headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}
+  });}
+  catch{throw Error('Histórico temporariamente indisponível. Verifique a conexão do Worker.');}
+  if(response.status===401){token=null;user=null;throw Error('Sessão expirada. Entre novamente.');}
+  return readResponse(response);
+ }
  async function send(message,recentMessages,onToken){
   if(!token)throw Error('Entre novamente na conta Veyro.');
   if(message.length<1||message.length>600)throw Error('Envie até 600 caracteres por vez.');
@@ -77,5 +90,5 @@
   }finally{reader.releaseLock();}
   if(!finished||!tokens)throw Error('A conexão terminou sem uma resposta completa do Qwen.');
  }
- window.VeyroQwenPages={enabled,connected:()=>Boolean(token),username:()=>user,login,status,send,logout};
+ window.VeyroQwenPages={enabled,connected:()=>Boolean(token),username:()=>user,login,status,send,logout,history};
 })();

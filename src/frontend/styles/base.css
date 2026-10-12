@@ -77,3 +77,16 @@ input,select{font:inherit;color:inherit}button:disabled{opacity:.5}.nav-button,.
  border-radius:11px;color:#f1dba9;background:#101726;font:600 13px system-ui}
 .veyro-qwen-logout[hidden]{display:none!important}
 .veyro-qwen-locked .screen,.veyro-qwen-locked #sidebar{pointer-events:none}
+
+/* Persistent history entries in the existing sidebar, per logged-in account. */
+.veyro-history-row{display:flex;align-items:center;gap:5px;max-width:100%;padding:3px 0}
+.veyro-history-choice{min-width:0;flex:1;text-align:left;color:#e5e5e5;background:transparent;border:1px solid transparent;
+ border-radius:8px;padding:9px;font:13px system-ui;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.veyro-history-choice[aria-current=true]{border-color:#c3a15b7d;background:#1c1a16}
+.veyro-history-delete{flex:none;border:1px solid #75654c70;border-radius:8px;color:#ded0b5;
+ background:transparent;padding:8px 12px;font:14px system-ui}
+.veyro-memory-list{display:grid;gap:8px;margin:12px 0}
+.veyro-memory-entry{display:flex;justify-content:space-between;gap:10px;align-items:center;
+ padding:10px 12px;border:1px solid #84704e6e;border-radius:12px;background:#15191c}
+.veyro-memory-entry p{margin:0;flex:1;font:13px/1.5 system-ui;overflow-wrap:anywhere}
+.veyro-memory-entry button{flex:none}
