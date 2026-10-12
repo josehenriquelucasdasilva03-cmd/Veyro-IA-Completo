@@ -1,12 +1,61 @@
 'use strict';
 const $=id=>document.getElementById(id), DURATIONS=[5,6,7,8,9,10,12,15,20,25,30];
 const labels={horizontal:'Horizontal · 16:9',vertical:'Vertical · 9:16',auto:'Automático'};
+// Only static builds set this meta tag. The authenticated Cloudflare Worker never does.
+const IS_STATIC_PREVIEW=Boolean(document.querySelector('meta[name="veyro-static-preview"]'));
 const state={id:null,revision:0,title:'Novo projeto',step:'chat',mode:'chat',format:'auto',duration:null,original:'',draft:'',scenes:[],files:[],messages:[],memories:[],versions:[],runs:[],review:true,visualStyle:'',characters:'',constraints:'',photo:{},editor:{},allAssets:[],photoJobs:[],images:false,dirty:false,busy:false,chat:false,tts:false,ttsProvider:'azure'};
 let autosave,savePromise=null,changeNumber=0;
 function el(tag,text,cls){const node=document.createElement(tag);if(text!==undefined)node.textContent=text;if(cls)node.className=cls;return node;}
 function button(text,fn,cls='text-button'){const b=el('button',text,cls);b.type='button';b.onclick=()=>handle(fn);return b;}
 async function handle(fn){try{return await fn();}catch(e){feedback(e.message,true);if($('panel').open){let error=$('panel-error');if(!error){error=el('p',undefined,'error');error.id='panel-error';error.setAttribute('role','alert');$('panel-body').prepend(error);}error.textContent=e.message;}}}
 function feedback(text,error=false){$('feedback').textContent=text|| (state.chat?'IA conectada · revise as propostas antes de aplicar':'IA ainda não conectada · você pode salvar e editar');$('feedback').classList.toggle('error',error);}
+function sendPreviewMessage(text){
+ if(!text.trim())throw Error('Digite uma mensagem para testar o chat.');
+ const now=Date.now();
+ state.chatMessages.push({id:crypto.randomUUID(),role:'user',text,status:'COMPLETE',created_at:now});
+ if(!state.chatMessages.some(m=>m.role==='notice')){
+  state.chatMessages.push({id:crypto.randomUUID(),role:'notice',text:'Prévia de interface: sua mensagem aparece apenas nesta aba. Nada foi enviado à IA, e nenhuma resposta foi gerada.',status:'COMPLETE',created_at:now+1});
+ }
+ $('prompt').value='';
+ state.chatDraft='';
+ chatDraftDirty=false;
+ renderChatMessages();
+ resizeText();
+ feedback('Mensagem exibida nesta aba. Backend e Qwen ainda não conectados; isto não é envio real.');
+}
+function startStaticPreview(){
+ state.mode='chat';
+ state.chatMessages=[];
+ state.chatDraft='';
+ $('prompt').value='';
+ setStep('chat');
+ modeButtons();
+ $('chat-view').hidden=false;
+ $('empty').hidden=true;
+ $('review').hidden=true;
+ $('result').hidden=true;
+ $('photo-view').hidden=true;
+ $('editor-view').hidden=true;
+ $('save-status').textContent='Prévia local · sem salvamento no servidor';
+ const banner=el('p','PRÉVIA DO CHAT: teste o botão de enviar. As mensagens ficam apenas nesta aba e NÃO são enviadas ao Qwen.','veyro-preview-banner');
+ banner.setAttribute('role','status');
+ $('composer').before(banner);
+ for(const id of ['nav-images','nav-videos','nav-agents','photo-mode','editor-mode','create-mode','projects-open','memories-open','versions-open','activity-open','save','add','voice-input','translate-input','profile-open']){
+  const node=$(id);if(node){node.disabled=true;node.title='Indisponível na prévia estática; precisa do backend autenticado.';}
+ }
+ $('project-title').disabled=true;
+ $('new-chat').onclick=()=>{
+  state.chatMessages=[];
+  state.chatDraft='';
+  chatDraftDirty=false;
+  $('prompt').value='';
+  renderChatMessages();
+  feedback('Nova conversa de teste aberta. Nenhum dado foi enviado ou salvo no servidor.');
+  $('prompt').focus();
+ };
+ renderChatMessages();
+ feedback('Prévia de interface. Envie uma mensagem para testá-la visualmente, sem conexão com a IA.');
+}
 function showLoginGate(){const gate=$('auth-gate');if(gate)gate.hidden=false;}
 function isCloudflareAccessRedirect(response){
  if(!response.redirected)return false;
@@ -77,7 +126,7 @@ async function metadata(file){return new Promise(resolve=>{const m=document.crea
 async function addFiles(event){const files=[...event.target.files];event.target.value='';if(!state.id)throw Error('Abra um projeto primeiro.');if(state.files.length+files.length>12)throw Error('Use até 12 referências por pedido.');busy(true);try{for(const file of files){if(file.size>25*1024*1024)throw Error(file.name+': limite de 25 MB por arquivo.');feedback('Salvando '+file.name+'…');const form=new FormData();form.append('file',file);form.append('metadata',JSON.stringify(await metadata(file)));const result=await api(route('assets'),{method:'POST',body:form});state.files.push(result);state.allAssets.push(result);renderFiles();if(state.mode==='photo'||state.mode==='editor')studioRender();changed();await save();}feedback('Referências salvas no projeto.');}finally{busy(false);}}
 for(const n of DURATIONS){const b=button(n+' s',()=>{const before=state.duration;state.duration=n;try{balance();}catch(e){state.duration=before;throw e;}for(const x of $('durations').children)x.setAttribute('aria-pressed',String(x===b));changed();},'');b.dataset.duration=n;b.setAttribute('aria-pressed','false');$('durations').append(b);}
 for(const b of $('formats').children)b.onclick=()=>{state.format=b.dataset.format;for(const x of $('formats').children)x.setAttribute('aria-pressed',String(x===b));changed();};
-$('composer').onsubmit=e=>{e.preventDefault();handle(async()=>{if(state.busy)return;if(!state.id)throw Error('Os projetos ainda não foram carregados.');const text=$('prompt').value.trim();if(state.mode==='photo'){await submitPhoto();return;}if(state.mode==='editor'){await editorCommand(text);return;}if(state.mode==='create'&&state.step==='format'&&text){const hint=await api(route('intent'),{method:'POST',body:{text}});if(hint.tool){await studioRoute(hint.tool,text);return;}}if(state.mode==='chat'||state.step==='review'){if(!text&&!state.files.length)throw Error('Escreva uma mensagem ou adicione um arquivo.');await talk(text,state.mode==='chat'?'chat':'revise');return;}
+$('composer').onsubmit=e=>{e.preventDefault();handle(async()=>{if(state.busy)return;const text=$('prompt').value.trim();if(IS_STATIC_PREVIEW){sendPreviewMessage(text);return;}if(!state.id)throw Error('Os projetos ainda não foram carregados.');if(state.mode==='photo'){await submitPhoto();return;}if(state.mode==='editor'){await editorCommand(text);return;}if(state.mode==='create'&&state.step==='format'&&text){const hint=await api(route('intent'),{method:'POST',body:{text}});if(hint.tool){await studioRoute(hint.tool,text);return;}}if(state.mode==='chat'||state.step==='review'){if(!text&&!state.files.length)throw Error('Escreva uma mensagem ou adicione um arquivo.');await talk(text,state.mode==='chat'?'chat':'revise');return;}
  if(!text&&!state.files.length)throw Error('Escreva uma ideia ou adicione fotos e vídeos.');if(state.step==='format'){state.original=text;changed();setStep('duration');return;}if(!state.duration)throw Error('Escolha a duração.');state.original=text;state.draft='';if(!state.scenes.length)state.scenes=[{id:crypto.randomUUID(),text,seconds:state.duration,locked:false}];balance();if(!$('review-toggle').checked){showSummary();changed();await save();return;}showReview();changed();await save();await talk(text||'Crie uma proposta a partir das referências.','plan');});};
 $('back').onclick=()=>{if(state.step==='review'){state.draft=$('prompt').value;$('prompt').value=state.original;$('review').hidden=true;$('empty').hidden=false;}setStep('format');};
 $('ask-plan').onclick=()=>handle(()=>talk(state.original||'Crie uma proposta com as referências.','plan'));
@@ -90,4 +139,5 @@ function menu(open){$('add-menu').hidden=!open;$('add').setAttribute('aria-expan
 $('add').onclick=()=>menu($('add-menu').hidden);for(const kind of ['photo','video']){$('add-'+kind).onclick=()=>{menu(false);$(kind+'-input').click();};$(kind+'-input').onchange=e=>handle(()=>addFiles(e));}
 document.addEventListener('click',e=>{if(!e.target.closest('.add-wrap'))menu(false);});window.addEventListener('beforeunload',e=>{if(state.dirty||chatDraftDirty){e.preventDefault();e.returnValue='';}});window.addEventListener('resize',updateViewport);if(window.visualViewport){window.visualViewport.addEventListener('resize',updateViewport);window.visualViewport.addEventListener('scroll',updateViewport);}updateViewport();
 initStudio();initChat();knowledgeInit();
-handle(async()=>{const [status,projects]=await Promise.all([api('status'),api('projects')]);state.chat=status.chat;state.tts=status.tts===true;state.ttsProvider=status.ttsProvider||'azure';state.images=status.images;state.web=status.research;state.semantic=status.embeddings;state.agents=status.agents;if($('agent-status'))$('agent-status').textContent=state.agents?'Agentes locais: configurados':'Agentes locais: aguardando configuração';const hash=location.hash.slice(1);let cid=null,pid=hash;if(hash.startsWith('c-')){try{const c=await api('conversations/'+hash.slice(2));cid=c.conversation.id;pid=c.conversation.project_id;}catch{pid=null;}}const selected=projects.find(p=>p.id===pid)||projects[0];const p=selected||await api('projects',{method:'POST',body:{title:'Meu primeiro projeto'}});await loadProject(p.id,{conversationId:cid});});
+if(IS_STATIC_PREVIEW)startStaticPreview();
+else handle(async()=>{const [status,projects]=await Promise.all([api('status'),api('projects')]);state.chat=status.chat;state.tts=status.tts===true;state.ttsProvider=status.ttsProvider||'azure';state.images=status.images;state.web=status.research;state.semantic=status.embeddings;state.agents=status.agents;if($('agent-status'))$('agent-status').textContent=state.agents?'Agentes locais: configurados':'Agentes locais: aguardando configuração';const hash=location.hash.slice(1);let cid=null,pid=hash;if(hash.startsWith('c-')){try{const c=await api('conversations/'+hash.slice(2));cid=c.conversation.id;pid=c.conversation.project_id;}catch{pid=null;}}const selected=projects.find(p=>p.id===pid)||projects[0];const p=selected||await api('projects',{method:'POST',body:{title:'Meu primeiro projeto'}});await loadProject(p.id,{conversationId:cid});});

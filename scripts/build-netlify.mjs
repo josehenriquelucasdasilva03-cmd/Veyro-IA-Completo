@@ -1,4 +1,4 @@
-import { copyFile, mkdir, readFile, rm } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 
 // Netlify preview serves only the browser UI. The authenticated Worker backend
@@ -28,7 +28,13 @@ for (const [source, target] of files) {
   await copyFile(source, target);
 }
 
-const index = await readFile('dist/site/index.html', 'utf8');
+// Static hosts do not have Cloudflare Worker bindings, databases or Qwen.
+ // Explicitly mark this browser-only preview; the protected Worker HTML is unchanged.
+const html = await readFile('dist/site/index.html', 'utf8');
+const marked = html.replace('<head>', '<head>\n  <meta name="veyro-static-preview" content="true">');
+if (marked === html) throw new Error('Cabeçalho HTML ausente: marcador da prévia não foi inserido.');
+await writeFile('dist/site/index.html', marked);
+const index = marked;
 if (!index.includes('<title>Veyro IA</title>')) {
   throw new Error('O build do Netlify não encontrou o index.html oficial da Veyro IA.');
 }
