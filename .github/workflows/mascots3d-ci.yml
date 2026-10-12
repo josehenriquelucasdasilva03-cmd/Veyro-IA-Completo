@@ -1,0 +1,28 @@
+name: Mascotes 3D CI
+on:
+  pull_request:
+    paths:
+      - 'src/frontend/components/mascot*'
+      - 'src/frontend/styles/mascot.css'
+      - 'src/frontend/index.html'
+      - 'scripts/build.mjs'
+      - 'scripts/build-netlify.mjs'
+      - 'tests/mascot3d.test.mjs'
+      - '.github/workflows/mascots3d-ci.yml'
+  push:
+    branches:
+      - 'feature/mascots3d-mobile-notebook-20261012'
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: node --check src/frontend/components/mascot3d.js && node --check src/frontend/components/mascot-ui.js
+      - run: npm run build
+      - run: node scripts/build-netlify.mjs
+      - run: npm test
