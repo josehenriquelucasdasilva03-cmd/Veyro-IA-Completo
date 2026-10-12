@@ -5,14 +5,14 @@
 import * as THREE from 'three';
 
 const bodies=[
-  {key:'mercury',orbit:2.5,size:.12,speed:.34,phase:2.6,colors:['#cbbeb0','#777b82','#292d36']},
-  {key:'venus',orbit:3.25,size:.22,speed:.25,phase:4.6,colors:['#f5d39c','#c09b6f','#624837']},
-  {key:'earth',orbit:4.1,size:.27,speed:.22,phase:2.2,colors:['#2d85ba','#276853','#153560']},
-  {key:'mars',orbit:5.1,size:.19,speed:.18,phase:5.0,colors:['#de9569','#ab5737','#542c2b']},
-  {key:'jupiter',orbit:6.5,size:.72,speed:.13,phase:.16,colors:['#e5c7a4','#b77c5e','#6d4c41']},
-  {key:'saturn',orbit:8.0,size:.56,speed:.1,phase:2.15,colors:['#e1cb9e','#ab8c62','#6b5749']},
-  {key:'uranus',orbit:9.25,size:.39,speed:.08,phase:5.55,colors:['#b9e1e3','#76b7c8','#315f8e']},
-  {key:'neptune',orbit:10.4,size:.37,speed:.068,phase:3.8,colors:['#7297d5','#2b5fa0','#182b5f']}
+  {key:'mercury',orbit:2.5,size:.15,speed:.34,phase:2.6,colors:['#cbbeb0','#777b82','#292d36']},
+  {key:'venus',orbit:3.25,size:.25,speed:.25,phase:4.6,colors:['#f5d39c','#c09b6f','#624837']},
+  {key:'earth',orbit:4.1,size:.42,speed:.22,phase:2.2,colors:['#2d85ba','#276853','#153560']},
+  {key:'mars',orbit:5.1,size:.29,speed:.18,phase:5.0,colors:['#de9569','#ab5737','#542c2b']},
+  {key:'jupiter',orbit:6.5,size:1.03,speed:.13,phase:.16,colors:['#e5c7a4','#b77c5e','#6d4c41']},
+  {key:'saturn',orbit:8.0,size:.71,speed:.1,phase:2.15,colors:['#e1cb9e','#ab8c62','#6b5749']},
+  {key:'uranus',orbit:9.25,size:.43,speed:.08,phase:5.55,colors:['#b9e1e3','#76b7c8','#315f8e']},
+  {key:'neptune',orbit:10.4,size:.43,speed:.068,phase:3.8,colors:['#7297d5','#2b5fa0','#182b5f']}
 ];
 const max=(v,a,b)=>Math.max(a,Math.min(v,b));
 function seeded(seed){let n=seed|0;return ()=>{n=(1664525*n+1013904223)>>>0;return n/4294967296;};}
@@ -101,7 +101,7 @@ export function mountCosmos(host){
     extraMaterials.push(material);
   }
 
-  const starCount=mobile?125:220;
+  const starCount=mobile?180:310;
   const positions=new Float32Array(starCount*3);
   const random=seeded(9927);
   for(let i=0;i<starCount;i++){
@@ -112,16 +112,16 @@ export function mountCosmos(host){
   const starsGeometry=new THREE.BufferGeometry();
   starsGeometry.setAttribute('position',new THREE.BufferAttribute(positions,3));
   group.add(new THREE.Points(starsGeometry,new THREE.PointsMaterial({
-    color:0xbfd0e6,size:.025,transparent:true,opacity:.76,depthWrite:false
+    color:0xf1e5cb,size:.036,transparent:true,opacity:.89,depthWrite:false
   })));
 
-  const coreGeometry=new THREE.SphereGeometry(1.46,mobile?28:48,20);
+  const coreGeometry=new THREE.SphereGeometry(1.12,mobile?28:48,20);
   const coreMaterial=new THREE.MeshStandardMaterial({color:0x10131b,roughness:.68,metalness:.35});
   const core=new THREE.Mesh(coreGeometry,coreMaterial);
   core.position.z=-1.6;
   group.add(core);
 
-  const goldMaterial=new THREE.LineBasicMaterial({color:0xb99959,transparent:true,opacity:.34,depthWrite:false});
+  const goldMaterial=new THREE.LineBasicMaterial({color:0xdab97b,transparent:true,opacity:.54,depthWrite:false});
   const planets=[];
   for(const body of bodies){
     const points=[];
@@ -139,6 +139,15 @@ export function mountCosmos(host){
     const sphere=new THREE.Mesh(geometry,mat);
     sphere.rotation.z=.18;
     group.add(sphere);
+    if(['earth','jupiter','saturn','neptune'].includes(body.key)){
+      const haloGeometry=new THREE.SphereGeometry(body.size*1.12,mobile?18:28,mobile?12:20);
+      const haloMaterial=new THREE.MeshBasicMaterial({
+        color:body.key==='earth'?0x4a91ce:0xd6ac67,
+        side:THREE.BackSide,transparent:true,opacity:.10,depthWrite:false
+      });
+      const halo=new THREE.Mesh(haloGeometry,haloMaterial);
+      sphere.add(halo);
+    }
     if(body.key==='saturn'){
       const ringGeometry=new THREE.RingGeometry(body.size*1.32,body.size*2.05,80);
       const ringMaterial=new THREE.MeshBasicMaterial({color:0xdfc69a,side:THREE.DoubleSide,transparent:true,opacity:.73,depthWrite:false});
