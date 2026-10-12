@@ -86,7 +86,7 @@ export class ComfyUiImageProvider {
   assert(this.config.ready,'Configure o ComfyUI e o modelo SDXL-Lightning local para gerar imagens.',503);
   return withGpuLock(async()=>{
    await unloadQwen(this.config);
-   assert(request.operation==='generate'?!source:Boolean(source),'A operação requer uma imagem de origem válida ou a remoção da referência.');
+   assert((request.operation||'generate')==='generate'?!source:Boolean(source),'A operação requer uma imagem de origem válida ou a remoção da referência.');
    const sourceName=source?await uploadSource(this.config,source):'';
    const imageRequest={...request,_index:index,_sourceName:sourceName},payload={prompt:workflowFor(imageRequest,this.config.checkpoint,Math.floor(Math.random()*2**32)),client_id:crypto.randomUUID()};let response;
    try{response=await fetch(this.config.base+'/prompt',{method:'POST',headers:{'Content-Type':'application/json',...requestAuth(this.config)},redirect:'error',body:JSON.stringify(payload),signal:AbortSignal.timeout(15000)});}catch{throw new AppError('ComfyUI local indisponível. Inicie o serviço antes de gerar imagens.',503);}
