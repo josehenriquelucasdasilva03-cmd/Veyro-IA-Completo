@@ -1,7 +1,9 @@
 /* Single public entry; only /api/auth/session confirms a login. */
 (()=>{
 'use strict';
-const INTRO_MS=16000,SESSION_TIMEOUT_MS=10000;
+const INTRO_MS=16000,SESSION_TIMEOUT_MS=10000,INTRO_KEY='veyro.intro.seen';
+function introWasSeen(){try{return sessionStorage.getItem(INTRO_KEY)==='1';}catch{return false;}}
+function markIntroSeen(){try{sessionStorage.setItem(INTRO_KEY,'1');}catch{}}
 const el=id=>document.getElementById(id);
 const stages=['auth-intro','auth-check','auth-login','auth-unavailable'];
 let started=false,introWasShown=false,resolveReady;
@@ -16,10 +18,11 @@ function requireLogin(){stage('auth-login');}
 function showError(){stage('auth-unavailable');}
 function intro(){
  introWasShown=true;stage('auth-intro');
- if(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)return Promise.resolve();
+ if(introWasSeen())return Promise.resolve();
+ if(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){markIntroSeen();return Promise.resolve();}
  return new Promise(resolve=>{
   let done=false;const button=el('auth-skip'),timer=setTimeout(finish,INTRO_MS);
-  function finish(){if(done)return;done=true;clearTimeout(timer);button?.removeEventListener('click',finish);resolve();}
+  function finish(){if(done)return;done=true;clearTimeout(timer);markIntroSeen();button?.removeEventListener('click',finish);resolve();}
   button?.addEventListener('click',finish,{once:true});
  });
 }
