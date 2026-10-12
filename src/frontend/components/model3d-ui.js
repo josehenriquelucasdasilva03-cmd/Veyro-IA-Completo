@@ -21,4 +21,20 @@ get('model3d-import').onchange=async e=>{
  }catch(error){status(error.message||'Falha ao carregar imagem.',true);}
  finally{e.target.value='';}
 };
+
+let exportUrl=null;
+for(const [id,method,ext] of [['model3d-glb','exportGLB','glb'],['model3d-png','exportPNG','png']]){
+ get(id).addEventListener('click',async()=>{
+  try{
+   if(!window.veyro3DStage)throw Error('Abra o editor primeiro.');
+   const result=await window.veyro3DStage[method]();
+   if(exportUrl)URL.revokeObjectURL(exportUrl);
+   exportUrl=URL.createObjectURL(result);
+   const a=document.createElement('a');
+   a.href=exportUrl;a.download='veyro-'+(window.veyro3DName||'modelo')+'.'+ext;
+   a.textContent='Baixar arquivo '+ext.toUpperCase();
+   get('model3d-status').replaceChildren(a);
+  }catch(error){status(error.message||'Falha na exportação.',true);}
+ });
+}
 })();
