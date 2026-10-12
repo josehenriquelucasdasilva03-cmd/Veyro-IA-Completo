@@ -95,14 +95,14 @@
       <nav class="tools" aria-label="Ferramentas do projeto"><button id="projects-open" class="nav-button" type="button">Projetos</button><button id="create-mode" aria-pressed="true">Criar</button><button id="photo-mode" aria-pressed="false">Photo Studio</button><button id="editor-mode" aria-pressed="false">Editor</button><button id="chat-mode" aria-pressed="false">Conversar</button><button id="memories-open">Memórias</button><button id="versions-open">Versões</button><button id="activity-open">Atividade</button></nav>
       <section id="photo-view" class="studio-view" hidden>
         <span class="eyebrow">VEYRO PHOTO STUDIO</span><h1>Uma imagem. Sua intenção.</h1>
-        <p class="review-help">Gere imagens localmente com SDXL-Lightning. A edição de imagens enviadas ainda não está conectada.</p>
+        <p class="review-help">Crie imagens por texto ou use uma imagem salva como referência para edição e aprimoramento. A execução exige um gerador configurado no servidor.</p>
         <div class="studio-grid">
-          <label>Operação<select id="photo-operation"><option value="generate">Criar imagem</option><option value="edit" disabled>Editar imagem · em breve</option><option value="enhance" disabled>Aprimorar imagem · em breve</option></select></label>
+          <label>Operação<select id="photo-operation"><option value="generate">Criar imagem</option><option value="edit">Editar imagem</option><option value="enhance">Aprimorar imagem</option></select></label>
           <label>Quantidade<select id="photo-count"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
           <label>Formato<select id="photo-size"><option value="1024x1024">Quadrado</option><option value="1536x1024">Horizontal</option><option value="1024x1536">Vertical</option></select></label>
           <label>Destino<select id="photo-scene"><option value="">Imagem independente</option></select></label>
         </div>
-        <label class="studio-label">Imagem de referência<select id="photo-source" disabled><option value="">Disponível em uma atualização futura</option></select></label>
+        <label class="studio-label">Imagem de referência<select id="photo-source"><option value="">Selecione uma imagem salva</option></select></label>
         <label class="studio-label">O que deve continuar igual<textarea id="photo-preserve" maxlength="2000" rows="2" placeholder="Ex.: manter personagem, roupa e iluminação"></textarea></label>
         <p id="photo-connection" class="studio-status" role="status"></p>
         <div id="photo-gallery" class="photo-gallery"></div><h2 class="subheading">Pedidos de imagem</h2><div id="photo-jobs"></div>
