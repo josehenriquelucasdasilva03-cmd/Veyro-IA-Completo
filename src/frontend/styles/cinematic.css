@@ -42,7 +42,7 @@ body.welcome-state.welcome-intro .dock .composer{will-change:transform,opacity;a
 /* Mascotes selecionáveis: a imagem original fica em um único arquivo local e
    cada personagem é enquadrado pela posição do fundo, sem alterar a arte. */
 .mascot-chat-bar{display:flex;align-items:center;gap:12px;max-width:1040px;margin:0 auto 10px;padding:7px 12px;border:1px solid #ffffff14;border-radius:16px;background:#090c0fc9;backdrop-filter:blur(12px)}
-.mascot-portrait{display:block;flex:none;background-image:url('/veyro-mascots.jpg');background-repeat:no-repeat;background-position:0 center;background-size:auto 300%;border-radius:50%;background-color:#111820;box-shadow:0 0 18px #e8be4420;transition:filter .2s,transform .2s,box-shadow .2s}
+.mascot-portrait{display:block;flex:none;background-image:url('./veyro-mascots.jpg');background-repeat:no-repeat;background-position:0 center;background-size:auto 300%;border-radius:50%;background-color:#111820;box-shadow:0 0 18px #e8be4420;transition:filter .2s,transform .2s,box-shadow .2s}
 .mascot-portrait[data-mascot=blue]{background-position:33.333% center;box-shadow:0 0 18px #479dff35}
 .mascot-portrait[data-mascot=green]{background-position:66.667% center;box-shadow:0 0 18px #7bcf6a35}
 .mascot-portrait[data-mascot=prime]{background-position:100% center;box-shadow:0 0 18px #e4b94635}
