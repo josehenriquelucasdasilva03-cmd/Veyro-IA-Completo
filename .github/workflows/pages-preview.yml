@@ -26,8 +26,8 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
-      - run: npm run build
-      - run: node scripts/build-netlify.mjs
+      # npm test builds both bundles and runs regression checks before publication.
+      - run: npm test
       - run: touch dist/site/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
