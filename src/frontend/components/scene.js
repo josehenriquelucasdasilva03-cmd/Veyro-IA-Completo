@@ -20,7 +20,31 @@
     }
     layer.append(part);
   }
+  const solar=document.createElement('div');
+  solar.className='veyro-solar-system';
+  solar.setAttribute('aria-hidden','true');
+  for(const name of ['mercury','venus','earth','mars','jupiter','saturn','uranus','neptune']){
+    const orbit=document.createElement('div');
+    orbit.className='veyro-orbit veyro-orbit-'+name;
+    const runner=document.createElement('div');
+    runner.className='veyro-orbit-runner';
+    const planet=document.createElement('span');
+    planet.className='veyro-planet veyro-planet-'+name;
+    if(name==='saturn'){
+      const ring=document.createElement('i');
+      ring.className='veyro-saturn-ring';
+      planet.append(ring);
+    }
+    runner.append(planet);
+    orbit.append(runner);
+    solar.append(orbit);
+  }
+  layer.append(solar);
   backdrop.append(layer);
+
+  document.getElementById('header-options')?.addEventListener('click',()=>{
+    document.getElementById('project-options')?.click();
+  });
 
   // Parallax responds to a finger or pointer but never intercepts a tap or scroll.
   const media=window.matchMedia('(prefers-reduced-motion: reduce)');

@@ -29,3 +29,13 @@ test('cinematic entrance preserves mobile and accessibility fallbacks',()=>{
   assert.match(css,/\.veyro-cosmos-ringed/);
   assert.match(css,/\.veyro-cosmos-amber/);
 });
+
+test('solar system renders with existing chat and responsive controls',()=>{
+ const js=read('src/frontend/components/scene.js'), css=read('src/frontend/styles/scene.css'), html=read('src/frontend/index.html');
+ assert.match(js,/veyro-solar-system/);
+ assert.match(css,/@keyframes veyro-solar-revolve/);
+ assert.match(css,/prefers-reduced-motion:reduce/);
+ assert.match(html,/id="header-options"/);
+ assert.match(html,/id="composer"/);
+ assert.match(html,/id="chat-log"/);
+});
