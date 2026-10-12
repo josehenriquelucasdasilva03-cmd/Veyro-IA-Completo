@@ -9,7 +9,7 @@ export async function createPhotoJob(db,env,p,user,b){
  const settings=photoSettings(b.settings),state=JSON.parse(p.state);assert(settings.prompt,'Descreva a imagem ou a alteração.');
  const scene=settings.sceneId?state.scenes.find(s=>s.id===settings.sceneId):null;assert(!settings.sceneId||scene,'Cena não encontrada.');
  let source=null;if(settings.sourceId){source=await db.first('SELECT * FROM assets WHERE id=? AND project_id=?',settings.sourceId,p.id);assert(source&&/^image\/(png|jpeg|webp)$/.test(source.mime),'Escolha uma referência JPG, PNG ou WebP deste projeto.');assert(source.size<=25*1024*1024,'A referência ultrapassa 25 MB.');}
- assert(settings.operation==='generate','O modelo local conectado cria imagens a partir de texto; edição e aprimoramento ainda não estão conectados.');assert(!source,'A geração atual é por texto. Remova a referência para continuar.');
+ assert(settings.operation==='generate'?!source:Boolean(source),settings.operation==='generate'?'Para criar do zero, remova a imagem de referência.':'Escolha uma imagem de referência deste projeto para editar ou aprimorar.');
  const request={...settings,visualStyle:state.visualStyle,characters:state.characters,constraints:state.constraints,sceneText:scene?.text||'',sourceRevision:p.revision};
  const status=photoReady(env)?'QUEUED':'WAITING',now=Date.now();
  await db.run('INSERT INTO media_jobs(id,project_id,status,request,created_at,updated_at) VALUES(?,?,?,?,?,?)',b.id,p.id,status,JSON.stringify(request),now,now);
@@ -23,7 +23,15 @@ export async function runPhotoSlot(db,env,p,user,id){
  const claim=await db.run("UPDATE media_jobs SET status='RUNNING',attempt=attempt+1,updated_at=?,error=NULL WHERE id=? AND project_id=? AND status IN ('QUEUED','PARTIAL','WAITING')",Date.now(),id,p.id);if(!claim.meta.changes)return readJob(await db.first('SELECT * FROM media_jobs WHERE id=?',id));
  try{
   assert(env.BUCKET,'O armazenamento local de imagens não está disponível.',503);
-  const generated=await new ComfyUiImageProvider(env).generate(request,outputs.length),assetId=crypto.randomUUID(),now=Date.now(),extension=generated.mime==='image/jpeg'?'jpg':generated.mime==='image/webp'?'webp':'png',name='veyro-'+assetId.slice(0,8)+'.'+extension,key=user+'/'+p.id+'/'+assetId;
+  let source=null;
+  if(request.operation!=='generate'){
+   const asset=await db.first('SELECT * FROM assets WHERE id=? AND project_id=?',request.sourceId,p.id);
+   assert(asset&&/^image\/(png|jpeg|webp)$/.test(asset.mime)&&asset.size<=25*1024*1024,'A imagem de referência não está disponível.',404);
+   const stored=await env.BUCKET.get(asset.object_key);assert(stored,'O arquivo de referência não foi encontrado.',404);
+   const bytes=new Uint8Array(await stored.arrayBuffer());assert(bytes.length>0&&bytes.length<=25*1024*1024,'O arquivo de referência é inválido.',413);
+   source={bytes,mime:asset.mime};
+  }
+  const generated=await new ComfyUiImageProvider(env).generate(request,outputs.length,source),assetId=crypto.randomUUID(),now=Date.now(),extension=generated.mime==='image/jpeg'?'jpg':generated.mime==='image/webp'?'webp':'png',name='veyro-'+assetId.slice(0,8)+'.'+extension,key=user+'/'+p.id+'/'+assetId;
   await env.BUCKET.put(key,generated.bytes,{httpMetadata:{contentType:generated.mime}});
   try{await db.run('INSERT INTO assets(id,project_id,name,mime,size,object_key,metadata,created_at) VALUES(?,?,?,?,?,?,?,?)',assetId,p.id,name,generated.mime,generated.bytes.byteLength,key,JSON.stringify({photoJobId:id,model:env.IMAGE_MODEL||'sdxl_lightning_4step.safetensors'}),now);}catch(e){await env.BUCKET.delete(key);throw e;}
   const next=[...outputs,{assetId,name,mime:generated.mime,size:generated.bytes.byteLength}],status=next.length>=request.count?'COMPLETE':'PARTIAL';
