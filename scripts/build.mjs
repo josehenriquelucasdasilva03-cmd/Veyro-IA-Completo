@@ -14,6 +14,7 @@ const entries={
  '/cinematic.css':'src/frontend/styles/cinematic.css',
  '/video.css':'src/frontend/styles/video.css',
  '/cosmos.css':'src/frontend/styles/cosmos.css',
+ '/planetarium-theme.css':'src/frontend/styles/planetarium-theme.css',
  '/cosmos-loader.js':'src/frontend/components/cosmos-loader.js'
 };
 const assets={};for(const [url,path]of Object.entries(entries))assets[url]=await readFile(path,'utf8');
