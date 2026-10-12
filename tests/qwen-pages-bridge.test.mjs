@@ -20,11 +20,11 @@ test('browser bridge parses and uses the authenticated deployed Cloudflare Worke
 });
 test('official GitHub Pages has sign-in and real Qwen path; other previews remain demo',()=>{
  const app=read('src/frontend/app.js');
- assert.match(app,/if\(QWEN_PAGES\)startGithubQwen\(banner\)/);
+ assert.match(app,/if\(QWEN_PAGES\)setupQwenLogin\(\)/);
  assert.match(app,/if\(QWEN_PAGES\)await sendGithubQwen\(text\);else sendPreviewMessage\(text\)/);
  assert.match(app,/bridge.send\(text,prior,piece=>/);
  assert.match(app,/role:'assistant',text:'',status:'RUNNING'/);
- assert.match(app,/Qwen3-30B-A3B \(não Qwen3.5-35B\)/);
+ assert.match(app,/function showQwenGate\(\)/);
  for(const file of ['scripts/build.mjs','scripts/build-netlify.mjs','src/frontend/index.html'])
   assert.match(read(file),/qwen-pages\.js/);
 });

@@ -13,6 +13,8 @@
     root.classList.add('veyro-entry-finished');
     root.setAttribute('aria-hidden','true');
     root.inert=true;
+    document.body.dataset.veyroIntroFinished='1';
+    document.dispatchEvent(new Event('veyro:intro-finished'));
     scene?.dispose();
     window.setTimeout(()=>root.remove(),700);
   }

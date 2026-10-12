@@ -24,62 +24,91 @@ function sendPreviewMessage(text){
  resizeText();
  feedback('Mensagem exibida nesta aba. Backend e Qwen ainda não conectados; isto não é envio real.');
 }
-let pagesAuthDialog=null,pagesAuthStatus=null,pagesAuthButton=null;
-function openQwenPagesLogin(){
- if(!QWEN_PAGES)return;
- if(pagesAuthDialog){pagesAuthDialog.showModal();return;}
- const dialog=el('dialog',undefined,'veyro-qwen-login');
- dialog.setAttribute('aria-labelledby','veyro-qwen-login-title');
- const form=el('form');form.autocomplete='on';
- const title=el('h2','Entrar no Veyro IA');title.id='veyro-qwen-login-title';
- const note=el('p','Use a conta que você já cadastrou no Worker Veyro. Sua senha vai diretamente ao Cloudflare por HTTPS, nunca ao GitHub.');
- const username=el('input');username.name='username';username.required=true;username.maxLength=32;username.autocomplete='username';username.placeholder='Seu usuário';username.setAttribute('aria-label','Usuário do Veyro');
- const password=el('input');password.name='password';password.type='password';password.required=true;password.autocomplete='current-password';password.placeholder='Sua senha';password.setAttribute('aria-label','Senha da conta Veyro');
- const message=el('p',undefined,'veyro-qwen-auth-message');message.setAttribute('role','alert');
- const confirm=el('button','Entrar e conectar Qwen');confirm.type='submit';
- const close=el('button','Cancelar');close.type='button';close.onclick=()=>dialog.close();
- form.append(title,note,username,password,message,confirm,close);
- form.onsubmit=async e=>{
-   e.preventDefault();
-   confirm.disabled=true;
-   message.textContent='Validando a sessão…';
-   try{
-     const status=await window.VeyroQwenPages.login(username.value.trim(),password.value);
-     const enabled=Boolean(status.enabled);
-     pagesAuthButton.textContent='Sair do Qwen';
-     pagesAuthStatus.textContent=enabled?'Qwen conectado: '+status.model+' · '+status.userRemaining+' mensagens restantes hoje':'Sessão válida, mas Qwen está indisponível no Worker.';
-     dialog.close();
-     feedback(enabled?'Conectado ao Qwen. Envie sua mensagem.':'Conta conectada, mas o modelo não está disponível.',!enabled);
-   }catch(error){message.textContent=error.message||'Não foi possível entrar. Confira a conta e a rede.';}
-   finally{password.value='';confirm.disabled=false;}
- };
- dialog.append(form);document.body.append(dialog);
- pagesAuthDialog=dialog;
- dialog.showModal();
+let qwenGateVisible=false;
+function lockQwenChat(locked){
+ for(const selector of ['.screen','#sidebar','#sidebar-overlay']){
+  const node=document.querySelector(selector);
+  if(node)node.inert=locked;
+ }
+ document.body.classList.toggle('veyro-qwen-locked',locked);
 }
-function startGithubQwen(banner){
+function showQwenGate(){
+ if(!QWEN_PAGES||window.VeyroQwenPages.connected())return;
+ qwenGateVisible=true;
+ lockQwenChat(true);
+ // Do not put login over the cinematic intro.
+ if(document.body.dataset.veyroIntroFinished!=='1')return;
+ const gate=$('veyro-qwen-gate');
+ gate.hidden=false;
+ const submit=$('veyro-qwen-login-submit');
+ submit.disabled=false;
+ $('veyro-qwen-username').focus({preventScroll:true});
+}
+function hideQwenGate(){
+ qwenGateVisible=false;
+ $('veyro-qwen-gate').hidden=true;
+ $('veyro-qwen-auth-message').textContent='';
+ lockQwenChat(false);
+}
+function setupQwenLogin(){
+ if(!QWEN_PAGES)return;
  const bridge=window.VeyroQwenPages;
- banner.textContent='VEYRO IA · Login protegido. As mensagens vão ao Worker Cloudflare após autenticação. Modelo disponível: Qwen3-30B-A3B (não Qwen3.5-35B).';
- pagesAuthButton=el('button','Entrar para conversar com Qwen','veyro-qwen-connect');
- pagesAuthButton.type='button';
- pagesAuthButton.onclick=()=>handle(async()=>{
-  if(bridge.connected()){
-   await bridge.logout();
-   pagesAuthButton.textContent='Entrar para conversar com Qwen';
-   pagesAuthStatus.textContent='Desconectado. Faça login para enviar mensagens à IA.';
-   feedback('Sessão encerrada.');
-  }else openQwenPagesLogin();
+ const form=$('veyro-qwen-login-form'),submit=$('veyro-qwen-login-submit');
+ const username=$('veyro-qwen-username'),password=$('veyro-qwen-password'),message=$('veyro-qwen-auth-message');
+ const sidebarBottom=$('sidebar').querySelector('.sidebar-bottom');
+ const signout=el('button','Sair da conta','veyro-qwen-logout');
+ signout.type='button';
+ signout.hidden=true;
+ signout.onclick=()=>handle(async()=>{
+  if(state.busy)return;
+  signout.disabled=true;
+  try{await bridge.logout();}
+  finally{
+   signout.disabled=false;signout.hidden=true;
+   state.chatMessages=[];state.chatDraft='';chatDraftDirty=false;
+   $('prompt').value='';
+   renderChatMessages();
+   $('veyro-qwen-password').value='';
+   $('veyro-qwen-auth-message').textContent='';
+   closeSidebar();
+   feedback('Sessão encerrada. Entre novamente para conversar com Qwen.');
+   showQwenGate();
+  }
  });
- pagesAuthStatus=el('p','Faça login na conta já cadastrada para habilitar o envio real. Sem login, nada é enviado.','veyro-qwen-status');
- pagesAuthStatus.setAttribute('role','status');
- banner.append(pagesAuthButton,pagesAuthStatus);
- $('save-status').textContent='Chat Qwen · não há histórico salvo no servidor';
- feedback('Qwen disponível após login. O histórico desta interface dura somente até fechar a página.');
+ sidebarBottom?.append(signout);
+ document.addEventListener('veyro:intro-finished',()=>{
+  if(qwenGateVisible)showQwenGate();
+ });
+ form.addEventListener('submit',async e=>{
+  e.preventDefault();
+  if(!qwenGateVisible||submit.disabled)return;
+  submit.disabled=true;
+  message.textContent='Conectando sua conta ao Qwen…';
+  try{
+   const status=await bridge.login(username.value.trim().toLowerCase(),password.value);
+   if(!status.enabled){
+    await bridge.logout();
+    throw Error('Conta autenticada, mas o Qwen está indisponível no momento. Tente mais tarde.');
+   }
+   hideQwenGate();
+   signout.hidden=false;
+   feedback('Qwen conectado · pronto para conversar.');
+   $('save-status').textContent='Conectado ao Qwen · conversa nesta aba';
+   $('prompt').focus({preventScroll:true});
+  }catch(error){
+   message.textContent=error.message||'Não foi possível entrar. Confira seus dados e tente novamente.';
+  }finally{password.value='';submit.disabled=false;}
+ });
+ showQwenGate();
 }
 async function sendGithubQwen(text){
  if(!text.trim())throw Error('Digite uma mensagem para enviar.');
  const bridge=window.VeyroQwenPages;
- if(!bridge.connected()){openQwenPagesLogin();feedback('Faça login para enviar sua mensagem ao Qwen. O texto continua na caixa.');return;}
+ if(!bridge.connected()){
+  showQwenGate();
+  feedback('Faça login para enviar sua mensagem ao Qwen.');
+  return;
+ }
  if(text.length>600)throw Error('O Qwen aceita até 600 caracteres por mensagem.');
  const prior=state.chatMessages.filter(m=>['user','assistant'].includes(m.role)&&m.status==='COMPLETE'&&m.text).slice(-4).map(m=>({role:m.role,content:m.text.slice(0,360)}));
  const now=Date.now(),user={id:crypto.randomUUID(),role:'user',text,status:'COMPLETE',created_at:now};
@@ -88,12 +117,16 @@ async function sendGithubQwen(text){
  try{
   await bridge.send(text,prior,piece=>{reply.text+=piece;renderChatMessages();});
   reply.status='COMPLETE';$('prompt').value='';state.chatDraft='';chatDraftDirty=false;
-  feedback('Resposta recebida do Qwen via Cloudflare Workers AI.');
+  feedback('Resposta recebida do Qwen.');
  }catch(error){
   state.chatMessages=state.chatMessages.filter(m=>m!==reply);
   state.chatMessages.push({id:crypto.randomUUID(),role:'notice',text:'Envio não concluído: '+(error.message||'falha no backend')+'. Confira a sessão e tente novamente.',status:'COMPLETE',created_at:Date.now()+1});
   feedback(error.message||'Envio não concluído.',true);
-  if(!bridge.connected()&&pagesAuthButton){pagesAuthButton.textContent='Entrar para conversar com Qwen';pagesAuthStatus.textContent='Sessão expirada. Faça login novamente.';}
+  if(!bridge.connected()){
+   const signout=document.querySelector('.veyro-qwen-logout');
+   if(signout)signout.hidden=true;
+   showQwenGate();
+  }
  }finally{busy(false);renderChatMessages();resizeText();}
 }
 function startStaticPreview(){
@@ -110,9 +143,11 @@ function startStaticPreview(){
  $('photo-view').hidden=true;
  $('editor-view').hidden=true;
  $('save-status').textContent='Prévia local · sem salvamento no servidor';
- const banner=el('div','PRÉVIA DO CHAT: teste o botão de enviar. As mensagens ficam apenas nesta aba e NÃO são enviadas ao Qwen.','veyro-preview-banner');
- banner.setAttribute('role','status');
- $('composer').before(banner);
+ if(!QWEN_PAGES){
+  const banner=el('div','PRÉVIA DO CHAT: teste o botão de enviar. As mensagens ficam apenas nesta aba e NÃO são enviadas ao Qwen.','veyro-preview-banner');
+  banner.setAttribute('role','status');
+  $('composer').before(banner);
+ }
  for(const id of ['nav-images','nav-videos','nav-agents','photo-mode','editor-mode','create-mode','projects-open','memories-open','versions-open','activity-open','save','add','voice-input','translate-input','profile-open']){
   const node=$(id);if(node){node.disabled=true;node.title='Indisponível na prévia estática; precisa do backend autenticado.';}
  }
@@ -127,7 +162,7 @@ function startStaticPreview(){
   $('prompt').focus();
  };
  renderChatMessages();
- if(QWEN_PAGES)startGithubQwen(banner);
+ if(QWEN_PAGES)setupQwenLogin();
  else feedback('Prévia de interface. Envie uma mensagem para testá-la visualmente, sem conexão com a IA.');
 }
 function showLoginGate(){const gate=$('auth-gate');if(gate)gate.hidden=false;}

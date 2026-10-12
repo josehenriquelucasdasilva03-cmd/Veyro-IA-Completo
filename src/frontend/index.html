@@ -37,6 +37,26 @@
     <button class="veyro-entry-skip" type="button">Pular introdução</button>
     <div class="veyro-entry-progress" aria-hidden="true"><span></span></div>
   </div>
+  <!-- Login do Qwen existe somente na publicação autenticada do GitHub Pages.
+       A introdução termina primeiro. O site não armazena senhas nem tokens. -->
+  <section id="veyro-qwen-gate" class="veyro-qwen-gate" aria-labelledby="veyro-qwen-login-title" hidden>
+    <div class="veyro-qwen-gate-stars" aria-hidden="true"></div>
+    <div class="veyro-qwen-gate-card">
+      <span class="veyro-qwen-brand">VEYRO <em>IA</em></span>
+      <span class="veyro-qwen-eyebrow">ACESSO PROTEGIDO</span>
+      <h1 id="veyro-qwen-login-title">Entre na sua conta</h1>
+      <p>Faça login para conectar ao Qwen e começar a conversar.</p>
+      <form id="veyro-qwen-login-form" autocomplete="on">
+        <label for="veyro-qwen-username">Usuário</label>
+        <input id="veyro-qwen-username" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required maxlength="32" placeholder="Seu usuário Veyro">
+        <label for="veyro-qwen-password">Senha</label>
+        <input id="veyro-qwen-password" name="password" type="password" autocomplete="current-password" required placeholder="Sua senha">
+        <p id="veyro-qwen-auth-message" class="veyro-qwen-error" role="alert" aria-live="polite"></p>
+        <button id="veyro-qwen-login-submit" type="submit">Entrar e conectar ao Qwen</button>
+      </form>
+      <p class="veyro-qwen-privacy"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 10V7a7 7 0 0 1 14 0v3M5 10h14v11H5z"/></svg> Seu acesso é validado no Cloudflare. A senha não é salva no GitHub.</p>
+    </div>
+  </section>
   <section id="auth-gate" class="auth-gate" aria-labelledby="auth-title" hidden>
     <div class="auth-panel">
       <h1 id="auth-title">Entrar no Veyro IA</h1>
