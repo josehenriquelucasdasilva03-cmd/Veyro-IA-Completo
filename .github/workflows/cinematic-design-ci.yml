@@ -1,0 +1,25 @@
+name: Cinematic Design CI
+on:
+  push:
+    branches: [design/three-references-cinematic-20261012]
+  pull_request:
+    paths:
+      - 'src/frontend/**'
+      - 'scripts/build.mjs'
+      - 'scripts/build-netlify.mjs'
+      - 'tests/scene.test.mjs'
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: node scripts/build-netlify.mjs
+      - run: test -f dist/site/scene.css && test -f dist/site/scene.js
