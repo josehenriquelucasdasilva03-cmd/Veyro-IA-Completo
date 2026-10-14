@@ -29,7 +29,7 @@ let mascotWordTimer=0;
 function resetMascotSpeechMotion(){clearTimeout(mascotWordTimer);document.body.removeAttribute('data-speech-boundary');document.body.style.removeProperty('--mascot-mouth');}
 function animateMascotWord(event){
  if(event.name!=='word'||document.hidden||voicePerformance==='economico'||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
- clearTimeout(mascotWordTimer);document.body.dataset.speechBoundary='true';
+ clearTimeout(mascotWordTimer);document.body.dataset.speechBoundary='true';document.dispatchEvent(new CustomEvent('veyro-speech-word'));
  document.body.style.setProperty('--mascot-mouth',String(0.8+Math.min(event.charLength||4,10)*.1));
  mascotWordTimer=setTimeout(()=>document.body.style.setProperty('--mascot-mouth','0.35'),140);
 }

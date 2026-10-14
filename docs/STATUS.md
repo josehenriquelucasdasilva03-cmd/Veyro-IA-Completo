@@ -1,5 +1,13 @@
 # Situação da base entregue
 
+## Robô de corpo inteiro em 3D — 14/10/2026
+
+- A área do mascote no topo do chat recebe um modelo procedural Three.js com cabeça, tronco, braços e pernas articulados. A foto permanece somente como alternativa quando WebGL falha; os retratos no histórico continuam leves, com um único renderer para o personagem principal.
+- Quatro temas: Black, Blue, Green e Red. Movimentos distintos para espera, atenção, pensamento, resposta/voz e conclusão. O botão Dançar aciona seis segundos de dança quando o robô está ocioso; uma resposta em andamento tem prioridade.
+- A boca reage aos eventos de palavra quando disponíveis; em outros mecanismos de áudio usa movimento aproximado durante a reprodução. Não representa sincronização fonética nem um modelo importado idêntico às ilustrações.
+- FPS limitado a 25, pixel ratio limitado a 1,5, pausa fora da área visível/aba oculta e pose estática no modo econômico ou com redução de movimento. Geometrias, materiais e renderer são liberados ao sair; falha WebGL volta ao retrato.
+- Build local e suíte de 123 testes passaram, incluindo cores, articulação, estados, redução de movimento e assets dos dois builds. Renderização WebGL real e qualidade visual no notebook ainda não verificadas: o ambiente não possui Chromium instalado. Nenhuma publicação nesta etapa.
+
 ## Falas e movimentos naturais — 14/10/2026
 
 - Apresentações mais conversacionais para Black, Blue, Green e Red, com botão para ouvir no seletor. Perfis do navegador mantêm o tom-base da voz e ritmos discretos, evitando alteração grave/aguda artificial por padrão.

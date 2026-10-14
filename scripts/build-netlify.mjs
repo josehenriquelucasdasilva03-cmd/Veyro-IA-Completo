@@ -21,6 +21,8 @@ const files = [
   ['src/frontend/styles/planetarium-theme.css', 'dist/site/planetarium-theme.css'],
   ['src/frontend/components/cosmos-loader.js', 'dist/site/cosmos-loader.js'],
   ['dist/cosmos3d.js', 'dist/site/cosmos3d.js'],
+  ['dist/mascot3d.js', 'dist/site/mascot3d.js'],
+  ['src/frontend/components/mascot3d-loader.js', 'dist/site/mascot3d-loader.js'],
   ['public/assets/cinematic.webp', 'dist/site/cinematic.webp'],
   ['public/assets/veyro-mascots.jpg', 'dist/site/veyro-mascots.jpg'],
   ...['black','blue','green','red'].flatMap(mascot=>['avatar','card'].map(type=>[

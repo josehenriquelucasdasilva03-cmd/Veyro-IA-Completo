@@ -185,3 +185,13 @@ body[data-voice-performance=economico] .mascot-hero::after{animation:none!import
 body[data-voice-performance=maximo][data-mascot-state=reading] .mascot-hero{filter:drop-shadow(0 0 13px #dfba78)}
 @media(prefers-reduced-motion:reduce){body[data-mascot-state=reading] .mascot-hero::after{display:none;animation:none!important;transition:none!important}}
 @media(max-width:420px){#mascot-voice-settings{font-size:15px;min-width:31px;padding:7px 5px}}
+
+/* Articulated full-body robot occupies the former photo slot. */
+.mascot-chat-bar{flex-wrap:wrap}
+.mascot-hero.mascot-3d-ready{width:128px;height:164px;flex:none;background:none!important;border-radius:16px;box-shadow:none!important;animation:none!important;transform:none!important;filter:none!important;overflow:hidden}
+.mascot-hero.mascot-3d-ready canvas{display:block;width:100%;height:100%}
+body[data-mascot-state] .mascot-hero.mascot-3d-ready::after{display:none!important}
+.mascot-chat-info{min-width:130px}
+#mascot-dance{min-height:36px}
+@media(max-width:899px){.mascot-hero.mascot-3d-ready{width:100px;height:132px}.mascot-chat-info{min-width:110px}}
+@media(max-width:420px){.mascot-hero.mascot-3d-ready{width:88px;height:116px}.mascot-chat-info{min-width:100px}}
