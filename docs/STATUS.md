@@ -1,5 +1,12 @@
 # Situação da base entregue
 
+## Falas e movimentos naturais — 14/10/2026
+
+- Apresentações mais conversacionais para Black, Blue, Green e Red, com botão para ouvir no seletor. Perfis do navegador mantêm o tom-base da voz e ritmos discretos, evitando alteração grave/aguda artificial por padrão.
+- Seleção automática prefere vozes Natural/Neural/Online do idioma, priorizando pt-BR. A escolha manual é preservada quando compatível. O navegador pode usar processamento remoto; não há garantia de síntese offline.
+- Leitura conserva parágrafos e usa frases de até 300 caracteres, evitando cortes em dois-pontos e ponto-e-vírgula. Movimentos de cabeça ficam lentos e discretos; eventos de palavra guiam a reação visual quando o navegador os fornece. Sem esses eventos, a animação é aproximada, sem sincronização fonética.
+- Modo econômico e redução de movimento desativam a reação de boca. Áudio pausado, parado ou concluído encerra a reação. Não houve substituição dos modelos TTS nem ativação de serviço pago.
+
 Base funcional: versão 7 da Veyro IA. Esta cópia reorganiza os fontes e adiciona ambiente local; nenhuma alteração desta revisão foi publicada em produção.
 
 ## Utilizável sem provedores
