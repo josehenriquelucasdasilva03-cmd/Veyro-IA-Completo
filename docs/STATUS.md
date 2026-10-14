@@ -15,6 +15,12 @@
 - Leitura conserva parágrafos e usa frases de até 300 caracteres, evitando cortes em dois-pontos e ponto-e-vírgula. Movimentos de cabeça ficam lentos e discretos; eventos de palavra guiam a reação visual quando o navegador os fornece. Sem esses eventos, a animação é aproximada, sem sincronização fonética.
 - Modo econômico e redução de movimento desativam a reação de boca. Áudio pausado, parado ou concluído encerra a reação. Não houve substituição dos modelos TTS nem ativação de serviço pago.
 
+## Correções de estabilidade — 14/10/2026
+
+- `npm test` prepara os bundles do servidor e da prévia estática antes dos testes. O teste Netlify somente lê a saída pronta; não remove/cria arquivos enquanto outros testes os verificam.
+- Pedidos Qwen aguardando a fila da GPU podem ser cancelados pelo sinal do cliente ou pelo identificador do pedido, sem esperar a inferência anterior. O timeout também inclui a espera na fila. Uma solicitação cancelada não chama o provedor nem bloqueia a próxima.
+- Correções preparadas em branch de revisão, sem publicação ou alteração dos serviços de produção. A validação usa provedores simulados; desempenho da GPU e voz reais continuam pendentes.
+
 Base funcional: versão 7 da Veyro IA. Esta cópia reorganiza os fontes e adiciona ambiente local; nenhuma alteração desta revisão foi publicada em produção.
 
 ## Utilizável sem provedores

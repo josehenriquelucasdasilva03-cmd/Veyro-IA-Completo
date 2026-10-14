@@ -1,16 +1,15 @@
 name: GitHub Pages Veyro Preview
 on:
   push:
-    branches:
-      - integration/consolidacao-veyro-chat-20261012
+    branches: [main]
     paths:
       - '.github/workflows/pages-preview.yml'
       - 'src/frontend/**'
-      - 'scripts/build.mjs'
-      - 'scripts/build-netlify.mjs'
+      - 'scripts/**'
       - 'public/**'
       - 'package.json'
       - 'package-lock.json'
+      - 'tests/**'
   workflow_dispatch:
 permissions:
   contents: read
@@ -32,8 +31,7 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
-      - run: npm run build
-      - run: node scripts/build-netlify.mjs
+      - run: npm test
       - run: touch dist/site/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

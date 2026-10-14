@@ -253,3 +253,130 @@ body[data-mode="chat"] .send{box-shadow:0 3px 10px #000a,inset 0 0 0 1px #bb9450
 body.welcome-state.welcome-intro .veyro-skip-intro{display:block}
 .veyro-skip-intro:focus-visible{outline:2px solid #f1d285;outline-offset:3px}
 @media(max-width:899px){.veyro-skip-intro{top:10px;right:4px}}
+
+/* Visual match for the approved 8-second storyboard.
+ * Gold orbits, centered logo, late-arriving header and live composer.
+ * The visible chat UI is never a bitmap and all existing handlers remain intact.
+ */
+body[data-mode="chat"] .welcome-backdrop{
+  background:
+    radial-gradient(ellipse at 18% 43%,rgba(144,95,54,.16),transparent 48%),
+    radial-gradient(ellipse at 75% 29%,rgba(81,87,120,.15),transparent 45%),
+    linear-gradient(172deg,#020309 0%,#0a0b17 52%,#02040a 100%);
+}
+body.welcome-state #welcome{isolation:isolate}
+body.welcome-state .welcome-title{z-index:2}
+body.welcome-state .welcome-title::before,
+body.welcome-state .welcome-title::after{
+  content:"";position:absolute;left:50%;top:49%;pointer-events:none;
+  border:1px solid rgba(229,184,109,.62);border-radius:50%;
+  transform:translate(-50%,-50%) rotate(-10deg);
+  box-shadow:0 0 20px #d6a35316,inset 0 0 16px #bd924017;
+  z-index:-1;
+}
+body.welcome-state .welcome-title::before{
+  width:min(72vw,490px);height:clamp(110px,18vw,160px);
+  border-width:1.6px;border-left-color:#ffe2a2b0;border-bottom-color:#b98d446a;
+}
+body.welcome-state .welcome-title::after{
+  width:min(92vw,650px);height:clamp(150px,25vw,220px);
+  transform:translate(-50%,-50%) rotate(10deg);
+  border-color:#b28c4b70;
+}
+body.welcome-state .welcome-title h1{
+  text-shadow:0 5px 30px #000,0 0 20px #efc16a33;
+  letter-spacing:clamp(4px,.9vw,12px)!important;
+  margin-bottom:12px!important;
+}
+body.welcome-state .welcome-title h1 .logo-ia em{color:#dfb873}
+.veyro-cinematic-motto{
+  position:relative;z-index:2;
+  display:block;color:#dbba79;
+  font-size:clamp(7px,.75vw,10px);font-weight:400;
+  letter-spacing:clamp(1px,.3vw,2.8px);
+  white-space:nowrap;text-transform:uppercase;
+  text-shadow:0 1px 9px #000;
+}
+.veyro-cinematic-motto>span{padding:0 5px;color:#e6c382}
+body.welcome-state .welcome-title>p{
+  font-size:clamp(9px,.9vw,12px);font-weight:400;
+  letter-spacing:clamp(1.3px,.3vw,4px);
+  margin-top:36px;color:#f0ece4;
+}
+/* The original icon and text buttons remain interactive after the entrance. */
+body.welcome-state.welcome-intro .header,
+body.welcome-state.welcome-intro .menu-toggle,
+body.welcome-state.welcome-intro .mascot-chat-bar{
+  animation:veyro-storyboard-top 8s ease-out both;
+}
+body.welcome-state.welcome-intro .veyro-cinematic-motto{
+  animation:veyro-caption-in .9s ease 4.55s both;
+}
+@keyframes veyro-storyboard-top{
+  0%,69%{opacity:0}
+  81%,100%{opacity:1}
+}
+body.welcome-state.welcome-intro .welcome-title::before{
+  animation:veyro-storyboard-inner-ring 5.5s cubic-bezier(.19,.7,.2,1) .7s both;
+}
+body.welcome-state.welcome-intro .welcome-title::after{
+  animation:veyro-storyboard-outer-ring 5.5s cubic-bezier(.19,.7,.2,1) .85s both;
+}
+@keyframes veyro-storyboard-inner-ring{
+  from{opacity:0;transform:translate(-50%,-50%) rotate(-82deg) scale(.6)}
+  to{opacity:1;transform:translate(-50%,-50%) rotate(-10deg) scale(1)}
+}
+@keyframes veyro-storyboard-outer-ring{
+  from{opacity:0;transform:translate(-50%,-50%) rotate(65deg) scale(.7)}
+  to{opacity:1;transform:translate(-50%,-50%) rotate(10deg) scale(1)}
+}
+/* Keep the actual suggestions but make them secondary to the orbital stage. */
+body.welcome-state .suggestions button{
+  background:linear-gradient(135deg,#0a0e16c9,#090c12b7);
+  border-color:#af8a515e;
+  box-shadow:0 8px 19px #0007;
+}
+body.welcome-state .sun-ring{opacity:.6}
+/* On a compact phone, preserve the center composition without clipping the logo. */
+@media(max-width:899px){
+  body.welcome-state .welcome-title{padding:155px 0 104px}
+  body.welcome-state .welcome-title h1{
+    font-size:clamp(29px,9.1vw,41px)!important;letter-spacing:4px!important;
+    margin-bottom:12px!important;
+  }
+  body.welcome-state .welcome-title::before{width:min(86vw,420px);height:120px}
+  body.welcome-state .welcome-title::after{width:min(120vw,550px);height:177px}
+  body.welcome-state .veyro-cinematic-motto{font-size:8px;letter-spacing:1.2px}
+  body.welcome-state .welcome-title>p{margin-top:37px;font-size:9px;letter-spacing:2px}
+  body.welcome-state .suggestions{
+    display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;
+    overscroll-behavior-x:contain;scrollbar-width:none;
+    margin-top:-12px;padding:7px 2px;
+  }
+  body.welcome-state .suggestions::-webkit-scrollbar{display:none}
+  body.welcome-state .suggestions button{
+    flex:0 0 134px;min-width:0;min-height:49px;
+    padding:9px 10px;gap:8px;justify-content:flex-start;
+    font-size:11px;
+  }
+  body.welcome-state .suggestions button:last-child{grid-column:auto;justify-content:flex-start;min-height:49px}
+  body.welcome-state .suggestions svg{width:20px;height:20px}
+  body.welcome-state .sun-ring{width:270px;height:270px;top:25px}
+  body[data-mode="chat"] .composer{border-radius:32px;box-shadow:0 14px 35px #000c,0 0 15px #b7903b1c}
+  body[data-mode="chat"] .send{border-radius:50%!important}
+}
+@media(max-height:730px) and (max-width:899px){
+  body.welcome-state .welcome-title{padding:80px 0 52px}
+  body.welcome-state .sun-ring{top:0}
+  body.welcome-state .suggestions{margin-top:0}
+}
+@media(prefers-reduced-motion:reduce){
+  body.welcome-state.welcome-intro .header,
+  body.welcome-state.welcome-intro .menu-toggle,
+  body.welcome-state.welcome-intro .mascot-chat-bar,
+  body.welcome-state.welcome-intro .veyro-cinematic-motto,
+  body.welcome-state.welcome-intro .welcome-title::before,
+  body.welcome-state.welcome-intro .welcome-title::after{
+    animation:none!important;opacity:1!important;
+  }
+}
