@@ -20,8 +20,14 @@ export function makeCloudflareWorkerConfig({databaseId,modelBaseUrl}){
    MODEL_AUTH_TYPE:'basic',
    MODEL_TIMEOUT_MS:'180000',
    VEYRO_CHAT_ENABLED:'true',
-   VEYRO_AUTH_MODE:'cloudflare-access'
+   VEYRO_AUTH_MODE:'cloudflare-access',
+   VEYRO_FAST_RESPONSES:'true'
   },
+  ratelimits:[
+    {name:'API_RATE_LIMITER',namespace_id:'81026011',simple:{limit:300,period:60}},
+    {name:'MODEL_RATE_LIMITER',namespace_id:'81026012',simple:{limit:20,period:60}},
+    {name:'UPLOAD_RATE_LIMITER',namespace_id:'81026013',simple:{limit:10,period:60}}
+  ],
   d1_databases:[{binding:'DB',database_name:'veyroia-test-db',database_id:id,migrations_dir:'drizzle'}],
   secrets:{required:['MODEL_BASIC_USER','MODEL_BASIC_PASSWORD']}
  };

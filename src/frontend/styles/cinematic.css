@@ -42,29 +42,156 @@ body.welcome-state.welcome-intro .dock .composer{will-change:transform,opacity;a
 /* Mascotes selecionáveis: a imagem original fica em um único arquivo local e
    cada personagem é enquadrado pela posição do fundo, sem alterar a arte. */
 .mascot-chat-bar{display:flex;align-items:center;gap:12px;max-width:1040px;margin:0 auto 10px;padding:7px 12px;border:1px solid #ffffff14;border-radius:16px;background:#090c0fc9;backdrop-filter:blur(12px)}
-.mascot-portrait{display:block;flex:none;background-image:url('/veyro-mascots.jpg');background-repeat:no-repeat;background-position:0 center;background-size:auto 300%;border-radius:50%;background-color:#111820;box-shadow:0 0 18px #e8be4420;transition:filter .2s,transform .2s,box-shadow .2s}
-.mascot-portrait[data-mascot=blue]{background-position:33.333% center;box-shadow:0 0 18px #479dff35}
-.mascot-portrait[data-mascot=green]{background-position:66.667% center;box-shadow:0 0 18px #7bcf6a35}
-.mascot-portrait[data-mascot=prime]{background-position:100% center;box-shadow:0 0 18px #e4b94635}
+/* Each robot uses a separate tested image. Avoid fragile four-in-one sprite cropping. */
+.mascot-portrait{display:block;flex:none;background-image:url('./veyro-black-avatar.webp');background-repeat:no-repeat;background-position:center;background-size:cover;border-radius:50%;background-color:#111820;box-shadow:0 0 18px #e8be4420;transition:filter .2s,transform .2s,box-shadow .2s}
+.mascot-portrait[data-mascot=blue]{background-image:url('./veyro-blue-avatar.webp');box-shadow:0 0 18px #479dff35}
+.mascot-portrait[data-mascot=green]{background-image:url('./veyro-green-avatar.webp');box-shadow:0 0 18px #7bcf6a35}
+.mascot-portrait[data-mascot=red]{background-image:url('./veyro-red-avatar.webp');box-shadow:0 0 18px #e4b94635}
 .mascot-hero{width:54px;height:54px}
 .mascot-chat-info{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}.mascot-chat-info strong{font-size:13px;letter-spacing:.3px}.mascot-chat-info span{font-size:11px;color:#abb2b7}
 .mascot-change,.voice-toggle,.message-speech{border:1px solid #554a2d;border-radius:10px;background:#17160f;color:#eddb9b;padding:9px 11px;font-size:12px;white-space:nowrap}.voice-toggle[aria-pressed=true]{border-color:#d5b749;color:#ffe685;box-shadow:0 0 15px #eac54420}.mascot-change:hover,.voice-toggle:hover,.message-speech:hover{background:#282315}
 .assistant-author{display:flex;align-items:center;gap:9px;margin-bottom:8px;min-height:31px}.assistant-author .message-author{margin:0;color:#cfc18e}.mascot-reply-portrait{width:30px;height:30px}.message-speech{margin-left:auto;padding:6px 9px;font-size:11px}
 .mascot-picker{width:min(94vw,790px);max-height:min(90dvh,820px);padding:22px;background:linear-gradient(145deg,#111517,#090b0d);border-color:#71613b;box-shadow:0 22px 90px #000b}
 .mascot-picker .panel-head{position:static;background:transparent;padding:0 0 7px}.mascot-picker .panel-head h2{font-size:24px;letter-spacing:.3px}.mascot-intro{max-width:650px;color:#aeb5b7;font-size:13px;line-height:1.6;margin:0 0 17px}
-.mascot-options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}.mascot-option{display:flex;min-width:0;flex-direction:column;align-items:center;justify-content:flex-start;gap:6px;padding:12px 8px 13px;border:1px solid #ffffff1a;border-radius:15px;background:linear-gradient(150deg,#171b1e,#0c0e10);color:#f4f4f1;text-align:center;transition:border-color .2s,background .2s,transform .2s,box-shadow .2s}.mascot-option:hover{transform:translateY(-2px);border-color:#9b8441}.mascot-option[aria-pressed=true]{border-color:#e0bd50;background:linear-gradient(150deg,#292414,#111210);box-shadow:0 0 24px #d0aa352b, inset 0 0 0 1px #c8a63230}.mascot-card-portrait{width:100px;height:150px;border-radius:10px;background-size:auto 150%;background-color:#101519;box-shadow:none}.mascot-option[data-mascot-choice=blue] .mascot-card-portrait{background-position:33.333% center}.mascot-option[data-mascot-choice=green] .mascot-card-portrait{background-position:66.667% center}.mascot-option[data-mascot-choice=prime] .mascot-card-portrait{background-position:100% center}.mascot-option strong{font-size:13px}.mascot-option small{color:#a7afb2;font-size:10px;line-height:1.35}
-.mascot-preview{display:flex;align-items:center;gap:15px;margin:17px 0 12px;padding:12px;border:1px solid #ffffff13;border-radius:14px;background:#ffffff05}.mascot-preview-portrait{width:78px;height:78px;border-radius:13px;background-size:auto 300%}.mascot-preview h3{margin:5px 0;font-weight:500;font-size:18px}.mascot-preview p{margin:0;color:#c0c4c5;font-size:13px;line-height:1.5}.mascot-confirm{width:100%;border:0;border-radius:12px;background:linear-gradient(120deg,#f3d36a,#c79931);color:#17140b;padding:13px 16px;font-weight:700;font-size:14px}
+.mascot-options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}.mascot-option{display:flex;min-width:0;flex-direction:column;align-items:center;justify-content:flex-start;gap:6px;padding:12px 8px 13px;border:1px solid #ffffff1a;border-radius:15px;background:linear-gradient(150deg,#171b1e,#0c0e10);color:#f4f4f1;text-align:center;transition:border-color .2s,background .2s,transform .2s,box-shadow .2s}.mascot-option:hover{transform:translateY(-2px);border-color:#9b8441}.mascot-option[aria-pressed=true]{border-color:#e0bd50;background:linear-gradient(150deg,#292414,#111210);box-shadow:0 0 24px #d0aa352b, inset 0 0 0 1px #c8a63230}.mascot-card-portrait{width:100px;height:150px;border-radius:10px;background-image:url('./veyro-black-card.webp');background-size:contain;background-position:center;background-color:#101519;box-shadow:none}
+.mascot-card-portrait[data-mascot=blue]{background-image:url('./veyro-blue-card.webp')}
+.mascot-card-portrait[data-mascot=green]{background-image:url('./veyro-green-card.webp')}
+.mascot-card-portrait[data-mascot=red]{background-image:url('./veyro-red-card.webp')}.mascot-option strong{font-size:13px}.mascot-option small{color:#a7afb2;font-size:10px;line-height:1.35}
+.mascot-preview{display:flex;align-items:center;gap:15px;margin:17px 0 12px;padding:12px;border:1px solid #ffffff13;border-radius:14px;background:#ffffff05}.mascot-preview-portrait{width:78px;height:78px;border-radius:13px;background-size:cover}.mascot-preview h3{margin:5px 0;font-weight:500;font-size:18px}.mascot-preview p{margin:0;color:#c0c4c5;font-size:13px;line-height:1.5}.mascot-confirm{width:100%;border:0;border-radius:12px;background:linear-gradient(120deg,#f3d36a,#c79931);color:#17140b;padding:13px 16px;font-weight:700;font-size:14px}
 body[data-mascot-state=idle] .mascot-hero{animation:mascot-breathe 4s ease-in-out infinite}
 body[data-mascot-state=attention] .mascot-hero{transform:translateY(-2px) scale(1.05);filter:brightness(1.12)}
 body[data-mascot-state=thinking] .mascot-hero{filter:brightness(1.3) drop-shadow(0 0 8px #e5c34b);animation:mascot-think 1.1s ease-in-out infinite alternate}
 body[data-mascot-state=speaking] .mascot-hero{animation:mascot-speak .55s ease-in-out infinite alternate}
 body[data-mascot-state=reading] .mascot-hero{animation:mascot-speak .8s ease-in-out infinite alternate;filter:brightness(1.2)}
 body[data-mascot-state=done] .mascot-hero{filter:brightness(1.12) drop-shadow(0 0 9px #e7c448)}
-@keyframes mascot-breathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
-@keyframes mascot-think{from{transform:scale(1)}to{transform:scale(1.045)}}
-@keyframes mascot-speak{from{transform:translateY(0)}to{transform:translateY(-2px) scale(1.025)}}
+@keyframes mascot-breathe{0%,100%{transform:translateY(0) rotate(-.4deg)}45%{transform:translateY(-1.5px) rotate(.4deg)}}
+@keyframes mascot-think{from{transform:translateY(0) rotate(-2deg)}to{transform:translateY(-1px) rotate(1deg)}}
+@keyframes mascot-speak{0%,100%{transform:translateY(0) rotate(-.5deg)}40%{transform:translateY(-1px) rotate(.6deg)}70%{transform:translateY(-.3px) rotate(0)}}
 @media(max-width:899px){.mascot-chat-bar{gap:8px;margin-bottom:5px;padding:6px 8px;border-radius:13px}.mascot-hero{width:44px;height:44px}.mascot-change,.voice-toggle{padding:8px 9px;font-size:10px}.mascot-options{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.mascot-option{padding:9px 6px 10px}.mascot-card-portrait{width:88px;height:132px}.mascot-picker{padding:17px}.mascot-preview-portrait{width:65px;height:65px}}
 @media(max-width:420px){.mascot-chat-bar{gap:6px}.mascot-change,.voice-toggle{padding:7px 6px;font-size:9px}.mascot-chat-info strong{font-size:11px}.mascot-chat-info span{font-size:10px}.mascot-hero{width:39px;height:39px}.mascot-picker .panel-head h2{font-size:20px}.mascot-card-portrait{width:78px;height:117px}.mascot-preview{gap:10px}.mascot-preview p{font-size:12px}}
 @media(prefers-reduced-motion:reduce){.mascot-portrait,.mascot-option{transition:none!important;animation:none!important}body[data-mascot-state] .mascot-hero{animation:none!important;transform:none!important}}
 .voice-profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:13px 0}.voice-profile-card{min-width:0;padding:13px;border:1px solid #ffffff20;border-radius:13px;background:#111517}.voice-profile-card.selected{border-color:#dfbf58;box-shadow:0 0 18px #d5aa3020}.voice-card-heading{display:flex;align-items:center;justify-content:space-between;gap:7px}.voice-card-heading strong{font-size:15px}.voice-card-heading small{color:#d3c27e}.voice-profile-card p{margin:9px 0;color:#b8c0c1;font-size:12px}.voice-profile-card code{display:block;overflow-wrap:anywhere;color:#8eb5d6;font-size:10px;margin:5px 0 10px}.voice-profile-card>button{display:block;width:100%;margin-top:7px}.voice-select,.voice-demo{padding:9px 10px;border:1px solid #4b493d;border-radius:9px;background:#191b1b;color:#eee;font-size:12px}.voice-profile-card.selected .voice-select{border-color:#d0ad41;color:#f1db8b}.voice-provider-status{padding:10px 12px;border:1px solid #ffffff19;border-radius:10px;background:#ffffff06;color:#bbc3c6;font-size:12px;line-height:1.5}.voice-demo-status{min-height:20px;margin:8px 0;color:#d5c382;font-size:12px}.voice-setting{display:flex;flex-direction:column;gap:9px;margin:14px 0;color:#ddd;font-size:13px}.voice-setting output{float:right;color:#e8cf77}.voice-setting input[type=range]{width:100%;height:24px;padding:0;margin:0;accent-color:#e7c557;background:transparent}.voice-setting select{margin:0!important}.voice-auto-setting{display:flex!important;flex-direction:row;align-items:center;gap:10px;padding:11px;border:1px solid #ffffff20;border-radius:10px;color:#e5e5df;font-size:13px}.voice-auto-setting input[type=checkbox]{display:block!important;width:19px!important;height:19px!important;margin:0!important;accent-color:#e5c24f}.voice-privacy{margin:12px 0;color:#999f9f;font-size:11px;line-height:1.55}.assistant-author .message-speech{margin-left:0}.assistant-author{flex-wrap:wrap}.assistant-author .message-speech{padding:6px 8px}
 @media(max-width:600px){.voice-profile-grid{grid-template-columns:1fr}.voice-profile-card{padding:11px}.voice-card-heading strong{font-size:14px}.assistant-author{gap:6px}.assistant-author .message-author{font-size:10px}.assistant-author .message-speech{font-size:10px}}
+
+
+/*
+ * Veyro IA · acabamento espacial da conversa (design v1).
+ * Para trocar a paisagem pela arte oficial dos planetas, altere somente
+ * --veyro-chat-background-image após incorporar o arquivo ao build.
+ */
+:root {
+  --veyro-chat-gold: #d0b169;
+  --veyro-chat-gold-soft: rgba(208, 177, 105, .58);
+  --veyro-chat-background-image: url('/cinematic.webp');
+}
+
+/* O mesmo fundo permanece visível ao entrar no histórico do chat. */
+body[data-mode="chat"] .welcome-backdrop {
+  background-image:
+    linear-gradient(180deg, rgba(5, 8, 12, .54), rgba(4, 7, 11, .22) 42%, rgba(3, 6, 9, .85)),
+    var(--veyro-chat-background-image);
+  background-position: center 43%;
+  background-size: cover;
+  opacity: .94;
+  filter: brightness(.88) saturate(.86);
+  transition: opacity .45s ease, filter .55s ease;
+}
+body[data-mode="chat"]:not(.welcome-state) .welcome-backdrop {
+  opacity: .55;
+  filter: brightness(.45) saturate(.75);
+}
+body[data-mode="chat"].welcome-state.welcome-intro .welcome-backdrop,
+body[data-mode="chat"].welcome-state.welcome-settled .welcome-backdrop {
+  opacity: 1;
+}
+
+/* Acabamento dourado com alto contraste para as mensagens. */
+body[data-mode="chat"] .chat-message.assistant .chat-message-content {
+  color: #f5f6f7;
+  background: rgba(10, 13, 17, .92);
+  border: 1px solid var(--veyro-chat-gold-soft);
+  border-radius: 18px;
+  padding: 15px 18px;
+  box-shadow: 0 10px 26px rgba(0,0,0,.23), inset 0 1px 0 rgba(255,236,181,.05);
+}
+body[data-mode="chat"] .chat-message.user .chat-message-content {
+  color: #fff;
+  background: rgba(16, 19, 23, .94);
+  border-color: var(--veyro-chat-gold-soft);
+  box-shadow: 0 8px 20px rgba(0,0,0,.2);
+}
+body[data-mode="chat"] .chat-message.notice .chat-message-content {
+  background: rgba(13,16,19,.92);
+  border-color: rgba(208,177,105,.45);
+}
+body[data-mode="chat"] .message-body {
+  color: #f4f4f5;
+}
+
+/* Caixa de texto, círculo preto, seta branca e contornos dourados. */
+body[data-mode="chat"] .composer {
+  border: 1px solid var(--veyro-chat-gold);
+  background: rgba(10, 13, 17, .96);
+  box-shadow: 0 0 0 1px rgba(208,177,105,.10), 0 10px 32px rgba(0,0,0,.42);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+body[data-mode="chat"] .composer:focus-within {
+  border-color: #f0d78c;
+  box-shadow: 0 0 0 2px rgba(208,177,105,.18), 0 12px 32px rgba(0,0,0,.5);
+}
+body[data-mode="chat"] .send {
+  background: #060709;
+  border: 1.5px solid var(--veyro-chat-gold);
+  border-radius: 50%;
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(255,237,178,.07);
+  transition: background .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+body[data-mode="chat"] .send svg {
+  stroke: #fff;
+  filter: none;
+}
+body[data-mode="chat"] .send:hover:not(:disabled),
+body[data-mode="chat"] .send:focus-visible {
+  background: #161710;
+  border-color: #f0d78c;
+  box-shadow: 0 0 0 3px rgba(208,177,105,.14);
+}
+body[data-mode="chat"] .send:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+@media(prefers-reduced-motion:reduce) {
+  body[data-mode="chat"] .welcome-backdrop,
+  body[data-mode="chat"] .composer,
+  body[data-mode="chat"] .send { transition: none; }
+}
+
+/* Spoken reply visibly reacts to actual browser/remote audio state. Static avatar
+   pulses only; true skeletal lip sync requires a future rigged 3D model. */
+body[data-mascot-state=reading] .mascot-hero{position:relative;isolation:isolate}
+body[data-mascot-state=reading] .mascot-hero::after{
+ content:'';position:absolute;left:33%;bottom:7%;width:34%;height:6%;border-radius:60%;
+ background:rgba(247,214,136,.75);box-shadow:0 0 6px #e7c37a;
+ animation:veyro-mouth-wave .32s ease-in-out infinite alternate
+}
+@keyframes veyro-mouth-wave{from{transform:scaleY(.55);opacity:.3}to{transform:scaleY(1.65);opacity:1}}
+body[data-speech-boundary=true][data-mascot-state=reading] .mascot-hero::after{animation:none;transform:scaleY(var(--mascot-mouth,.35));transition:transform 90ms ease-out;opacity:.85}
+body[data-mascot-state=reading] .mascot-hero{animation-duration:3.8s;animation-direction:normal}
+#mascot-greeting-demo{margin:10px 0 0;padding:8px 10px}
+body[data-voice-performance=economico] .mascot-hero::after{display:none}
+body[data-voice-performance=economico] .mascot-hero,
+body[data-voice-performance=economico] .mascot-hero::after{animation:none!important}
+body[data-voice-performance=maximo][data-mascot-state=reading] .mascot-hero{filter:drop-shadow(0 0 13px #dfba78)}
+@media(prefers-reduced-motion:reduce){body[data-mascot-state=reading] .mascot-hero::after{display:none;animation:none!important;transition:none!important}}
+@media(max-width:420px){#mascot-voice-settings{font-size:15px;min-width:31px;padding:7px 5px}}
+
+/* Articulated full-body robot occupies the former photo slot. */
+.mascot-chat-bar{flex-wrap:wrap}
+.mascot-hero.mascot-3d-ready{width:128px;height:164px;flex:none;background:none!important;border-radius:16px;box-shadow:none!important;animation:none!important;transform:none!important;filter:none!important;overflow:hidden}
+.mascot-hero.mascot-3d-ready canvas{display:block;width:100%;height:100%}
+body[data-mascot-state] .mascot-hero.mascot-3d-ready::after{display:none!important}
+.mascot-chat-info{min-width:130px}
+#mascot-dance{min-height:36px}
+@media(max-width:899px){.mascot-hero.mascot-3d-ready{width:100px;height:132px}.mascot-chat-info{min-width:110px}}
+@media(max-width:420px){.mascot-hero.mascot-3d-ready{width:88px;height:116px}.mascot-chat-info{min-width:100px}}

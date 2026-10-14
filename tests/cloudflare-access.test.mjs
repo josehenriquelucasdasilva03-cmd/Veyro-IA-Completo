@@ -15,3 +15,13 @@ test('recusa chamadas sem identidade verificada pelo Access',async()=>{
  assert.equal(await cloudflareAccessUser({access:{getIdentity:async()=>{throw Error('bad')}}}),null);
 });
 
+
+test('mesmo email confirmado compartilha identidade; emails diferentes são isolados',async()=>{
+ const ctx=email=>({access:{getIdentity:async()=>({email})}});
+ const google=await cloudflareAccessUser(ctx('User@Example.org'));
+ const github=await cloudflareAccessUser(ctx(' user@example.org '));
+ const other=await cloudflareAccessUser(ctx('other@example.org'));
+ assert.equal(google,github);
+ assert.notEqual(google,other);
+ assert.equal(await cloudflareAccessUser(ctx('')),null);
+});

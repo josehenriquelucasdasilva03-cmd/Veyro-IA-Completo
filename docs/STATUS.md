@@ -1,5 +1,26 @@
 # Situação da base entregue
 
+## Robô de corpo inteiro em 3D — 14/10/2026
+
+- A área do mascote no topo do chat recebe um modelo procedural Three.js com cabeça, tronco, braços e pernas articulados. A foto permanece somente como alternativa quando WebGL falha; os retratos no histórico continuam leves, com um único renderer para o personagem principal.
+- Quatro temas: Black, Blue, Green e Red. Movimentos distintos para espera, atenção, pensamento, resposta/voz e conclusão. O botão Dançar aciona seis segundos de dança quando o robô está ocioso; uma resposta em andamento tem prioridade.
+- A boca reage aos eventos de palavra quando disponíveis; em outros mecanismos de áudio usa movimento aproximado durante a reprodução. Não representa sincronização fonética nem um modelo importado idêntico às ilustrações.
+- FPS limitado a 25, pixel ratio limitado a 1,5, pausa fora da área visível/aba oculta e pose estática no modo econômico ou com redução de movimento. Geometrias, materiais e renderer são liberados ao sair; falha WebGL volta ao retrato.
+- Build local e suíte de 123 testes passaram, incluindo cores, articulação, estados, redução de movimento e assets dos dois builds. Renderização WebGL real e qualidade visual no notebook ainda não verificadas: o ambiente não possui Chromium instalado. Nenhuma publicação nesta etapa.
+
+## Falas e movimentos naturais — 14/10/2026
+
+- Apresentações mais conversacionais para Black, Blue, Green e Red, com botão para ouvir no seletor. Perfis do navegador mantêm o tom-base da voz e ritmos discretos, evitando alteração grave/aguda artificial por padrão.
+- Seleção automática prefere vozes Natural/Neural/Online do idioma, priorizando pt-BR. A escolha manual é preservada quando compatível. O navegador pode usar processamento remoto; não há garantia de síntese offline.
+- Leitura conserva parágrafos e usa frases de até 300 caracteres, evitando cortes em dois-pontos e ponto-e-vírgula. Movimentos de cabeça ficam lentos e discretos; eventos de palavra guiam a reação visual quando o navegador os fornece. Sem esses eventos, a animação é aproximada, sem sincronização fonética.
+- Modo econômico e redução de movimento desativam a reação de boca. Áudio pausado, parado ou concluído encerra a reação. Não houve substituição dos modelos TTS nem ativação de serviço pago.
+
+## Correções de estabilidade — 14/10/2026
+
+- `npm test` prepara os bundles do servidor e da prévia estática antes dos testes. O teste Netlify somente lê a saída pronta; não remove/cria arquivos enquanto outros testes os verificam.
+- Pedidos Qwen aguardando a fila da GPU podem ser cancelados pelo sinal do cliente ou pelo identificador do pedido, sem esperar a inferência anterior. O timeout também inclui a espera na fila. Uma solicitação cancelada não chama o provedor nem bloqueia a próxima.
+- Correções preparadas em branch de revisão, sem publicação ou alteração dos serviços de produção. A validação usa provedores simulados; desempenho da GPU e voz reais continuam pendentes.
+
 Base funcional: versão 7 da Veyro IA. Esta cópia reorganiza os fontes e adiciona ambiente local; nenhuma alteração desta revisão foi publicada em produção.
 
 ## Utilizável sem provedores

@@ -5,3 +5,88 @@ input,select{font:inherit;color:inherit}button:disabled{opacity:.5}.nav-button,.
 
 .project-settings{display:grid;gap:9px;padding-top:18px}.project-settings label{font-size:13px;color:#aaa}.project-settings input,.project-settings textarea{font:inherit;font-size:16px;color:#eee;background:#151515;border:1px solid #444;border-radius:9px;padding:11px;width:100%;resize:vertical;margin-bottom:8px}
 .studio-view{max-width:740px;margin:24px auto}.studio-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:15px 0}.studio-grid label,.studio-label{font-size:14px;color:#c8c8c8;display:block}.studio-grid input,.studio-grid select,.studio-label select,.studio-label textarea{display:block;width:100%;min-width:0;background:#141414;color:#fff;border:1px solid #444;border-radius:10px;padding:11px;font:inherit;font-size:16px;margin:8px 0;resize:vertical}.studio-grid .text-button{align-self:end;margin:8px 0;min-height:44px}.studio-status{font-size:14px;line-height:1.6;border-left:2px solid #9d8928;padding:6px 14px;color:#c3bea7}.subheading{font-size:18px;font-weight:500;margin:28px 0 14px}.photo-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.photo-card{background:#111;border:1px solid #3c3c3c;border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:10px}.photo-card img{width:100%;height:auto;max-height:300px;object-fit:contain;border-radius:8px}.photo-card p{font-size:14px;overflow-wrap:anywhere;margin:0}.photo-card small{font-size:12px;color:#aaa}.photo-card a{color:#ffe784;font-size:14px}.editor-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:18px 0}.editor-toolbar span{margin-left:auto;color:#d2be69;font-size:13px}#timeline{display:grid;gap:15px}#clip-preview video,#export-result video,#export-canvas{display:block;max-width:100%;width:100%;max-height:350px;border:1px solid #444;border-radius:12px;margin:18px 0;background:#000}.export-source{position:fixed;width:2px;height:2px;opacity:.01;pointer-events:none;left:0;bottom:0}.export-panel{border-top:1px solid #333;padding-top:10px;margin-top:22px}.export-panel p{line-height:1.6;font-size:13px}#export-result a{display:inline-block;text-decoration:none;color:var(--yellow);margin:8px 0 20px}.tools{scrollbar-width:thin}.tools button{flex-shrink:0}@media(max-width:390px){.studio-grid{gap:10px}.photo-gallery{grid-template-columns:1fr}.studio-view h1{font-size:23px}}
+
+
+/* Login fallback for a lost Cloudflare Access browser session. */
+.auth-gate[hidden]{display:none}
+.auth-gate{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:24px;background:#07090e;color:#f8fafc}
+.auth-panel{width:min(100%,450px);padding:clamp(24px,5vw,42px);background:#11151e;border:1px solid #3b4452;border-radius:20px;text-align:center;box-shadow:0 22px 70px #000a}
+.auth-panel h1{font-size:clamp(26px,4vw,34px);margin:0 0 18px}
+.auth-panel p{line-height:1.5;color:#c8cdd8}
+.auth-login-link{display:block;margin:25px auto 16px;padding:15px;border-radius:10px;color:#111;background:#f1ce59;font-weight:700;text-decoration:none}
+.auth-login-link:focus-visible{outline:3px solid #fff;outline-offset:4px}
+.auth-note{font-size:13px}
+
+/* Visible safety notice only while running a static frontend test (no real chat backend). */
+.veyro-preview-banner{margin:0 0 8px;padding:8px 12px;border:1px solid #d7b66d70;
+ border-radius:10px;background:#12141cf2;color:#f2dba6;font:500 12px/1.45 system-ui,sans-serif;
+ text-align:center;max-width:100%;box-sizing:border-box}
+
+/* Secure sign-in only on GitHub Pages; password never entered in the chat itself. */
+.veyro-qwen-connect{display:block;margin:10px auto 5px;border:1px solid #f1c870;border-radius:999px;
+ padding:10px 18px;background:#090f1b;color:#f5deb0;font:600 13px system-ui;cursor:pointer}
+.veyro-qwen-status{font-size:12px;line-height:1.45;color:#e7d8b9;margin:7px 0 0}
+.veyro-qwen-login{border:1px solid #bfa162;border-radius:18px;background:#0a101c;color:#fff;
+ padding:20px;width:min(420px,calc(100vw - 44px));max-height:90vh;box-sizing:border-box}
+.veyro-qwen-login::backdrop{background:#010309e8;backdrop-filter:blur(5px)}
+.veyro-qwen-login form{display:grid;gap:12px}
+.veyro-qwen-login h2{font:600 22px system-ui;margin:0}
+.veyro-qwen-login p{font:13px/1.5 system-ui;margin:0;color:#ddd}
+.veyro-qwen-login input{width:100%;border:1px solid #ab955e;border-radius:10px;box-sizing:border-box;
+ padding:13px 12px;background:#141b28;color:#fff;font-size:16px}
+.veyro-qwen-login button{border:1px solid #bda165;border-radius:10px;padding:11px 14px;
+ background:#1c2431;color:#fff;font:600 13px system-ui;cursor:pointer}
+.veyro-qwen-login button[type=submit]{background:#a07b38;color:#fff}
+.veyro-qwen-auth-message{color:#f6c67c!important}
+
+/* Cosmic login appears after the intro, on the authenticated GitHub Pages bridge only. */
+.veyro-qwen-gate[hidden]{display:none!important}
+.veyro-qwen-gate{position:fixed;inset:0;z-index:9998;isolation:isolate;overflow:auto;
+ display:grid;place-items:center;padding:24px max(18px,env(safe-area-inset-right))
+ max(24px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left));
+ box-sizing:border-box;background:radial-gradient(ellipse at 32% 10%,#233a54 0,#0a1020 30%,#020408 75%);color:#fff}
+.veyro-qwen-gate-stars{position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.6;
+ background-image:radial-gradient(circle at 14% 23%,#c7b88a 0 1px,transparent 2px),
+ radial-gradient(circle at 76% 12%,#d4e6ff 0 1.5px,transparent 2px),
+ radial-gradient(circle at 88% 74%,#ccc 0 1px,transparent 2px),
+ radial-gradient(circle at 28% 87%,#c9b578 0 1px,transparent 2px);
+ background-size:240px 240px}
+.veyro-qwen-gate-card{width:min(100%,430px);box-sizing:border-box;padding:clamp(24px,6vw,38px);
+ border:1px solid #c6a3637a;border-radius:25px;background:linear-gradient(160deg,#101621f5,#080c15fc);
+ box-shadow:0 22px 70px #000b,0 0 75px #bd914b16;text-align:left}
+.veyro-qwen-brand{display:block;text-align:center;font-size:23px;font-weight:300;letter-spacing:.23em;color:#fff}
+.veyro-qwen-brand em{font-style:normal;color:#e4bf78}
+.veyro-qwen-eyebrow{display:block;margin-top:23px;font-size:11px;letter-spacing:.22em;color:#d4ae68}
+.veyro-qwen-gate h1{font:600 clamp(23px,5vw,29px)/1.2 system-ui;margin:12px 0 8px}
+.veyro-qwen-gate p{font:14px/1.6 system-ui;color:#d6d9e2;margin:0 0 20px}
+.veyro-qwen-gate form{display:grid;gap:9px}
+.veyro-qwen-gate label{font:600 13px system-ui;color:#e7dfd0;margin-top:5px}
+.veyro-qwen-gate input{display:block;box-sizing:border-box;width:100%;padding:13px 14px;
+ border:1px solid #bda26c80;border-radius:12px;background:#101827;color:#fff;font:16px system-ui;outline:none}
+.veyro-qwen-gate input:focus{border-color:#e8c57c;box-shadow:0 0 0 3px #dbba6a22}
+.veyro-qwen-gate button[type=submit]{padding:15px;border:1px solid #f0d294;border-radius:12px;
+ background:linear-gradient(135deg,#b88a3e,#e1bc76);color:#17100b;font:700 15px system-ui;
+ margin-top:10px;cursor:pointer}
+.veyro-qwen-gate button:disabled{opacity:.5;cursor:wait}
+.veyro-qwen-gate .veyro-qwen-error{color:#f6bda7;font:13px/1.5 system-ui;min-height:0;margin:0}
+.veyro-qwen-gate .veyro-qwen-privacy{font:12px/1.5 system-ui;color:#bcb9b0;margin:22px 0 0;
+ display:flex;align-items:flex-start;gap:8px}
+.veyro-qwen-gate .veyro-qwen-privacy svg{width:17px;height:17px;flex:none;fill:none;
+ stroke:#e0be78;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round}
+.veyro-qwen-logout{display:block;padding:10px 14px;border:1px solid #be9c5b70;
+ border-radius:11px;color:#f1dba9;background:#101726;font:600 13px system-ui}
+.veyro-qwen-logout[hidden]{display:none!important}
+.veyro-qwen-locked .screen,.veyro-qwen-locked #sidebar{pointer-events:none}
+
+/* Persistent history entries in the existing sidebar, per logged-in account. */
+.veyro-history-row{display:flex;align-items:center;gap:5px;max-width:100%;padding:3px 0}
+.veyro-history-choice{min-width:0;flex:1;text-align:left;color:#e5e5e5;background:transparent;border:1px solid transparent;
+ border-radius:8px;padding:9px;font:13px system-ui;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.veyro-history-choice[aria-current=true]{border-color:#c3a15b7d;background:#1c1a16}
+.veyro-history-delete{flex:none;border:1px solid #75654c70;border-radius:8px;color:#ded0b5;
+ background:transparent;padding:8px 12px;font:14px system-ui}
+.veyro-memory-list{display:grid;gap:8px;margin:12px 0}
+.veyro-memory-entry{display:flex;justify-content:space-between;gap:10px;align-items:center;
+ padding:10px 12px;border:1px solid #84704e6e;border-radius:12px;background:#15191c}
+.veyro-memory-entry p{margin:0;flex:1;font:13px/1.5 system-ui;overflow-wrap:anywhere}
+.veyro-memory-entry button{flex:none}

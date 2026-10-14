@@ -6,16 +6,68 @@
   <meta name="description" content="Veyro IA: escreva uma ideia, adicione referências e planeje as cenas do seu vídeo.">
   <title>Veyro IA</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23060606'/%3E%3Cpath d='M25 17 47 32 25 47Z' fill='%23ffd600'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="boot-intro.css">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="cinematic.css">
+  <link rel="stylesheet" href="video.css">
   <link rel="stylesheet" href="cosmos.css">
+  <link rel="stylesheet" href="planetarium-theme.css">
+  <script src="boot-intro.js" defer></script>
+  <script src="qwen-pages.js" defer></script>
   <script src="studio.js" defer></script>
+  <script src="voice-manager.js" defer></script>
   <script src="chat.js" defer></script>
   <script src="knowledge.js" defer></script>
   <script src="app.js" defer></script>
+  <script src="video.js" defer></script>
   <script src="cosmos-loader.js" defer></script>
+  <script src="mascot3d-loader.js" defer></script>
 </head>
 <body data-mode="chat">
+  <!-- Entrada autônoma: aparece antes do backend, inclusive em prévias estáticas. -->
+  <div id="veyro-intro" class="veyro-intro" role="region" aria-label="Introdução cinematográfica Veyro IA">
+    <div class="veyro-entry-stars" aria-hidden="true"></div>
+    <div class="veyro-entry-scene" aria-hidden="true"></div>
+    <div class="veyro-entry-orbits" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="veyro-entry-planet veyro-entry-earth" aria-hidden="true"></div>
+    <div class="veyro-entry-planet veyro-entry-jupiter" aria-hidden="true"></div>
+    <div class="veyro-entry-planet veyro-entry-saturn" aria-hidden="true"></div>
+    <div class="veyro-entry-copy">
+      <span class="veyro-entry-eyebrow">UMA NOVA DIMENSÃO DA INTELIGÊNCIA</span>
+      <h1><span>VEYRO</span> <strong>IA</strong></h1>
+      <p>Sua criatividade em outra órbita.</p>
+    </div>
+    <button class="veyro-entry-skip" type="button">Pular introdução</button>
+    <div class="veyro-entry-progress" aria-hidden="true"><span></span></div>
+  </div>
+  <!-- Login do Qwen existe somente na publicação autenticada do GitHub Pages.
+       A introdução termina primeiro. O site não armazena senhas nem tokens. -->
+  <section id="veyro-qwen-gate" class="veyro-qwen-gate" aria-labelledby="veyro-qwen-login-title" hidden>
+    <div class="veyro-qwen-gate-stars" aria-hidden="true"></div>
+    <div class="veyro-qwen-gate-card">
+      <span class="veyro-qwen-brand">VEYRO <em>IA</em></span>
+      <span class="veyro-qwen-eyebrow">ACESSO PROTEGIDO</span>
+      <h1 id="veyro-qwen-login-title">Entre na sua conta</h1>
+      <p>Faça login para conectar ao Qwen e começar a conversar.</p>
+      <form id="veyro-qwen-login-form" autocomplete="on">
+        <label for="veyro-qwen-username">Usuário</label>
+        <input id="veyro-qwen-username" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required maxlength="32" placeholder="Seu usuário Veyro">
+        <label for="veyro-qwen-password">Senha</label>
+        <input id="veyro-qwen-password" name="password" type="password" autocomplete="current-password" required placeholder="Sua senha">
+        <p id="veyro-qwen-auth-message" class="veyro-qwen-error" role="alert" aria-live="polite"></p>
+        <button id="veyro-qwen-login-submit" type="submit">Entrar e conectar ao Qwen</button>
+      </form>
+      <p class="veyro-qwen-privacy"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 10V7a7 7 0 0 1 14 0v3M5 10h14v11H5z"/></svg> Seu acesso é validado no Cloudflare. A senha não é salva no GitHub.</p>
+    </div>
+  </section>
+  <section id="auth-gate" class="auth-gate" aria-labelledby="auth-title" hidden>
+    <div class="auth-panel">
+      <h1 id="auth-title">Entrar no Veyro IA</h1>
+      <p>Sua sessão não está autenticada. Reabra a página protegida para entrar.</p>
+      <a class="auth-login-link" href="/">Reabrir login seguro</a>
+      <p class="auth-note">Google e GitHub aparecem na tela do Cloudflare Access apenas quando configurados. Prévias estáticas não oferecem login.</p>
+    </div>
+  </section>
   <svg class="svg-defs" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs>
   <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></symbol>
   <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m3 17 6-6 4 4 3-3 5 5"/><circle cx="16" cy="7" r="1"/></symbol>
@@ -27,7 +79,7 @@
   <symbol id="i-idea" viewBox="0 0 24 24"><path d="M8 17v-2a7 7 0 1 1 8 0v2M8 18h8m-7 3h6"/></symbol>
   <symbol id="i-magic" viewBox="0 0 24 24"><path d="m4 20 12-12 4 4L8 24zM17 2v3m4 2h-3M6 3l1 3m-6 4h3"/></symbol>
   <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2m-7 9v3m-4 0h8"/></symbol>
-  <symbol id="i-send" viewBox="0 0 24 24"><path d="m3 3 18 9-18 9 3-9-3-9zm3 9h15"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M12 19V5m-6 6 6-6 6 6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   </defs></svg>
   <button id="sidebar-toggle" class="menu-toggle" aria-label="Abrir menu" aria-controls="sidebar" aria-expanded="true"><svg><use href="#i-menu"/></svg></button>
   <button id="sidebar-overlay" class="sidebar-overlay" aria-label="Fechar menu" hidden></button>
@@ -67,7 +119,7 @@
         <div id="timeline"></div><div id="clip-preview"></div>
         <div class="export-panel"><button id="editor-export" class="text-button">Exportar montagem</button><button id="export-cancel" class="small-button" hidden>Cancelar exportação</button><p class="pending-note">Exportação experimental no navegador, em tempo real. Mantenha a tela aberta. A fluidez e a precisão dos cortes dependem do celular; o arquivo original é preservado.</p><p id="export-status" role="status"></p><canvas id="export-canvas" hidden></canvas><div id="export-result"></div></div>
       </section>
-      <section id="chat-view"><div class="mascot-chat-bar" aria-label="Mascote selecionado"><div class="mascot-portrait mascot-hero" data-mascot="black" role="img" aria-label="Veyro Black"></div><div class="mascot-chat-info"><strong id="mascot-current-name">Veyro Black</strong><span id="mascot-status" role="status">Pronto para conversar</span></div><button id="mascot-open" class="mascot-change" type="button" aria-label="Escolher outro mascote Veyro">Trocar</button><button id="voice-toggle" class="voice-toggle" type="button" aria-pressed="false" aria-label="Ativar leitura automática" title="Ativar leitura automática">◖)) Auto off</button></div><div id="welcome" class="welcome"><div class="welcome-title"><svg class="sun-ring" viewBox="0 0 300 300" aria-hidden="true"><path class="sun-arc sun-arc-top" pathLength="1" d="M 45 112 A 132 132 0 0 1 255 112"/><path class="sun-arc sun-arc-bottom" pathLength="1" d="M 255 188 A 132 132 0 0 1 45 188"/></svg><h1><span class="logo-part logo-veyro">VEYRO</span> <span class="logo-part logo-ia"><em>IA</em></span></h1><span class="veyro-cinematic-motto" aria-label="Inteligência, presença e futuro">INTELIGÊNCIA <span aria-hidden="true">·</span> PRESENÇA <span aria-hidden="true">·</span> FUTURO</span><p>Como posso te ajudar hoje?</p></div><div class="suggestions" aria-label="Sugestões para começar"><button data-suggestion="Me dê algumas ideias para um vídeo curto."><svg><use href="#i-idea"/></svg><span>Me dê<br>algumas ideias</span></button><button data-suggestion="Quero criar uma imagem de "><svg><use href="#i-image"/></svg><span>Criar<br>uma imagem</span></button><button data-action="plan"><svg><use href="#i-video"/></svg><span>Planejar<br>um vídeo</span></button><button data-action="edit"><svg><use href="#i-magic"/></svg><span>Editar<br>um vídeo existente</span></button><button data-suggestion="Quero tirar uma dúvida sobre "><svg><use href="#i-chat"/></svg><span>Tirar<br>dúvidas</span></button></div></div><div id="chat-log" role="log" aria-label="Conversa" aria-live="polite"></div><div id="proposals"></div></section>
+      <section id="chat-view"><div class="mascot-chat-bar" aria-label="Mascote selecionado"><div class="mascot-portrait mascot-hero" data-mascot="black" role="img" aria-label="Veyro Black"></div><div class="mascot-chat-info"><strong id="mascot-current-name">Veyro Black</strong><span id="mascot-status" role="status">Pronto para conversar</span></div><button id="mascot-dance" class="mascot-change" type="button" aria-label="Fazer o robô dançar">Dançar</button><button id="mascot-open" class="mascot-change" type="button" aria-label="Escolher outro mascote Veyro">Trocar</button><button id="voice-toggle" class="voice-toggle" type="button" aria-pressed="false" aria-label="Ativar leitura automática" title="Ativar leitura automática">◖)) Auto off</button><button id="mascot-voice-settings" class="mascot-change" type="button" aria-label="Configurar vozes e animações" title="Configurar voz">⚙</button></div><div id="welcome" class="welcome"><div class="welcome-title"><svg class="sun-ring" viewBox="0 0 300 300" aria-hidden="true"><path class="sun-arc sun-arc-top" pathLength="1" d="M 45 112 A 132 132 0 0 1 255 112"/><path class="sun-arc sun-arc-bottom" pathLength="1" d="M 255 188 A 132 132 0 0 1 45 188"/></svg><h1><span class="logo-part logo-veyro">VEYRO</span> <span class="logo-part logo-ia"><em>IA</em></span></h1><span class="veyro-cinematic-motto" aria-label="Inteligência, presença e futuro">INTELIGÊNCIA <span aria-hidden="true">·</span> PRESENÇA <span aria-hidden="true">·</span> FUTURO</span><p>Como posso te ajudar hoje?</p></div><div class="suggestions" aria-label="Sugestões para começar"><button data-suggestion="Me dê algumas ideias para um vídeo curto."><svg><use href="#i-idea"/></svg><span>Me dê<br>algumas ideias</span></button><button data-suggestion="Quero criar uma imagem de "><svg><use href="#i-image"/></svg><span>Criar<br>uma imagem</span></button><button data-action="plan"><svg><use href="#i-video"/></svg><span>Planejar<br>um vídeo</span></button><button data-action="edit"><svg><use href="#i-magic"/></svg><span>Editar<br>um vídeo existente</span></button><button data-suggestion="Quero tirar uma dúvida sobre "><svg><use href="#i-chat"/></svg><span>Tirar<br>dúvidas</span></button></div></div><div id="chat-log" role="log" aria-label="Conversa" aria-live="polite"></div><div id="proposals"></div></section>
       <section class="empty" id="empty">
         <div class="frame" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><rect x="8" y="12" width="32" height="24" rx="5" stroke="currentColor" stroke-width="1.3"/><path d="m21 19 9 5-9 5Z" stroke="currentColor" stroke-width="1.3"/></svg></div>
         <h1>Qual cena você imagina?</h1>
@@ -122,6 +174,6 @@
     <input id="video-input" type="file" accept="video/*" multiple hidden>
   </div>
   <dialog id="panel" aria-labelledby="panel-title"><div class="panel-head"><h2 id="panel-title"></h2><button id="panel-close" type="button" aria-label="Fechar">×</button></div><div id="panel-body"></div></dialog>
-  <dialog id="mascot-picker" class="mascot-picker" aria-labelledby="mascot-picker-title"><div class="panel-head"><h2 id="mascot-picker-title">Escolha seu Veyro</h2><button id="mascot-close" type="button" aria-label="Fechar">×</button></div><p class="mascot-intro">Seu mascote representa visualmente a mesma inteligência Veyro. Sua conversa continua intacta ao trocar de personagem.</p><div class="mascot-options" role="group" aria-label="Mascotes Veyro"><button type="button" class="mascot-option" data-mascot-choice="black" aria-pressed="false"><span class="mascot-portrait mascot-card-portrait" data-mascot="black" role="img" aria-label="Robô preto Veyro Black"></span><strong>Veyro Black</strong><small>Analítico · confiante</small></button><button type="button" class="mascot-option" data-mascot-choice="blue" aria-pressed="false"><span class="mascot-portrait mascot-card-portrait" data-mascot="blue" role="img" aria-label="Robô azul Veyro Blue"></span><strong>Veyro Blue</strong><small>Curioso · tecnológico</small></button><button type="button" class="mascot-option" data-mascot-choice="green" aria-pressed="false"><span class="mascot-portrait mascot-card-portrait" data-mascot="green" role="img" aria-label="Robô verde Veyro Green"></span><strong>Veyro Green</strong><small>Tranquilo · prestativo</small></button><button type="button" class="mascot-option" data-mascot-choice="prime" aria-pressed="false"><span class="mascot-portrait mascot-card-portrait" data-mascot="prime" role="img" aria-label="Robô multicolorido Veyro Prime"></span><strong>Veyro Prime</strong><small>Premium · tecnológico</small></button></div><div class="mascot-preview"><div class="mascot-portrait mascot-preview-portrait" data-mascot="black" role="img" aria-label="Prévia do mascote"></div><div><span class="eyebrow">SEU COMPANHEIRO</span><h3 id="mascot-preview-name">Veyro Black</h3><p id="mascot-greeting">Olá! Estou pronto para conversar com você.</p></div></div><button id="mascot-confirm" class="mascot-confirm" type="button">Conversar com este Veyro</button></dialog>
+  <dialog id="mascot-picker" class="mascot-picker" aria-labelledby="mascot-picker-title"><div class="panel-head"><h2 id="mascot-picker-title">Escolha seu Veyro</h2><button id="mascot-close" type="button" aria-label="Fechar">×</button></div><p class="mascot-intro">Seu mascote representa visualmente a mesma inteligência Veyro. Sua conversa continua intacta ao trocar de personagem.</p><div class="mascot-options" role="group" aria-label="Mascotes Veyro"><button type="button" class="mascot-option" data-mascot-choice="black" aria-pressed="false"><span class="mascot-portrait mascot-card-portrait" data-mascot="black" role="img" aria-label="Robô preto Veyro Black"></span><strong>Veyro Black</strong><small>Analítico · confiante</small></button><button type="button" class="mascot-option" data-mascot-choice="blue" aria-pressed="false"><span class="mascot-portrait mascot-card-portrait" data-mascot="blue" role="img" aria-label="Robô azul Veyro Blue"></span><strong>Veyro Blue</strong><small>Curioso · tecnológico</small></button><button type="button" class="mascot-option" data-mascot-choice="green" aria-pressed="false"><span class="mascot-portrait mascot-card-portrait" data-mascot="green" role="img" aria-label="Robô verde Veyro Green"></span><strong>Veyro Green</strong><small>Tranquilo · prestativo</small></button><button type="button" class="mascot-option" data-mascot-choice="red" aria-pressed="false"><span class="mascot-portrait mascot-card-portrait" data-mascot="red" role="img" aria-label="Robô branco e vermelho Veyro Red"></span><strong>Veyro Red</strong><small>Dinâmico · criativo</small></button></div><div class="mascot-preview"><div class="mascot-portrait mascot-preview-portrait" data-mascot="black" role="img" aria-label="Prévia do mascote"></div><div><span class="eyebrow">SEU COMPANHEIRO</span><h3 id="mascot-preview-name">Veyro Black</h3><p id="mascot-greeting">Olá! Estou pronto para conversar com você.</p></div></div><button id="mascot-confirm" class="mascot-confirm" type="button">Conversar com este Veyro</button></dialog>
 </body>
 </html>

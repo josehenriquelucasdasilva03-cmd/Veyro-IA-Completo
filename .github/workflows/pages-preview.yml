@@ -2,7 +2,14 @@ name: GitHub Pages Veyro Preview
 on:
   push:
     branches: [main]
-    paths: ['.github/workflows/pages-preview.yml']
+    paths:
+      - '.github/workflows/pages-preview.yml'
+      - 'src/frontend/**'
+      - 'scripts/**'
+      - 'public/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tests/**'
   workflow_dispatch:
 permissions:
   contents: read
@@ -19,14 +26,11 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: integration/consolidacao-veyro-chat-20261012
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
           cache: npm
       - run: npm ci
-      # npm test builds both bundles and runs regression checks before publication.
       - run: npm test
       - run: touch dist/site/.nojekyll
       - uses: actions/configure-pages@v5

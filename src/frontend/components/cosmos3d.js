@@ -4,6 +4,7 @@
  */
 import * as THREE from 'three';
 
+/* Orbital movement is deliberately slow: planets remain recognizable in the mockup composition. */
 const bodies=[
   {key:'mercury',orbit:2.5,size:.15,speed:.34,phase:2.6,colors:['#cbbeb0','#777b82','#292d36']},
   {key:'venus',orbit:3.25,size:.25,speed:.25,phase:4.6,colors:['#f5d39c','#c09b6f','#624837']},
@@ -18,34 +19,40 @@ const max=(v,a,b)=>Math.max(a,Math.min(v,b));
 function seeded(seed){let n=seed|0;return ()=>{n=(1664525*n+1013904223)>>>0;return n/4294967296;};}
 function textureFor(body){
   const canvas=document.createElement('canvas');
-  canvas.width=256;canvas.height=128;
+  canvas.width=384;canvas.height=192;
   const ctx=canvas.getContext('2d');
   const rng=seeded(body.key.length*67+body.key.charCodeAt(0));
-  const gradient=ctx.createLinearGradient(0,0,0,128);
+  const gradient=ctx.createLinearGradient(0,0,0,192);
   for(let i=0;i<3;i++)gradient.addColorStop(i/2,body.colors[i]);
-  ctx.fillStyle=gradient;ctx.fillRect(0,0,256,128);
-  if(body.key==='jupiter'||body.key==='saturn'||body.key==='venus'){
-    for(let j=0;j<35;j++){
-      const y=rng()*128;
+  ctx.fillStyle=gradient;ctx.fillRect(0,0,384,192);
+  if(body.key==='jupiter'||body.key==='saturn'||body.key==='venus'||body.key==='core'){
+    for(let j=0;j<55;j++){
+      const y=rng()*192;
       ctx.globalAlpha=.08+rng()*.32;
       ctx.fillStyle=rng()>.5?'#fff3d0':'#503c3b';
-      ctx.fillRect(0,y,256,1+rng()*7);
+      ctx.fillRect(0,y,384,1+rng()*9);
     }
     ctx.globalAlpha=1;
     if(body.key==='jupiter'){
-      ctx.fillStyle='#b86c554f';ctx.beginPath();ctx.ellipse(186,80,21,8,-.23,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#b86c554f';ctx.beginPath();ctx.ellipse(270,122,31,12,-.23,0,Math.PI*2);ctx.fill();
+    }
+    if(body.key==='core'){
+      for(let i=0;i<60;i++){
+        ctx.fillStyle=i%3===0?'#ca935321':'#080f1955';
+        ctx.beginPath();ctx.ellipse(rng()*384,rng()*192,3+rng()*17,1+rng()*5,rng()*3,0,Math.PI*2);ctx.fill();
+      }
     }
   }else if(body.key==='earth'){
     for(let i=0;i<17;i++){
-      let x=rng()*260,y=rng()*130;
+      let x=rng()*384,y=rng()*192;
       ctx.fillStyle=i%3===0?'#9fc8a1':'#4b8461';
       ctx.beginPath();ctx.ellipse(x,y,6+rng()*24,3+rng()*10,rng()*3,0,Math.PI*2);ctx.fill();
     }
-    for(let i=0;i<25;i++){ctx.fillStyle='#ffffff18';ctx.fillRect(rng()*256,rng()*128,10+rng()*40,1+rng()*4);}
+    for(let i=0;i<25;i++){ctx.fillStyle='#ffffff18';ctx.fillRect(rng()*384,rng()*192,10+rng()*40,1+rng()*4);}
   }else{
     for(let i=0;i<240;i++){
       ctx.fillStyle=rng()>.5?'#ffffff17':'#14101822';
-      ctx.beginPath();ctx.arc(rng()*256,rng()*128,.5+rng()*3,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.arc(rng()*384,rng()*192,.5+rng()*3,0,Math.PI*2);ctx.fill();
     }
   }
   const texture=new THREE.CanvasTexture(canvas);
@@ -69,7 +76,7 @@ export function mountCosmos(host){
       preserveDrawingBuffer:false,stencil:false
     });
   }catch{ return null; }
-  renderer.setPixelRatio(max(window.devicePixelRatio||1,1,1.5));
+  renderer.setPixelRatio(max(window.devicePixelRatio||1,1,mobile?1.2:1.5));
   renderer.setClearColor(0x000000,0);
   renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.domElement.className='veyro-cosmos-canvas';
@@ -78,19 +85,20 @@ export function mountCosmos(host){
 
   const scene=new THREE.Scene();
   const camera=new THREE.PerspectiveCamera(42,1,.1,90);
-  const ambient=new THREE.AmbientLight(0xc1d8ff,1.0);
-  const sun=new THREE.PointLight(0xffd8a0,55,45,1.45);
-  sun.position.set(-3.6,1.5,8);
+  const ambient=new THREE.AmbientLight(0x8793b7,.65);
+  const sun=new THREE.PointLight(0xffd49a,115,70,1.4);
+  sun.position.set(3.3,5.1,8);
   scene.add(ambient,sun);
   const group=new THREE.Group();scene.add(group);
+  if(mobile)group.scale.setScalar(.78);
   const extraGeometries=[];
   const extraMaterials=[];
   const hologramRings=[];
   // Fine holographic orbital lines: limited geometry for stable mobile performance.
-  for(const [radius,tilt,shade] of [[1.85,.27,0xdab970],[2.38,-.38,0x74a7bc],[3.02,.66,0xd2b270]]){
+  for(const [radius,tilt,shade] of [[3.55,.21,0xdab970],[3.8,-.18,0xd2b270]]){
     const geometry=new THREE.TorusGeometry(radius,.015,4,mobile?80:140);
     const material=new THREE.MeshBasicMaterial({
-      color:shade,transparent:true,opacity:mobile?.36:.49,
+      color:shade,transparent:true,opacity:mobile?.10:.18,
       depthWrite:false,side:THREE.DoubleSide
     });
     const ring=new THREE.Mesh(geometry,material);
@@ -118,8 +126,19 @@ export function mountCosmos(host){
   const coreGeometry=new THREE.SphereGeometry(1.12,mobile?28:48,20);
   const coreMaterial=new THREE.MeshStandardMaterial({color:0x10131b,roughness:.68,metalness:.35});
   const core=new THREE.Mesh(coreGeometry,coreMaterial);
-  core.position.z=-1.6;
+  core.position.set(0,.27,-2.2);
   group.add(core);
+  // Fresnel-like rim, rendered only on the edge to preserve legibility of the title.
+  const atmosphereGeometry=new THREE.SphereGeometry(3.36,mobile?36:64,mobile?24:42);
+  const atmosphereMaterial=new THREE.ShaderMaterial({
+    transparent:true,depthWrite:false,side:THREE.BackSide,blending:THREE.AdditiveBlending,
+    uniforms:{glowColor:{value:new THREE.Color(0xd7a45e)}},
+    vertexShader:'varying vec3 vNormal;varying vec3 vViewDir;void main(){vec4 mv=modelViewMatrix*vec4(position,1.0);vNormal=normalize(normalMatrix*normal);vViewDir=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}',
+    fragmentShader:'uniform vec3 glowColor;varying vec3 vNormal;varying vec3 vViewDir;void main(){float rim=pow(1.0-max(dot(normalize(vNormal),normalize(vViewDir)),0.0),3.0);gl_FragColor=vec4(glowColor,rim*0.26);}'
+  });
+  const atmosphere=new THREE.Mesh(atmosphereGeometry,atmosphereMaterial);
+  atmosphere.position.copy(core.position);
+  group.add(atmosphere);
 
   const goldMaterial=new THREE.LineBasicMaterial({color:0xdab97b,transparent:true,opacity:.54,depthWrite:false});
   const planets=[];
@@ -132,7 +151,8 @@ export function mountCosmos(host){
     }
     const orbitGeometry=new THREE.BufferGeometry().setFromPoints(points);
     extraGeometries.push(orbitGeometry);
-    group.add(new THREE.LineLoop(orbitGeometry,goldMaterial));
+    // Only two faint curves on notebooks, not eight dominant wire orbits.
+    if(!mobile&&(body.key==='jupiter'||body.key==='saturn'))group.add(new THREE.LineLoop(orbitGeometry,goldMaterial));
     const geometry=new THREE.SphereGeometry(body.size,mobile?20:36,mobile?14:22);
     const map=textureFor(body);
     const mat=new THREE.MeshStandardMaterial({map,roughness:.9,metalness:.03});
@@ -149,7 +169,7 @@ export function mountCosmos(host){
       sphere.add(halo);
     }
     if(body.key==='saturn'){
-      const ringGeometry=new THREE.RingGeometry(body.size*1.32,body.size*2.05,80);
+      const ringGeometry=new THREE.RingGeometry(body.size*1.3,body.size*2.04,mobile?60:100);
       const ringMaterial=new THREE.MeshBasicMaterial({color:0xdfc69a,side:THREE.DoubleSide,transparent:true,opacity:.73,depthWrite:false});
       const ring=new THREE.Mesh(ringGeometry,ringMaterial);
       ring.rotation.x=.66;ring.rotation.y=.25; sphere.add(ring);
@@ -167,7 +187,7 @@ export function mountCosmos(host){
     width=w;height=h;
     renderer.setSize(w,h,false);
     camera.aspect=w/h;
-    camera.position.set(0,0,w<650?26:23);
+    camera.position.set(0,0,w<650?25:23);
     camera.fov=w<650?44:42;
     camera.updateProjectionMatrix();
   }
@@ -181,8 +201,9 @@ export function mountCosmos(host){
     for(const {body,sphere} of planets){
       orbitPoint(body.orbit,body.phase+seconds*body.speed,point);
       sphere.position.copy(point);
-      sphere.rotation.y=seconds*.14;
+      sphere.rotation.y=seconds*.055;
     }
+    core.rotation.y=seconds*.025;
     group.rotation.x+=(tiltX-group.rotation.x)*.055;
     group.rotation.y+=(tiltY-group.rotation.y)*.055;
     group.position.x+=((tiltY*.8)-group.position.x)*.04;
@@ -232,7 +253,9 @@ export function mountCosmos(host){
       }
       extraGeometries.forEach(item=>item.dispose());
       extraMaterials.forEach(item=>item.dispose());
-      coreGeometry.dispose();coreMaterial.dispose();goldMaterial.dispose();starsGeometry.dispose();
+      coreGeometry.dispose();coreTexture.dispose();coreMaterial.dispose();
+      atmosphereGeometry.dispose();atmosphereMaterial.dispose();
+      goldMaterial.dispose();starsGeometry.dispose();
       renderer.dispose();renderer.domElement.remove();
     }
   };

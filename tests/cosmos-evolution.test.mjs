@@ -3,12 +3,13 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read=path=>readFileSync(path,'utf8');
 
-test('eight-second cinematic intro keeps existing chat and does not delay message API',()=>{
+test('sixteen-second cinematic intro keeps existing chat and does not delay message API',()=>{
  const chat=read('src/frontend/components/chat.js');
  const css=read('src/frontend/styles/cosmos.css');
- assert.match(chat,/welcomeEntranceTimer=setTimeout\([\s\S]*?,8000\);/);
- assert.match(css,/veyro-eight-second-camera 8s/);
- assert.match(css,/veyro-ring-draw 2\.75s/);
+ assert.match(chat,/const VEYRO_INTRO_DURATION_MS=16000;/);
+ assert.match(chat,/welcomeEntranceTimer=setTimeout\([\s\S]*?,VEYRO_INTRO_DURATION_MS\);/);
+ assert.match(css,/veyro-sixteen-second-camera 16s/);
+ assert.match(css,/veyro-ring-draw 4\.5s/);
  assert.match(css,/veyro-gold-particle-collapse/);
  assert.match(read('src/frontend/components/cosmos-loader.js'),/Pular introdução/);
  assert.match(chat,/function updateWelcome\(/);

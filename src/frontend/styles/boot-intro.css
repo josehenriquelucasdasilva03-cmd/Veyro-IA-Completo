@@ -1,0 +1,71 @@
+/* Initial entry never depends on API, Cloudflare, Netlify, or GitHub Pages. */
+.veyro-intro{position:fixed;inset:0;z-index:99999;overflow:hidden;isolation:isolate;
+ display:grid;place-items:center;background:radial-gradient(ellipse at 50% 52%,#131825 0%,#050711 47%,#010207 100%);
+ color:#fff;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+ animation:veyro-entry-auto-hide .7s ease 16s forwards}
+.veyro-entry-scene{position:absolute;inset:0;z-index:1;opacity:.75;pointer-events:none}
+.veyro-entry-scene canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.veyro-entry-stars{position:absolute;inset:-15%;z-index:0;opacity:.85;
+ background-image:radial-gradient(1px 1px at 12% 21%,#fff 95%,transparent),
+ radial-gradient(2px 2px at 79% 32%,#d1e3ff 95%,transparent),
+ radial-gradient(1px 1px at 43% 71%,#fff 95%,transparent),
+ radial-gradient(2px 2px at 25% 81%,#dec48f 95%,transparent),
+ radial-gradient(1px 1px at 66% 15%,#fff 95%,transparent),
+ radial-gradient(1px 1px at 89% 78%,#b6d4ff 95%,transparent),
+ radial-gradient(1px 1px at 10% 63%,#fff 95%,transparent);
+ background-size:270px 240px;animation:veyro-entry-star-drift 16s linear both}
+.veyro-entry-orbits{position:absolute;left:50%;top:51%;width:min(78vw,680px);aspect-ratio:1;
+ transform:translate(-50%,-50%) rotate(-18deg) scaleY(.46);z-index:2;pointer-events:none}
+.veyro-entry-orbits i{position:absolute;inset:0;border:1px solid #bba06b55;border-radius:50%;
+ box-shadow:0 0 30px #b3925320,inset 0 0 20px #cfaf5522;animation:veyro-entry-orbit 16s linear both}
+.veyro-entry-orbits i:nth-child(2){inset:12%;border-color:#a5d2e54c;animation-direction:reverse}
+.veyro-entry-orbits i:nth-child(3){inset:26%;border-color:#f0bc655d}
+.veyro-entry-planet{position:absolute;border-radius:50%;z-index:2;pointer-events:none;opacity:.93;
+ animation:veyro-entry-float 8s ease-in-out infinite alternate}
+.veyro-entry-earth{width:clamp(90px,19vw,210px);aspect-ratio:1;left:8%;top:24%;
+ background:radial-gradient(circle at 35% 30%,#84d5e7 1%,#2b8e9a 23%,#316f89 25%,#183764 54%,#050f24 75%);
+ box-shadow:inset -15px -17px 30px #01030dbf,0 0 40px #2675bd44}
+.veyro-entry-jupiter{width:clamp(110px,24vw,270px);aspect-ratio:1;right:-3%;bottom:10%;
+ background:repeating-linear-gradient(172deg,#c4a17a 0 11px,#a16e55 12px 20px,#d6b68d 21px 32px,#655144 33px 44px);
+ box-shadow:inset -40px -30px 60px #01040abf,0 0 38px #aa7b554b;animation-delay:-3s}
+.veyro-entry-saturn{width:clamp(65px,10vw,120px);aspect-ratio:1;right:20%;top:15%;
+ background:radial-gradient(circle at 33% 25%,#e6d0a6,#907856 58%,#241b22);
+ box-shadow:inset -10px -7px 22px #070a13,0 0 22px #baa57c48;animation-delay:-4s}
+.veyro-entry-saturn::after{content:"";position:absolute;inset:34% -42%;
+ border:clamp(5px,1vw,12px) solid #bba579a3;border-radius:50%;transform:rotate(-24deg) scaleY(.45)}
+.veyro-entry-webgl .veyro-entry-planet{opacity:.46}
+.veyro-entry-copy{position:relative;z-index:4;text-align:center;padding:25px 20px;
+ text-shadow:0 5px 30px #000,0 0 22px #000c;animation:veyro-entry-brand-in 16s cubic-bezier(.15,.75,.2,1) both}
+.veyro-entry-eyebrow{display:block;font-size:clamp(9px,1.8vw,12px);letter-spacing:.32em;
+ color:#dfc68e;font-weight:600;margin-bottom:24px}
+.veyro-entry-copy h1{font-size:clamp(53px,11vw,125px);font-weight:300;line-height:1.04;
+ letter-spacing:.11em;margin:0;white-space:nowrap}
+.veyro-entry-copy h1 strong{color:#dfbc71;font-weight:600}
+.veyro-entry-copy p{font-size:clamp(13px,2.5vw,19px);letter-spacing:.1em;color:#e9e4d8;margin:25px 0 0}
+.veyro-entry-skip{position:absolute;z-index:10;top:max(16px,env(safe-area-inset-top));
+ right:max(16px,env(safe-area-inset-right));padding:11px 18px;border:1px solid #caa96785;
+ border-radius:999px;background:#090d16dd;color:#f3e6c9;font:500 13px system-ui;cursor:pointer}
+.veyro-entry-skip:focus-visible{outline:3px solid #efcf83;outline-offset:3px}
+.veyro-entry-progress{position:absolute;z-index:5;bottom:max(24px,env(safe-area-inset-bottom));
+ left:12%;right:12%;height:2px;background:#bba16736;overflow:hidden;border-radius:4px}
+.veyro-entry-progress span{display:block;width:100%;height:100%;transform:scaleX(0);
+ transform-origin:left;background:#e2ba69;animation:veyro-entry-progress 16s linear both}
+.veyro-entry-finished{animation:veyro-entry-fade .65s ease forwards!important;pointer-events:none}
+@keyframes veyro-entry-star-drift{from{transform:scale(1.05) translateX(-3%)}
+ to{transform:scale(1.28) translateX(3%)}}
+@keyframes veyro-entry-orbit{from{rotate:0deg}to{rotate:24deg}}
+@keyframes veyro-entry-float{from{transform:translateY(-15px) rotate(-6deg)}to{transform:translateY(18px) rotate(5deg)}}
+@keyframes veyro-entry-brand-in{0%,8%{opacity:0;transform:translateY(25px) scale(.93)}
+ 28%{opacity:1;transform:translateY(0) scale(1)}85%,100%{opacity:1;transform:none}}
+@keyframes veyro-entry-progress{to{transform:scaleX(1)}}
+@keyframes veyro-entry-auto-hide{to{opacity:0;visibility:hidden;pointer-events:none}}
+@keyframes veyro-entry-fade{to{opacity:0;visibility:hidden}}
+@media(max-width:600px){.veyro-entry-earth{left:-8%;top:22%}.veyro-entry-jupiter{right:-18%;bottom:18%}
+ .veyro-entry-saturn{right:12%;top:22%}.veyro-entry-orbits{width:110vw}
+ .veyro-entry-copy h1{letter-spacing:.04em}.veyro-entry-eyebrow{letter-spacing:.16em}}
+@media(prefers-reduced-motion:reduce){
+ .veyro-intro{animation:veyro-entry-auto-hide .2s ease .85s forwards}
+ .veyro-entry-stars,.veyro-entry-orbits i,.veyro-entry-planet,.veyro-entry-copy,
+ .veyro-entry-progress span{animation:none!important}
+ .veyro-entry-copy{opacity:1;transform:none}.veyro-entry-progress{display:none}
+}
