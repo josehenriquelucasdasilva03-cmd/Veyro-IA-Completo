@@ -44,8 +44,9 @@ export class ModelProvider{
  async health(){const c=this.config;if(!c.ready)return {configured:false,reachable:false};try{const r=await fetch(c.base+'/models',{headers:authorizationHeaders(c),redirect:'error',signal:AbortSignal.timeout(8000)});return {configured:true,reachable:r.ok};}catch{return {configured:true,reachable:false};}}
  async generate(input,options){let text='';for await(const e of this.stream(input,options))if(e.type==='token'){text+=e.text;assert(text.length<=120000,'A resposta do modelo excedeu o limite.',502);}return text;}
  async *stream({instructions,messages,tools,maxTokens},{requestId,signal}){
-  const c=this.config;assert(c.ready,'O modelo de conversa ainda não foi conectado.',503);const releaseGpu=await acquireGpu();const control=new AbortController();active.set(requestId,control);const abort=()=>control.abort();signal?.addEventListener('abort',abort,{once:true});if(signal?.aborted)control.abort();let timedOut=false,connected=false;const timer=setTimeout(()=>{timedOut=true;control.abort();},c.timeoutMs);
+  const c=this.config;assert(c.ready,'O modelo de conversa ainda não foi conectado.',503);let releaseGpu;const control=new AbortController();active.set(requestId,control);const abort=()=>control.abort();signal?.addEventListener('abort',abort,{once:true});if(signal?.aborted)control.abort();let timedOut=false,connected=false;const timer=setTimeout(()=>{timedOut=true;control.abort();},c.timeoutMs);
   try{
+   releaseGpu=await acquireGpu(control.signal);
    const headers={'Content-Type':'application/json',...authorizationHeaders(c)};
    let body,url;
    url=c.base+'/chat/completions';body={model:c.model,stream:true,max_tokens:maxTokens,messages:[{role:'system',content:instructions},...messages.map(m=>({role:m.role,content:m.images?.length&&c.vision?[{type:'text',text:m.content},...m.images.map(url=>({type:'image_url',image_url:{url}}))]:m.content}))]};if(c.tools)body.tools=tools.map(({type,name,description,parameters})=>({type,function:{name,description,parameters}}));
@@ -59,6 +60,6 @@ export class ModelProvider{
     if(event.choices?.[0]?.finish_reason==='length')throw new AppError('A resposta atingiu o limite. Tente uma pergunta mais específica.',502);
    }
    assert(finished,'A conexão terminou antes da resposta completa.',502);for(const call of calls.values())yield {type:'tool',name:call.name,args:JSON.parse(call.args)};
-  }catch(error){if(timedOut)throw new AppError('O modelo excedeu o tempo de resposta. Verifique a GPU e tente novamente.',504);if(error instanceof AppError)throw error;if(control.signal.aborted)throw new AppError('Resposta interrompida.',499);throw new AppError(connected?'A transmissão do modelo foi interrompida. Tente novamente.':'Não foi possível conectar ao modelo remoto. Verifique o endpoint e a disponibilidade da GPU.',connected?502:503);}finally{clearTimeout(timer);signal?.removeEventListener('abort',abort);active.delete(requestId);releaseGpu();}
+  }catch(error){if(timedOut)throw new AppError('O modelo excedeu o tempo de resposta. Verifique a GPU e tente novamente.',504);if(error instanceof AppError)throw error;if(control.signal.aborted)throw new AppError('Resposta interrompida.',499);throw new AppError(connected?'A transmissão do modelo foi interrompida. Tente novamente.':'Não foi possível conectar ao modelo remoto. Verifique o endpoint e a disponibilidade da GPU.',connected?502:503);}finally{clearTimeout(timer);signal?.removeEventListener('abort',abort);active.delete(requestId);releaseGpu?.();}
  }
 }

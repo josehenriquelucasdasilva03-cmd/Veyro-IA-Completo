@@ -1,6 +1,28 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {ModelProvider,providerConfig} from '../src/core/model-provider.js';
+import {acquireGpu} from '../src/core/gpu-lock.js';
+
+test('queued model requests cancel promptly without calling fetch or blocking the next request',async()=>{
+ const original=globalThis.fetch;
+ let requests=0;
+ globalThis.fetch=async()=>{requests++;return new Response('data: {"choices":[{"delta":{"content":"OK"}}]}\n\ndata: [DONE]\n\n');};
+ const release=await acquireGpu();
+ try{
+  const provider=new ModelProvider(remote()),input={instructions:'test',messages:[],tools:[],maxTokens:20};
+  for(const mode of ['signal','requestId']){
+   const controller=new AbortController(),requestId='queued-'+mode;
+   const pending=provider.generate(input,{requestId,signal:controller.signal});
+   const rejected=assert.rejects(pending,error=>error.status===499);
+   if(mode==='signal')controller.abort();else provider.cancel(requestId);
+   await rejected;
+   assert.equal(requests,0);
+  }
+  release();
+  assert.equal(await provider.generate(input,{requestId:'after-cancellation'}),'OK');
+  assert.equal(requests,1);
+ }finally{release();globalThis.fetch=original;}
+});
 
 const remote=(overrides={})=>({
  MODEL_PROVIDER:'vast',

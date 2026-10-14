@@ -3,8 +3,6 @@ import assert from 'node:assert/strict';
 import { access, readFile } from 'node:fs/promises';
 
 test('build do Netlify publica a página inicial e todos os arquivos referenciados', async () => {
-  await import('../scripts/build-netlify.mjs');
-
   const required = [
     'dist/site/index.html', 'dist/site/app.js', 'dist/site/studio.js',
     'dist/site/chat.js', 'dist/site/knowledge.js', 'dist/site/styles.css',

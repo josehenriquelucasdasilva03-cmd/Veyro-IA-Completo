@@ -1,5 +1,11 @@
 # Situação da base entregue
 
+## Correções de estabilidade — 14/10/2026
+
+- `npm test` prepara os bundles do servidor e da prévia estática antes dos testes. O teste Netlify somente lê a saída pronta; não remove/cria arquivos enquanto outros testes os verificam.
+- Pedidos Qwen aguardando a fila da GPU podem ser cancelados pelo sinal do cliente ou pelo identificador do pedido, sem esperar a inferência anterior. O timeout também inclui a espera na fila. Uma solicitação cancelada não chama o provedor nem bloqueia a próxima.
+- Correções preparadas em branch de revisão, sem publicação ou alteração dos serviços de produção. A validação usa provedores simulados; desempenho da GPU e voz reais continuam pendentes.
+
 Base funcional: versão 7 da Veyro IA. Esta cópia reorganiza os fontes e adiciona ambiente local; nenhuma alteração desta revisão foi publicada em produção.
 
 ## Utilizável sem provedores
