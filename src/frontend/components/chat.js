@@ -2,7 +2,7 @@
 let chatController=null,chatRequestId=null,chatDraftTimer=null,chatDraftDirty=false,chatProfile=null,recorder=null,recordingStream=null,recordingTimer=null,welcomeEntranceTimer=0,mascotStateTimer=0,activeSpeech=null,speechOperation=0;
 // Duração da abertura cinematográfica: 16 segundos, sincronizada com cosmos.css.
 const VEYRO_INTRO_DURATION_MS=16000;
-const VEYRO_MASCOTS={black:{name:'Veyro Black',greeting:'Olá! Sou o Veyro Black. Estou pronto para conversar com você.'},blue:{name:'Veyro Blue',greeting:'Oi! Sou o Veyro Blue. Vamos descobrir e criar juntos?'},green:{name:'Veyro Green',greeting:'Olá! Sou o Veyro Green. Pode contar comigo.'},red:{name:'Veyro Red',greeting:'Olá! Sou o Veyro Red. Estou aqui para ajudar você.'}};
+const VEYRO_MASCOTS={black:{name:'Veyro Black',greeting:'Oi, eu sou o Black. Me conta o que você quer resolver hoje.'},blue:{name:'Veyro Blue',greeting:'Oi! Eu sou o Blue. Qual ideia você quer tirar do papel?'},green:{name:'Veyro Green',greeting:'Oi, eu sou o Green. Pode falar com calma. Vamos por partes.'},red:{name:'Veyro Red',greeting:'Oi! Eu sou o Red. Me diz o que você precisa e vamos começar.'}};
 const VEYRO_VOICES={atlas:{name:'Veyro Atlas',gender:'Masculina',description:'Grave, firme e madura.',voice:'pt-BR-AntonioNeural'},neo:{name:'Veyro Neo',gender:'Masculina',description:'Clara, leve e ligeiramente aguda.',voice:'pt-BR-FabioNeural'},luna:{name:'Veyro Luna',gender:'Feminina',description:'Suave, doce e expressiva.',voice:'pt-BR-ThalitaNeural'},iris:{name:'Veyro Iris',gender:'Feminina',description:'Clara, séria e profissional.',voice:'pt-BR-FranciscaNeural'},rafael:{name:'Veyro Local',gender:'Masculina · Português',description:'Voz sintetizada no computador pelo Pocket TTS. O texto não é enviado a um serviço externo.',voice:'Pocket TTS · Rafael'}};
 const MASCOT_KEY='veyro-mascot-v1',VOICE_KEY='veyro-voice-profile-v1',VOICE_AUTO_KEY='veyro-voice-auto-v1',VOICE_RATE_KEY='veyro-voice-rate-v1',VOICE_PITCH_KEY='veyro-voice-pitch-v1',VOICE_SPEED_KEY='veyro-voice-speed-v1';
 function readPreference(key,fallback){try{return localStorage.getItem(key)||fallback;}catch{return fallback;}}
@@ -19,11 +19,19 @@ function currentVoiceProfile(){
  return state.ttsProvider==='pocket'?'rafael':selectedVoice;
 }
 function localSpeechConfig(profileId=currentVoiceProfile(),{rate=voiceRate,pitch=voicePitch,speed=voiceSpeed}={}){
- const defaults={atlas:{rate:.91,pitch:.84},neo:{rate:1.04,pitch:1.1},luna:{rate:.94,pitch:1.06},iris:{rate:1.06,pitch:.95}};
+ const defaults={atlas:{rate:.97,pitch:1},neo:{rate:1.02,pitch:1},luna:{rate:.98,pitch:1},iris:{rate:1,pitch:1}};
  const style=defaults[profileId]||defaults.atlas;
  return {lang:voiceLanguage,voiceName:browserVoiceName,
   rate:Math.max(.65,Math.min(1.5,style.rate*speed*(1+rate/100))),
   pitch:Math.max(.6,Math.min(1.6,style.pitch*(1+pitch/100)))};
+}
+let mascotWordTimer=0;
+function resetMascotSpeechMotion(){clearTimeout(mascotWordTimer);document.body.removeAttribute('data-speech-boundary');document.body.style.removeProperty('--mascot-mouth');}
+function animateMascotWord(event){
+ if(event.name!=='word'||document.hidden||voicePerformance==='economico'||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ clearTimeout(mascotWordTimer);document.body.dataset.speechBoundary='true';
+ document.body.style.setProperty('--mascot-mouth',String(0.8+Math.min(event.charLength||4,10)*.1));
+ mascotWordTimer=setTimeout(()=>document.body.style.setProperty('--mascot-mouth','0.35'),140);
 }
 function applyVoicePerformance(){document.body.dataset.voicePerformance=voicePerformance;}
 function handleLocalSpeechState(entry,status,statusNode){
@@ -43,7 +51,7 @@ function localSpeech(text,{messageId=null,profileId=currentVoiceProfile(),rate=v
  const entry={messageId,profileId,status:'loading',mode:'local',audio:null};
  activeSpeech=entry;
  const ok=engine.startText(speechText(text),{...localSpeechConfig(profileId,{rate,pitch,speed}),
-  onState:status=>handleLocalSpeechState(entry,status,statusNode)});
+  onBoundary:animateMascotWord,onState:status=>handleLocalSpeechState(entry,status,statusNode)});
  if(!ok){activeSpeech=null;feedback('Voz local não disponível.',true);return false;}
  return true;
 }
@@ -54,16 +62,16 @@ function startQwenSpeech(messageId){
  releaseSpeech();
  const entry={messageId,profileId:currentVoiceProfile(),status:'loading',mode:'local',audio:null,streaming:true};
  activeSpeech=entry;
- return engine.startStream({...localSpeechConfig(),onState:status=>handleLocalSpeechState(entry,status)});
+ return engine.startStream({...localSpeechConfig(),onBoundary:animateMascotWord,onState:status=>handleLocalSpeechState(entry,status)});
 }
 function feedQwenSpeech(piece){if(activeSpeech?.mode==='local'&&activeSpeech.streaming)window.VeyroVoice?.pushToken(piece);}
 function finishQwenSpeech(){if(activeSpeech?.mode==='local'&&activeSpeech.streaming){activeSpeech.streaming=false;window.VeyroVoice?.finish();}}
 
 function renderMascot(){for(const node of document.querySelectorAll('.mascot-hero,.mascot-preview-portrait')){node.dataset.mascot=selectedMascot;node.setAttribute('aria-label',mascotName());}$('mascot-current-name').textContent=mascotName();$('mascot-preview-name').textContent=mascotName();$('mascot-greeting').textContent=VEYRO_MASCOTS[selectedMascot].greeting;for(const option of document.querySelectorAll('[data-mascot-choice]'))option.setAttribute('aria-pressed',String(option.dataset.mascotChoice===selectedMascot));$('voice-toggle').setAttribute('aria-pressed',String(voiceAutoRead));$('voice-toggle').setAttribute('aria-label',voiceAutoRead?'Desativar leitura automática':'Ativar leitura automática');$('voice-toggle').textContent=voiceAutoRead?'◖)) Auto on':'◖)) Auto off';$('voice-toggle').title=voiceAutoRead?'Leitura automática ativa':'Leitura automática desativada';}
 function chooseMascot(id){if(!VEYRO_MASCOTS[id])return;selectedMascot=id;try{localStorage.setItem(MASCOT_KEY,id);}catch{}renderMascot();renderChatMessages();}
-function openMascotPicker(){renderMascot();$('mascot-picker').showModal();}
-function setMascotState(value){clearTimeout(mascotStateTimer);document.body.dataset.mascotState=value;const labels={idle:'Pronto para conversar',attention:'Estou ouvindo você',thinking:'Veyro está pensando…',speaking:'Veyro está respondendo…',reading:'Lendo a resposta em voz alta',done:'Resposta concluída'};$('mascot-status').textContent=labels[value]||labels.idle;if(value==='done')mascotStateTimer=setTimeout(()=>setMascotState('idle'),1800);}
-function speechText(value){return String(value||'').replace(/```[\s\S]*?```/g,' ').replace(/`[^`]*`/g,' ').replace(/!\[([^\]]*)\]\([^)]*\)/g,'$1').replace(/\[([^\]]+)\]\([^)]*\)/g,'$1').replace(/^\s{0,3}#{1,6}\s+/gm,'').replace(/^\s*>\s?/gm,'').replace(/^\s*[-*+]\s+/gm,'').replace(/^\s*\d+[.)]\s+/gm,'').replace(/https?:\/\/\S+/g,'link').replace(/[|*_~]/g,' ').replace(/\s+/g,' ').trim();}
+function openMascotPicker(){renderMascot();if(!$('mascot-greeting-demo')){const demo=button('Ouvir apresentação',()=>requestSpeech(VEYRO_MASCOTS[selectedMascot].greeting,{profileId:currentVoiceProfile()}),'message-speech');demo.id='mascot-greeting-demo';$('mascot-greeting').after(demo);}$('mascot-picker').showModal();}
+function setMascotState(value){if(value!=='reading')resetMascotSpeechMotion();clearTimeout(mascotStateTimer);document.body.dataset.mascotState=value;const labels={idle:'Pronto para conversar',attention:'Estou ouvindo você',thinking:'Veyro está pensando…',speaking:'Veyro está respondendo…',reading:'Lendo a resposta em voz alta',done:'Resposta concluída'};$('mascot-status').textContent=labels[value]||labels.idle;if(value==='done')mascotStateTimer=setTimeout(()=>setMascotState('idle'),1800);}
+function speechText(value){return String(value||'').replace(/```[\s\S]*?```/g,' ').replace(/`[^`]*`/g,' ').replace(/!\[([^\]]*)\]\([^)]*\)/g,'$1').replace(/\[([^\]]+)\]\([^)]*\)/g,'$1').replace(/^\s{0,3}#{1,6}\s+/gm,'').replace(/^\s*>\s?/gm,'').replace(/^\s*[-*+]\s+/gm,'').replace(/^\s*\d+[.)]\s+/gm,'').replace(/https?:\/\/\S+/g,'link').replace(/[|*_~]/g,' ').replace(/[^\S\n]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();}
 function releaseSpeech(){if(!activeSpeech)return;const old=activeSpeech;activeSpeech=null;
  if(old.mode==='local')window.VeyroVoice?.stop();
  if(old.audio){old.audio.pause();old.audio.removeAttribute('src');old.audio.load();}
@@ -137,7 +145,7 @@ async function profilePanel(){await loadProfile();const root=openPanel('Meu perf
 function projectOptions(){const root=openPanel('Conversa e projeto'),title=el('input');title.value=state.conversation?.title||'Nova conversa';title.maxLength=80;title.setAttribute('aria-label','Título da conversa');root.append(title,button('Renomear conversa',async()=>{await api('conversations/'+state.conversationId,{method:'PATCH',body:{title:title.value}});await updateSidebar();state.conversation.title=title.value; $('panel').close();}),button('Vozes do Veyro IA',voiceSettings),button('Trocar projeto',projects),button('Memórias',knowledgeMemories),button('Versões do projeto',versions),button('Atividade e conexão',activity),button('Arquivar conversa',archiveCurrent),button('Excluir conversa',deleteCurrentPanel,'danger-button'));}
 function localVoiceSettings(){
  const root=openPanel('Voz e mascotes');
- const intro=el('p','A voz do aparelho é usada sem enviar o texto a uma API de narração. As vozes disponíveis dependem do navegador e do sistema operacional.','review-help');
+ const intro=el('p','Usamos a melhor voz em português disponível no navegador. Vozes naturais podem exigir internet; o processamento depende do navegador e do sistema.','review-help');
  const available=window.VeyroVoice?.supported();
  const status=el('p',available?'Voz local disponível. As configurações são salvas neste navegador.':'Seu navegador não oferece síntese de voz. O chat continuará respondendo em texto.','voice-provider-status');
  const profile=el('select');profile.setAttribute('aria-label','Personalidade da voz do mascote');
@@ -157,7 +165,7 @@ function localVoiceSettings(){
   voiceLanguage=language.value;try{localStorage.setItem(VOICE_LANG_KEY,voiceLanguage);}catch{}
  };
  const voice=el('select');voice.setAttribute('aria-label','Voz instalada no aparelho');
- const defaultVoice=el('option','Voz automática do aparelho');defaultVoice.value='';voice.append(defaultVoice);
+ const defaultVoice=el('option','Automática · priorizar voz natural');defaultVoice.value='';voice.append(defaultVoice);
  for(const v of window.VeyroVoice?.voices()||[]){
   const opt=el('option',v.name+' · '+v.lang);opt.value=v.name;voice.append(opt);
  }
@@ -174,7 +182,7 @@ function localVoiceSettings(){
   const opt=el('option',title);opt.value=id;performance.append(opt);
  }
  performance.value=voicePerformance;performance.onchange=()=>{voicePerformance=performance.value;applyVoicePerformance();try{localStorage.setItem(VOICE_PERFORMANCE_KEY,voicePerformance);}catch{}};
- const preview=button('Ouvir teste de voz',()=>requestSpeech('Olá! Sou o '+mascotName()+'. Agora você pode ouvir minhas respostas.',{messageId:null,profileId:profile.value}), 'voice-demo');
+ const preview=button('Ouvir teste de voz',()=>requestSpeech(VEYRO_MASCOTS[selectedMascot].greeting+'\n\nVocê pode me interromper ou pedir uma explicação mais direta.',{messageId:null,profileId:profile.value}), 'voice-demo');
  preview.disabled=!available;
  root.append(intro,status,el('label','Perfil de '+mascotName()),profile,
   el('label','Idioma'),language,el('label','Voz do aparelho'),voice,

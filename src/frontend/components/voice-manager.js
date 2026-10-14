@@ -1,5 +1,5 @@
 /* Veyro browser voice engine: isolated from Qwen credentials and Worker endpoints.
- * Uses Web Speech only when available; never uploads conversation text.
+ * Uses Web Speech when available; the browser controls voice processing.
  * Streaming utterances are queued by phrase, with explicit pause/resume/cancel.
  */
 (()=>{
@@ -23,11 +23,9 @@
  }
  function chooseVoice(locale,name=''){
   const list=safeVoices();
-  return list.find(v=>v.name===name&&v.lang?.toLowerCase().startsWith(locale.slice(0,2).toLowerCase()))
-   ||list.find(v=>v.name===name)
-   ||list.find(v=>v.lang?.toLowerCase()===locale.toLowerCase())
-   ||list.find(v=>v.lang?.toLowerCase().startsWith(locale.slice(0,2).toLowerCase()))
-   ||null;
+  const matching=list.filter(v=>v.lang?.toLowerCase().startsWith(locale.slice(0,2).toLowerCase()));
+  const score=v=>(v.lang?.toLowerCase()===locale.toLowerCase()?100:0)+(/natural|neural|online/i.test(v.name)?40:0)+(v.default?2:0);
+  return matching.find(v=>v.name===name)||matching.sort((a,b)=>score(b)-score(a))[0]||null;
  }
  const notify=(session,status)=>{
   if(active!==session)return;
@@ -44,7 +42,7 @@
   if(!supported())return false;
   stop();
   const s={id:serial,queue:[],buffer:'',streaming:Boolean(options.streaming),
-   finished:false,busy:false,status:'loading',onState:options.onState,
+   finished:false,busy:false,status:'loading',onState:options.onState,onBoundary:options.onBoundary,
    preferred:options.lang||'pt-BR',rate:Math.min(1.5,Math.max(.65,Number(options.rate)||1)),
    pitch:Math.min(1.6,Math.max(.6,Number(options.pitch)||1)),
    voiceName:options.voiceName||'',text:'',current:null};
@@ -65,6 +63,7 @@
   const voice=chooseVoice(u.lang,session.voiceName);
   if(voice)u.voice=voice;
   u.onstart=()=>notify(session,'playing');
+  u.onboundary=event=>{if(active===session&&session.status==='playing')try{session.onBoundary?.({name:event.name,charIndex:event.charIndex,charLength:event.charLength,text:part});}catch{}};
   u.onend=()=>{
    if(active!==session)return;
    session.busy=false;session.current=null;
@@ -80,11 +79,11 @@
   try{synth().speak(u);}catch{notify(session,'error');session.busy=false;}
  }
  function takeChunks(session,flush){
-  const max=175;
+  const max=300;
   while(session.buffer.length){
    let end=-1;
    const windowText=session.buffer.slice(0,max);
-   const sentence=/[.!?。！？;:](?:\s|$)/g;
+   const sentence=/[.!?。！？](?:\s|$)|\n\s*\n/g;
    for(const m of windowText.matchAll(sentence))if(m.index>=20)end=m.index+1;
    if(end<0&&session.buffer.length>max){
     end=windowText.lastIndexOf(' ',max-1);
@@ -101,7 +100,7 @@
  function pushToken(chunk){
   const s=active;
   if(!s||s.finished||typeof chunk!=='string')return;
-  s.text+=chunk;s.buffer+=chunk.replace(/\s+/g,' ');
+  s.text+=chunk;s.buffer+=chunk;
   if(s.buffer.length>4000){notify(s,'error');stop();return;}
   takeChunks(s,false);
  }
