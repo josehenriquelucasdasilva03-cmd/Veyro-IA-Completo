@@ -26,6 +26,6 @@
     "node": ">=24"
   },
   "dependencies": {
-    "three": "0.186.1"
+    "three": "0.187.0"
   }
 }
